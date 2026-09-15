@@ -1,0 +1,16 @@
+{
+  "name": "reactor-talk",
+  "version": "1.0.0",
+  "description": "The Reactor \u2014 a diagram-only reveal.js talk with speaker notes in outline.md",
+  "scripts": {
+    "build": "node bin/build.mjs",
+    "render": "python3 bin/render-diagrams.py",
+    "serve": "python3 -m http.server 7788 --bind 127.0.0.1",
+    "pdf": "python3 bin/pdf.py"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "reveal.js": "^6.0.2"
+  },
+  "private": true
+}

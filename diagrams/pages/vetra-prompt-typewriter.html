@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    /* 720 = the component's own 672px (max-w-2xl) plus the frame's 24px gutters */
+    .frame { max-width: 720px; }
+    /* the component is the whole image: the house card is only a transparent container here */
+    .card {
+      height: auto;
+      padding: 0;
+      background: none;
+      border: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .card-body { flex: none; align-items: center; }
+
+    /* vetra.io dark-theme tokens (app/globals.css, .dark) */
+    .vetra {
+      --background: #1b1e24;
+      --foreground: #fcfcfc;
+      --muted: #343839;
+      --muted-foreground: #6c7275;
+      --border: #485265;
+      --primary: #04c161;
+      --primary-foreground: #ffffff;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      width: 100%;
+      max-width: 672px; /* max-w-2xl */
+      margin: 0 auto;
+      letter-spacing: normal;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+      background: var(--background);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    /* Header bar */
+    .vetra-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .vetra-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--foreground);
+    }
+    .vetra-badge {
+      margin-left: auto;
+      background: rgba(4, 193, 97, 0.15);
+      color: var(--primary);
+      border-radius: 9999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.333;
+    }
+
+    /* Spinning leaf logo — loader variant of AnimatedVetraLogo */
+    .vetra-logo {
+      display: block;
+      flex-shrink: 0;
+      transform-origin: 50% 50%;
+      animation: vetra-loader 1.2s infinite;
+    }
+    @keyframes vetra-loader {
+      0%   { transform: rotate(0deg); animation-timing-function: ease-in-out; }
+      40%  { transform: rotate(180deg); animation-timing-function: linear; }
+      100% { transform: rotate(180deg); }
+    }
+
+    /* Typewriter input row */
+    .vetra-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+    }
+    .vetra-input {
+      flex: 1 1 0%;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-align: left;
+      background: var(--muted);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 20px;
+    }
+    .vetra-typed { color: var(--foreground); }
+    .vetra-placeholder { color: var(--muted-foreground); }
+    .vetra-caret {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      margin-left: 2px;
+      vertical-align: middle;
+      background: var(--primary);
+      animation: vetra-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes vetra-pulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.5; }
+    }
+    .vetra-send {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: var(--radius-lg);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="vetra">
+          <div class="vetra-head">
+            <svg class="vetra-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" width="24" height="24" aria-hidden="true">
+              <g transform="translate(0 0) rotate(0 7.5 7.5)"><path fill="#04c161" d="M12.7297 -9.92366e-08C13.9836 -4.44297e-08 15 1.01643 15 2.27027L15 3.64865C15 9.91783 9.91783 15 3.64865 15L2.27027 15C1.01643 15 2.82829e-07 13.9836 3.37635e-07 12.7297L7.94833e-07 2.27027C8.4964e-07 1.01643 1.01644 -6.11241e-07 2.27027 -5.56434e-07L12.7297 -9.92366e-08Z"/></g>
+              <g transform="translate(18 0) rotate(90 7.5 7.5)"><path fill="#04c161" d="M12.7297 -9.92366e-08C13.9836 -4.44297e-08 15 1.01643 15 2.27027L15 3.64865C15 9.91783 9.91783 15 3.64865 15L2.27027 15C1.01643 15 2.82829e-07 13.9836 3.37635e-07 12.7297L7.94833e-07 2.27027C8.4964e-07 1.01643 1.01644 -6.11241e-07 2.27027 -5.56434e-07L12.7297 -9.92366e-08Z"/></g>
+              <g transform="translate(18 18) rotate(180 7.5 7.5)"><path fill="#04c161" d="M12.7297 -9.92366e-08C13.9836 -4.44297e-08 15 1.01643 15 2.27027L15 3.64865C15 9.91783 9.91783 15 3.64865 15L2.27027 15C1.01643 15 2.82829e-07 13.9836 3.37635e-07 12.7297L7.94833e-07 2.27027C8.4964e-07 1.01643 1.01644 -6.11241e-07 2.27027 -5.56434e-07L12.7297 -9.92366e-08Z"/></g>
+              <g transform="translate(0 18) rotate(270 7.5 7.5)"><path fill="#04c161" d="M12.7297 -9.92366e-08C13.9836 -4.44297e-08 15 1.01643 15 2.27027L15 3.64865C15 9.91783 9.91783 15 3.64865 15L2.27027 15C1.01643 15 2.82829e-07 13.9836 3.37635e-07 12.7297L7.94833e-07 2.27027C8.4964e-07 1.01643 1.01644 -6.11241e-07 2.27027 -5.56434e-07L12.7297 -9.92366e-08Z"/></g>
+            </svg>
+            <span class="vetra-name">Vetra Agent</span>
+            <span class="vetra-badge">Online</span>
+          </div>
+
+          <div class="vetra-row">
+            <div class="vetra-input"><span id="typed" class="vetra-placeholder">Ask Vetra anything...</span><span class="vetra-caret"></span></div>
+            <button class="vetra-send" type="button" tabindex="-1">&#8593;</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Verbatim from vetra.io modules/home/components/hero.tsx
+    var typewriterPrompts = [
+      'We need a case tracker for our field teams that follows our protocol.',
+      'Build a compliance tracker that syncs our operational policies.',
+      'Set up an invoicing workflow my whole team can edit in real time.'
+    ];
+
+    var TYPE_SPEED_MS = 45;
+    var DELETE_SPEED_MS = 20;
+    var PAUSE_AFTER_TYPE_MS = 2200;
+    var PAUSE_AFTER_DELETE_MS = 500;
+
+    (function () {
+      var el = document.getElementById('typed');
+      var promptIndex = 0;
+      var charCount = 0;
+      var deleting = false;
+
+      function render() {
+        var typed = typewriterPrompts[promptIndex].slice(0, charCount);
+        if (typed) {
+          el.className = 'vetra-typed';
+          el.textContent = typed;
+        } else {
+          el.className = 'vetra-placeholder';
+          el.textContent = 'Ask Vetra anything...';
+        }
+      }
+
+      function tick() {
+        var prompt = typewriterPrompts[promptIndex];
+        var delay;
+        if (!deleting && charCount === prompt.length) {
+          delay = PAUSE_AFTER_TYPE_MS;
+        } else if (deleting && charCount === 0) {
+          delay = PAUSE_AFTER_DELETE_MS;
+        } else {
+          delay = deleting ? DELETE_SPEED_MS : TYPE_SPEED_MS;
+        }
+
+        setTimeout(function () {
+          if (!deleting) {
+            if (charCount < prompt.length) {
+              charCount += 1;
+            } else {
+              deleting = true;
+            }
+          } else {
+            if (charCount > 0) {
+              charCount -= 1;
+            } else {
+              deleting = false;
+              promptIndex = (promptIndex + 1) % typewriterPrompts.length;
+            }
+          }
+          render();
+          tick();
+        }, delay);
+      }
+
+      render();
+      tick();
+    })();
+  </script>
+</body>
+</html>

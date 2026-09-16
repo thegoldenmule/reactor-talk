@@ -18,7 +18,8 @@ const diagrams = process.env.PH_DIAGRAMS || join(root, "..", "ph-diagrams");
 const port = Number(process.env.PORT || 7788);
 
 const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css",
-  ".png": "image/png", ".svg": "image/svg+xml", ".json": "application/json", ".woff2": "font/woff2", ".pdf": "application/pdf" };
+  ".png": "image/png", ".svg": "image/svg+xml", ".json": "application/json", ".woff2": "font/woff2", ".pdf": "application/pdf",
+  ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif" };
 
 const client = `<script>
 (function () {

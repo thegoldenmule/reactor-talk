@@ -21,29 +21,52 @@ A structured runtime for local-first applications.
 - I: "our goal is to provide users true agency and ownership, without sacrificing the typical merits of centralized services."
 - I: "We are aiming for the convenience of a centralized SaaS with the sovereignty of local-first."
 
-## The Ask
+## The Vision
 
-### Three non-negotiables
+### Business Processes as Documents
 
-![Local-first, append-only, audit trail: what each rules out and forces](img/design-constraints.png)
+![Document editors for an invoice, a wiki page and a business process](img/document-editors.png)
 
-- Local-first. I: "both the data and the execution to be locally owned by the user."
-- Append-only. II: "each Reactor writes to append-only storage backends (like Swarm or
-  Hypercore), so we can't actually go back and rewrite operations or their order."
-- Audit trail. II: the stream has "a signed hash chain"; an Action is "a signed user intent."
-  II: "do you really want your mutations altered by someone else? Who gets to decide that
-  anyway?"
+- The vision of Powerhouse was to enable anyone to create bespoke documents that could model
+  many types of artifacts: an invoice, a wiki page, or even an internal business process or
+  workflow.
 
-### Run everywhere
+### ... and the Operations on them
+
+![The signed operation history behind a single document](img/document-operation-log.png)
+
+### Support "Citizen Builders"
+
+![Vetra's agent prompt box typing out real use cases](img/vetra-prompt-typewriter.png)
+
+- On top of this, Powerhouse wanted a chatbot sort of interface for businesses to build out
+  these use cases.
+
+## Technical Requirements
+
+### Runs Everywhere
 
 ![The Reactor runs everywhere and syncs](img/reactor-environments.png)
 
-- I: "both data storage and execution need to happen on your machine first, with seamless
-  'eventually consistent' synchronization across devices."
-- I: "The Reactor needs to be able to run everywhere. It needs to run in your browser when you
-  load an application and it needs to run in hosted environments, like a node server."
+- The very core component of this stack is called The Reactor. The demand was that this sit
+  anywhere, sync with any other Reactor, and execute the logic and verification of these
+  different business processes.
 - I: "able to run serially without impeding the render thread of a browser while also able to
   scale horizontally in a server environment."
+
+### Local First
+
+- Both the data and the execution must be locally owned by the user.
+- Sovereignty and responsiveness.
+
+### Transparent Audit Trails
+
+- "each Reactor must write to append-only storage"
+- "the stream of operations form a signature chain"
+
+### Multi-User by Default
+
+- All applications built on this stack must be inherently realtime multi-user.
 
 ## Act I — Document Models
 

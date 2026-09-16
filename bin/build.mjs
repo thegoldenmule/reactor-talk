@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Build the deck from outline.md. One command does everything:
 //   1. copies the diagram sources this deck uses out of ../ph-diagrams (override with
-//      PH_DIAGRAMS) into diagrams/pages/ and diagrams/css/, byte for byte;
+//      PH_DIAGRAMS) into diagrams/pages/ and diagrams/css/, byte for byte, along with
+//      pages/assets/ (screenshots that diagram pages embed);
 //   2. writes index.html (a reveal.js deck) that shows each diagram page live in an iframe,
 //      scaled to fit under the slide header. No PNG rendering anywhere.
 //
@@ -90,6 +91,19 @@ mkdirSync(pagesDir, { recursive: true });
 mkdirSync(cssDir, { recursive: true });
 for (const f of readdirSync(join(DIAGRAMS, "css"))) if (f.endsWith(".css")) copyFileSync(join(DIAGRAMS, "css", f), join(cssDir, f));
 for (const id of used) copyFileSync(join(DIAGRAMS, "pages", `${id}.html`), join(pagesDir, `${id}.html`));
+// Only the page HTML is copied above, so a page that shows a screenshot (<img src="assets/x.png">)
+// would 404 in the deck. Copy the shared assets directory alongside the pages if it exists.
+const assetsSrc = join(DIAGRAMS, "pages", "assets");
+if (existsSync(assetsSrc)) {
+  const assetsDst = join(pagesDir, "assets");
+  mkdirSync(assetsDst, { recursive: true });
+  const assets = readdirSync(assetsSrc, { withFileTypes: true })
+    .filter((e) => e.isFile() && !e.name.startsWith("."))
+    .map((e) => e.name);
+  for (const name of assets) copyFileSync(join(assetsSrc, name), join(assetsDst, name));
+  for (const e of readdirSync(assetsDst, { withFileTypes: true }))
+    if (e.isFile() && !assets.includes(e.name)) unlinkSync(join(assetsDst, e.name));
+}
 for (const f of readdirSync(pagesDir)) {
   const id = f.replace(/\.html$/, "");
   if (f.endsWith(".html") && !used.includes(id)) unlinkSync(join(pagesDir, f));

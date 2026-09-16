@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1200px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    /* ── Operation boxes ───────────────────────────────── */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+
+    /* The append slot: not yet written */
+    .box.pending {
+      border-width: 2px;
+      border-style: dashed;
+      /* keep the outer box identical in size to the solid 1px ones */
+      padding: calc(var(--space-sm) - 1px) calc(var(--space-md) - 1px);
+    }
+
+    .box .meta {
+      display: block;
+      margin-top: 5px;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 10.5px;
+      font-weight: var(--font-weight-medium);
+      color: var(--text-muted);
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+    .box .meta .k { opacity: 0.65; }
+    .box .meta .v { color: var(--text-secondary); }
+
+    /* ── Stream grid: 5 op columns + 4 link columns ────── */
+    .stream {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr 48px 1fr 48px 1fr 68px 1fr;
+      row-gap: var(--space-md);
+      align-items: start;
+    }
+    .stream > .op-col  { grid-row: 1; }
+    .stream > .link-col { grid-row: 1; }
+
+
+    /* ── Chain links ───────────────────────────────────── */
+    .link-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 16px;
+    }
+    .h-arrow {
+      width: 24px;
+      height: 2px;
+      background: var(--text-muted);
+      position: relative;
+    }
+    .h-arrow::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--text-muted);
+    }
+    .chk {
+      margin-top: 7px;
+      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      line-height: 1;
+      color: var(--accent-green);
+    }
+    .link-col.pending .h-arrow {
+      background: none;
+      border-top: 2px dashed var(--accent-purple);
+      height: 0;
+    }
+    .link-col.pending .h-arrow::after { border-left-color: var(--accent-purple); }
+    .link-col.pending .chk {
+      color: var(--accent-purple);
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 9px;
+    }
+
+    /* ── Region brackets under the stream ──────────────── */
+    .region { grid-row: 2; }
+    .region.sealed { grid-column: 1 / 8; }
+    .region.append { grid-column: 9; }
+
+    .brk {
+      height: 9px;
+      border-bottom: 1px solid var(--border-glass);
+      border-left: 1px solid var(--border-glass);
+      border-right: 1px solid var(--border-glass);
+      border-radius: 0 0 var(--radius-xs) var(--radius-xs);
+    }
+    .region.sealed .brk { border-color: rgba(4, 217, 235, 0.45); }
+    .region.append .brk { border-color: rgba(169, 60, 206, 0.5); }
+
+    .brk-label { text-align: center; margin-top: 7px; }
+    .brk-label .t {
+      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+    .region.sealed .brk-label .t { color: var(--accent-cyan); }
+    .region.append .brk-label .t { color: var(--accent-purple); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="stream">
+
+          <!-- Op 1 -->
+          <div class="op-col">
+            <div class="box accent-cyan">Op 1
+              <span class="meta"><span class="k">prev</span> <span class="v">0000</span><br><span class="k">sig</span> <span class="v">a3f1</span></span>
+            </div>
+          </div>
+
+          <div class="link-col">
+            <div class="h-arrow"></div>
+            <div class="chk">&check;</div>
+          </div>
+
+          <!-- Op 2 -->
+          <div class="op-col">
+            <div class="box accent-cyan">Op 2
+              <span class="meta"><span class="k">prev</span> <span class="v">a3f1</span><br><span class="k">sig</span> <span class="v">b7d2</span></span>
+            </div>
+          </div>
+
+          <div class="link-col">
+            <div class="h-arrow"></div>
+            <div class="chk">&check;</div>
+          </div>
+
+          <!-- Op 3 -->
+          <div class="op-col">
+            <div class="box accent-cyan">Op 3
+              <span class="meta"><span class="k">prev</span> <span class="v">b7d2</span><br><span class="k">sig</span> <span class="v">e9c4</span></span>
+            </div>
+          </div>
+
+          <div class="link-col">
+            <div class="h-arrow"></div>
+            <div class="chk">&check;</div>
+          </div>
+
+          <!-- Op 4 -->
+          <div class="op-col">
+            <div class="box accent-cyan">Op 4
+              <span class="meta"><span class="k">prev</span> <span class="v">e9c4</span><br><span class="k">sig</span> <span class="v">c1d9</span></span>
+            </div>
+          </div>
+
+          <!-- Link to the append slot -->
+          <div class="link-col pending">
+            <div class="h-arrow"></div>
+            <div class="chk">append</div>
+          </div>
+
+          <!-- The only mutable point -->
+          <div class="op-col">
+            <div class="box accent-purple pending">Next op
+              <span class="meta"><span class="k">prev</span> <span class="v">c1d9</span><br><span class="k">sig</span> <span class="v">&hellip;</span></span>
+            </div>
+          </div>
+
+          <!-- Region labels -->
+          <div class="region sealed">
+            <div class="brk"></div>
+            <div class="brk-label">
+              <div class="t">Signature chain</div>
+            </div>
+          </div>
+
+          <div class="region append">
+            <div class="brk"></div>
+            <div class="brk-label">
+              <div class="t">Append only</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

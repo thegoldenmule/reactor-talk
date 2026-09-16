@@ -44,7 +44,7 @@ A structured runtime for local-first applications.
 
 ## Technical Requirements
 
-### Runs Everywhere
+### Run Everywhere
 
 ![The Reactor runs everywhere and syncs](img/reactor-environments.png)
 
@@ -56,15 +56,21 @@ A structured runtime for local-first applications.
 
 ### Local First
 
+![Centralized vs local first: where the data and the execution live](img/local-first-ownership.png)
+
 - Both the data and the execution must be locally owned by the user.
 - Sovereignty and responsiveness.
 
 ### Transparent Audit Trails
 
+![Append-only operations chained by signature](img/audit-trail-signature-chain.png)
+
 - "each Reactor must write to append-only storage"
 - "the stream of operations form a signature chain"
 
 ### Multi-User by Default
+
+![Realtime multi-user sync](img/multi-user-sync.png)
 
 - All applications built on this stack must be inherently realtime multi-user.
 

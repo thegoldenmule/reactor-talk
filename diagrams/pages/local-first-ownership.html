@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1200px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    /* Two columns, four aligned rows: heading, upper zone, connector, lower zone.
+       One grid for both sides so the rows line up across the comparison. */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--space-2xl);
+      row-gap: var(--space-md);
+      align-items: stretch;
+    }
+
+    .col-head {
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .col-head.here { color: var(--accent-cyan); }
+
+    /* A zone is a machine: dashed and dim when it belongs to someone else,
+       solid and lit when it is the user's. */
+    .zone {
+      position: relative;
+      border: 1px dashed var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      display: flex;
+      gap: var(--space-md);
+    }
+    .zone.owned {
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.30);
+      background: rgba(255, 255, 255, 0.035);
+    }
+    .zone.faded { opacity: 0.4; }
+    .zone-label {
+      position: absolute;
+      top: -9px;
+      left: var(--space-md);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 0 var(--space-sm);
+    }
+    .zone.owned .zone-label { color: var(--text-primary); }
+
+    .box {
+      flex: 1;
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      padding: var(--space-md);
+      font-size: 15px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    .box.ghost {
+      border-style: dashed;
+      border-color: var(--border-subtle);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text-muted);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .conn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: var(--space-sm) 0;
+      min-height: 100px;
+    }
+    .conn .line { width: 2px; flex: 1; min-height: 18px; position: relative; }
+    .conn.hard .line { background: rgba(255, 255, 255, 0.34); }
+    /* arrowheads: up at the top of the upper segment, down at the foot of the lower one */
+    .conn.hard .line:first-of-type::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-bottom: 7px solid rgba(255, 255, 255, 0.34);
+    }
+    .conn.hard .line:last-of-type::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top: 7px solid rgba(255, 255, 255, 0.34);
+    }
+    .conn.soft .line { border-left: 2px dotted var(--text-muted); opacity: 0.75; }
+    .conn-label {
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+    .conn.hard .conn-label { color: var(--text-secondary); }
+
+
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <div class="compare">
+
+          <!-- row 1: column headings -->
+          <div class="col-head">Centralized</div>
+          <div class="col-head here">Local first</div>
+
+          <!-- row 2: upper zone -->
+          <div class="zone">
+            <span class="zone-label">Someone else's server</span>
+            <div class="box accent-cyan">Data</div>
+            <div class="box accent-blue">Execution</div>
+          </div>
+          <div class="zone owned">
+            <span class="zone-label">Your device</span>
+            <div class="box accent-cyan">Data</div>
+            <div class="box accent-blue">Execution</div>
+          </div>
+
+          <!-- row 3: connector -->
+          <div class="conn hard">
+            <div class="line"></div>
+            <div class="conn-label">Every change round-trips</div>
+            <div class="line"></div>
+          </div>
+          <div class="conn soft">
+            <div class="line"></div>
+            <div class="conn-label">Sync · eventual</div>
+            <div class="line"></div>
+          </div>
+
+          <!-- row 4: lower zone -->
+          <div class="zone owned">
+            <span class="zone-label">Your device</span>
+            <div class="box ghost">A view of it</div>
+          </div>
+          <div class="zone faded">
+            <span class="zone-label">Your other devices</span>
+            <div class="box accent-cyan">Data</div>
+            <div class="box accent-blue">Execution</div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

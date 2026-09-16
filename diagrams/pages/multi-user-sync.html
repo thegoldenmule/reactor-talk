@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame {
+      max-width: 1200px;
+    }
+    .card {
+      height: auto;
+    }
+    .card-body {
+      flex: none;
+    }
+
+    /* Supplied vector artwork (1563x1081). No border or shadow: unlike the screenshot
+       pages this is an illustration with its own transparent background, and the house
+       card already frames it. Asset lives in pages/assets/. */
+    .art {
+      margin: 0;
+    }
+    .art img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .slot {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      aspect-ratio: 1563 / 1081;
+      text-align: center;
+      padding: var(--space-md);
+      box-sizing: border-box;
+      border: 1px dashed var(--border-glass);
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .art.empty img { display: none; }
+    .art.empty .slot { display: flex; }
+    .slot code {
+      color: var(--text-secondary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <figure class="art">
+          <img src="assets/sync.svg" alt="Realtime multi-user sync" onerror="this.closest('.art').classList.add('empty')">
+          <div class="slot">artwork slot<code>pages/assets/sync.svg</code></div>
+        </figure>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

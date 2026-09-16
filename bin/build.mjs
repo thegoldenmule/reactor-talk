@@ -141,9 +141,9 @@ const html = `<!DOCTYPE html>
     .reveal .slides section { top: 0; height: 1080px; padding: 0; text-align: left; }
     /* header band: title left, section right, hairline divider with a cyan accent */
     .reveal .hd {
-      position: absolute; top: 0; left: 0; right: 0; height: 112px;
-      margin: 0 72px; padding-top: 34px; box-sizing: border-box;
-      display: flex; align-items: baseline; justify-content: space-between;
+      position: absolute; top: 0; left: 0; right: 0; height: 136px;
+      margin: 0 72px; padding-top: 30px; box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: flex-start;
       border-bottom: 1px solid rgba(255,255,255,0.14);
     }
     .reveal .hd::after {
@@ -156,13 +156,15 @@ const html = `<!DOCTYPE html>
       text-transform: none; color: #fff; text-shadow: none;
     }
     .reveal .hd .sec {
+      order: -1;
       font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-      color: rgba(255,255,255,0.38);
+      font-size: 20px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: #04d9eb;
+      line-height: 24px; min-height: 24px; margin-bottom: 8px;
     }
     /* diagram fitted into the area under the header: the page is embedded unscaled in an
        iframe inside .fit, and .fit is scaled/positioned by the script below */
-    .reveal .art { position: absolute; top: 140px; right: 72px; bottom: 44px; left: 72px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .reveal .art { position: absolute; top: 164px; right: 72px; bottom: 44px; left: 72px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .reveal .art .fit { position: absolute; left: 0; top: 0; transform-origin: top left; }
     .reveal .art iframe { border: 0; background: transparent; pointer-events: none; display: block; margin: 0; max-width: none; max-height: none; box-shadow: none; }
     .reveal .art.text { flex-direction: column; text-align: center; }
@@ -196,13 +198,13 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
       plugins: [ RevealNotes ]
     });
 
-    // Fit each diagram iframe into the art box (1776 x 896 slide units, see .art above).
+    // Fit each diagram iframe into the art box (1776 x 872 slide units, see .art above).
     // The iframe already carries its design width inline so pages lay out (and draw any
     // JS overlays) at the right width on first load.
     // The iframe is sized to the page's design width and its card height (+24px above and
     // below, as the page's .frame padding gives), then .fit is scaled to fit and centered.
     (function () {
-      var BOX_W = 1776, BOX_H = 896, PAD = 48;
+      var BOX_W = 1776, BOX_H = 872, PAD = 48;
       function fit(iframe) {
         var doc = iframe.contentDocument;
         var card = doc && doc.querySelector('.card');

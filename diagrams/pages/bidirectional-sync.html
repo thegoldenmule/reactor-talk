@@ -171,7 +171,7 @@
     .equals-indicator {
       font-size: 32px;
       font-weight: var(--font-weight-bold);
-      color: var(--accent-cyan);
+      color: var(--text-primary);
       text-align: center;
       line-height: 1;
       margin: var(--space-md) 0;
@@ -179,11 +179,13 @@
     .convergence-label {
       font-size: 15px;
       font-weight: var(--font-weight-semibold);
-      color: var(--accent-cyan);
       text-align: center;
       margin-top: var(--space-md);
       letter-spacing: 0.04em;
     }
+    .convergence-label .a  { color: var(--accent-cyan); }
+    .convergence-label .b  { color: var(--accent-green); }
+    .convergence-label .eq { color: var(--text-primary); }
   </style>
 </head>
 <body>
@@ -239,7 +241,7 @@
           <div class="section-label is-b">B&prime;</div>
         </div>
 
-        <div class="convergence-label">A&prime; = B&prime;</div>
+        <div class="convergence-label"><span class="a">A&prime;</span> <span class="eq">=</span> <span class="b">B&prime;</span></div>
 
       </div>
     </div>

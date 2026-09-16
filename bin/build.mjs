@@ -2,10 +2,10 @@
 // Build index.html (a reveal.js deck) from outline.md.
 //
 // Rules:
-//   `### Heading`            starts a slide. The heading is NOT rendered on the slide unless the
-//                            slide has no image (title/closing slides), in which case the heading
-//                            and any plain paragraphs are shown centered.
-//   `![alt](img/x.png)`      the slide's diagram, shown as a contained full-bleed background.
+//   `### Heading`            starts a slide. The heading is the slide title, pinned to the
+//                            top-left of the page (outside reveal's scaled slide area).
+//   `![alt](img/x.png)`      the slide's diagram, fitted into the area under the title. Slides
+//                            without an image show their plain paragraphs centered instead.
 //   `- bullet` / paragraphs  become speaker notes (press S in the deck).
 //   `##` / `#` headings, `---` rules and everything before the first `###` are ignored.
 //   The `## Appendix` section and anything after it still produce slides; sections after
@@ -65,11 +65,12 @@ const section = (s, i) => {
         .map((n) => `<li>${inline(n)}</li>`)
         .join("")}</ul></aside>`
     : `<aside class="notes"><h4>${inline(s.title)}</h4></aside>`;
+  const attrs = `data-slide="${i + 1}" data-title="${esc(s.title)}"`;
   if (s.image) {
-    return `<section data-slide="${i + 1}" data-background-image="${s.image}" data-background-size="contain" data-background-color="#0e0e0d" aria-label="${esc(s.alt)}">${notes}</section>`;
+    return `<section ${attrs}><div class="art"><img src="${s.image}" alt="${esc(s.alt)}"></div>${notes}</section>`;
   }
   const body = s.text.map((t) => `<p>${inline(t)}</p>`).join("");
-  return `<section data-slide="${i + 1}" class="text-slide"><h1>${inline(s.title)}</h1>${body}${notes}</section>`;
+  return `<section ${attrs}><div class="art text">${body}</div>${notes}</section>`;
 };
 
 const html = `<!DOCTYPE html>
@@ -84,18 +85,20 @@ const html = `<!DOCTYPE html>
   <style>
     :root { --r-background-color: #0e0e0d; }
     html, body, .reveal-viewport, .reveal { background: #0e0e0d; }
-    /* never paint .slides: it sits in front of the background layer that carries the diagrams */
-    .reveal .slides section { padding: 0; }
-    .reveal .text-slide { text-align: center; }
-    .reveal .text-slide h1 {
+    .reveal { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; }
+    /* the title lives outside reveal's scaled slide, pinned to the page's top-left corner */
+    .deck-title {
+      position: fixed; top: 28px; left: 40px; z-index: 20; pointer-events: none;
       font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-      font-weight: 700; letter-spacing: -0.02em; font-size: 2.6em; text-transform: none;
-      color: #fff; margin-bottom: 0.3em;
+      font-size: clamp(20px, 2.1vw, 40px); line-height: 1.2; font-weight: 600;
+      letter-spacing: -0.02em; color: #fff;
     }
-    .reveal .text-slide p {
-      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-      color: rgba(255,255,255,0.6); font-size: 1.1em;
-    }
+    /* the slide itself: diagram fitted into the area below the title band */
+    .reveal .slides section { top: 0; height: 1080px; padding: 0; text-align: left; }
+    .reveal .art { position: absolute; top: 120px; right: 48px; bottom: 40px; left: 48px; display: flex; align-items: center; justify-content: center; }
+    .reveal .art img { max-width: 100%; max-height: 100%; width: auto; height: auto; margin: 0; border: 0; box-shadow: none; background: none; }
+    .reveal .art.text { flex-direction: column; text-align: center; }
+    .reveal .art.text p { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 48px; color: rgba(255,255,255,0.6); margin: 0 0 0.4em; max-width: 1400px; }
     /* keep the slide number as the only chrome, and tiny */
     .reveal .slide-number { background: transparent; color: rgba(255,255,255,0.25); font-size: 12px; }
     /* pdf export: one slide per page, dark background preserved */
@@ -107,6 +110,7 @@ const html = `<!DOCTYPE html>
   </style>
 </head>
 <body>
+  <div class="deck-title" id="deck-title"></div>
   <div class="reveal">
     <div class="slides">
 ${slides.map(section).map((s) => "      " + s).join("\n")}
@@ -117,13 +121,18 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
   <script>
     Reveal.initialize({
       width: 1920, height: 1080, margin: 0.04,
-      controls: false, progress: false, center: true, hash: true,
+      controls: false, progress: false, center: false, hash: true,
       transition: 'none', backgroundTransition: 'none',
       slideNumber: 'c/t', showSlideNumber: 'speaker',
       preloadIframes: true,
       pdfMaxPagesPerSlide: 1, pdfSeparateFragments: false,
       plugins: [ RevealNotes ]
     });
+    (function () {
+      var el = document.getElementById('deck-title');
+      var set = function () { var s = Reveal.getCurrentSlide(); el.textContent = s ? (s.dataset.title || '') : ''; };
+      Reveal.on('ready', set); Reveal.on('slidechanged', set);
+    })();
   </script>
 </body>
 </html>

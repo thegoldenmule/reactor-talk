@@ -14,15 +14,12 @@ Timing: 20 min. Opening 2, Act I 4, Act II 3, Act III 8, Act IV 3.
 
 ### The Reactor
 
-The convenience of a centralized SaaS with the sovereignty of local-first.
+A structured runtime for local-first applications.
 
 - Hands-on tech lead. About a year at Powerhouse on this runtime.
-- I: "Powerhouse provides a local-first tool-set that allows open organizations to
-  collaboratively coordinate people, code and capital."
-- I: "our goal is to provide users true agency and ownership, without sacrificing the typical
-  merits of centralized services."
-- I: "We are aiming for the convenience of a centralized SaaS with the sovereignty of
-  local-first. No magic allowed."
+- I: "Powerhouse provides a local-first tool-set that allows open organizations to collaboratively coordinate people, code and capital."
+- I: "our goal is to provide users true agency and ownership, without sacrificing the typical merits of centralized services."
+- I: "We are aiming for the convenience of a centralized SaaS with the sovereignty of local-first."
 
 ### The ask
 

@@ -8,7 +8,8 @@ import os, re
 from PIL import Image, ImageDraw, ImageFont, JpegImagePlugin  # noqa: F401 (registers the encoder the PDF writer uses)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-W, H, BG, MARGIN = 1920, 1080, (14, 14, 13), 0.04
+W, H, BG = 1920, 1080, (14, 14, 13)
+PAD_X, PAD_TOP, PAD_BOTTOM, TITLE_PX, GAP = 64, 48, 48, 44, 28   # same geometry as build.mjs
 
 def parse(md):
     slides, cur, stop = [], None, False
@@ -35,20 +36,20 @@ def font(size):
 
 def page(slide):
     im = Image.new("RGB", (W, H), BG)
+    d = ImageDraw.Draw(im)
+    d.text((PAD_X, PAD_TOP), slide["title"], fill=(255, 255, 255), font=font(TITLE_PX))
+    top = PAD_TOP + round(TITLE_PX * 1.15) + GAP
+    box_w, box_h = W - 2 * PAD_X, H - top - PAD_BOTTOM
     if slide["image"]:
         art = Image.open(os.path.join(ROOT, slide["image"])).convert("RGB")
-        box_w, box_h = W * (1 - 2 * MARGIN), H * (1 - 2 * MARGIN)
         s = min(box_w / art.width, box_h / art.height)
         art = art.resize((round(art.width * s), round(art.height * s)), Image.LANCZOS)
-        im.paste(art, ((W - art.width) // 2, (H - art.height) // 2))
+        im.paste(art, (PAD_X + (box_w - art.width) // 2, top + (box_h - art.height) // 2))
         return im
-    d = ImageDraw.Draw(im)
-    title, sub = slide["title"], " ".join(slide["text"])
-    tf, sf = font(120), font(44)
-    tw = d.textlength(title, font=tf); sw = d.textlength(sub, font=sf) if sub else 0
-    y = H // 2 - (150 if sub else 60)
-    d.text(((W - tw) / 2, y), title, fill=(255, 255, 255), font=tf)
-    if sub: d.text(((W - sw) / 2, y + 170), sub, fill=(153, 153, 153), font=sf)
+    sub = " ".join(slide["text"])
+    if sub:
+        sf = font(48); sw = d.textlength(sub, font=sf)
+        d.text((PAD_X + (box_w - sw) / 2, top + box_h / 2 - 24), sub, fill=(153, 153, 153), font=sf)
     return im
 
 slides = parse(open(os.path.join(ROOT, "outline.md"), encoding="utf8").read())

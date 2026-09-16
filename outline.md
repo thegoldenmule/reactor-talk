@@ -10,7 +10,7 @@ Timing: 20 min. Opening 2, Act I 4, Act II 3, Act III 8, Act IV 3.
 
 ---
 
-## Opening
+## 
 
 ### The Reactor
 
@@ -21,16 +21,7 @@ A structured runtime for local-first applications.
 - I: "our goal is to provide users true agency and ownership, without sacrificing the typical merits of centralized services."
 - I: "We are aiming for the convenience of a centralized SaaS with the sovereignty of local-first."
 
-### The ask
-
-![The Reactor runs everywhere and syncs](img/reactor-environments.png)
-
-- I: "both data storage and execution need to happen on your machine first, with seamless
-  'eventually consistent' synchronization across devices."
-- I: "The Reactor needs to be able to run everywhere. It needs to run in your browser when you
-  load an application and it needs to run in hosted environments, like a node server."
-- I: "able to run serially without impeding the render thread of a browser while also able to
-  scale horizontally in a server environment."
+## The Ask
 
 ### Three non-negotiables
 
@@ -42,6 +33,17 @@ A structured runtime for local-first applications.
 - Signed intent. II: the stream has "a signed hash chain"; an Action is "a signed user intent."
   II: "do you really want your mutations altered by someone else? Who gets to decide that
   anyway?"
+
+### Run everywhere
+
+![The Reactor runs everywhere and syncs](img/reactor-environments.png)
+
+- I: "both data storage and execution need to happen on your machine first, with seamless
+  'eventually consistent' synchronization across devices."
+- I: "The Reactor needs to be able to run everywhere. It needs to run in your browser when you
+  load an application and it needs to run in hosted environments, like a node server."
+- I: "able to run serially without impeding the render thread of a browser while also able to
+  scale horizontally in a server environment."
 
 ## Act I — Document Models
 

@@ -9,66 +9,74 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .frame { max-width: 1200px; }
+    /* Type scale, box and connector constants are lifted from event-sourcing.html so the
+       two slides read as a pair: same box padding, same 15px label, same 12px mono state
+       snapshot, same dashed connector. Narrower frame than before (1200 -> 900) because the
+       deck scales the page to fit its art box, so a narrower design width renders larger. */
+    .frame { max-width: 900px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
+    /* Shared box style — event-sourcing.html */
     .box {
       background: var(--bg-elevated);
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-md);
-      padding: var(--space-sm) var(--space-md);
-      font-size: 12px;
+      padding: var(--space-md) var(--space-lg);
+      font-size: 15px;
       font-weight: var(--font-weight-semibold);
       text-align: center;
-      white-space: nowrap;
     }
-    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
-    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
-    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
+    .box.accent-blue  { border-color: var(--accent-blue);  background: var(--accent-blue-bg);  color: var(--accent-blue); }
+    .box.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
 
+    /* State snapshot box — monospace text, left-aligned — event-sourcing.html */
     .box.state-snapshot {
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
-      font-size: 11px;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', 'Fira Mono', monospace);
+      font-size: 12px;
       font-weight: var(--font-weight-medium);
       text-align: left;
       white-space: pre;
       line-height: 1.5;
+      padding: var(--space-sm) var(--space-md);
+      width: 100%;
     }
 
-    .op-row {
-      display: flex;
-      gap: var(--space-sm);
-      justify-content: center;
+    /* Action and state rows share one 3-column track so each action sits above its state. */
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-lg);
+      align-items: start;
     }
-    .op-row .box {
-      flex: 1;
-    }
+    .row .box.action { white-space: nowrap; }
 
-    .arrow-down {
+    /* Vertical dashed connector with downward arrow — event-sourcing.html */
+    .conn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: var(--space-lg) 0;
+      margin: var(--space-md) 0;
     }
-    .arrow-down-line {
+    .conn-line {
       width: 2px;
-      height: 20px;
-      background: var(--text-muted);
+      height: 14px;
+      border-left: 2px dashed var(--text-muted);
     }
-    .arrow-down-label {
-      font-size: 10px;
+    .conn-label {
+      font-size: 11px;
       font-weight: var(--font-weight-semibold);
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.06em;
       margin: var(--space-xs) 0;
     }
-    .arrow-down-head {
+    .conn-head {
       width: 0;
       height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
       border-top: 6px solid var(--text-muted);
     }
   </style>
@@ -76,35 +84,32 @@
 <body>
   <div class="frame">
     <div class="card">
-      <div class="card-body" style="padding-top: 24px; padding-bottom: 24px;">
+      <div class="card-body">
 
-        <!-- Actions row -->
-        <div class="op-row">
-          <div class="box accent-purple">CREATE_BUDGET</div>
-          <div class="box accent-purple">SET_LINEITEM</div>
-          <div class="box accent-purple">SET_AMOUNT</div>
+        <!-- Actions: the stored intent -->
+        <div class="row">
+          <div class="box accent-green action">CREATE_BUDGET</div>
+          <div class="box accent-green action">SET_LINEITEM</div>
+          <div class="box accent-green action">SET_AMOUNT</div>
         </div>
 
-        <!-- Arrow -->
-        <div class="arrow-down">
-          <div class="arrow-down-line"></div>
-          <div class="arrow-down-label">reduce</div>
-          <div class="arrow-down-line"></div>
-          <div class="arrow-down-head"></div>
+        <div class="conn">
+          <div class="conn-line"></div>
+          <div class="conn-label">reduce</div>
+          <div class="conn-line"></div>
+          <div class="conn-head"></div>
         </div>
 
-        <!-- Reducer -->
-        <div class="box accent-blue" style="width: 100%;">Reducer</div>
+        <div class="box accent-blue">Reducer</div>
 
-        <!-- Arrow -->
-        <div class="arrow-down">
-          <div class="arrow-down-line"></div>
-          <div class="arrow-down-line"></div>
-          <div class="arrow-down-head"></div>
+        <div class="conn">
+          <div class="conn-line"></div>
+          <div class="conn-line"></div>
+          <div class="conn-head"></div>
         </div>
 
-        <!-- States row -->
-        <div class="op-row">
+        <!-- States: the result, derived rather than stored -->
+        <div class="row">
           <div class="box accent-cyan state-snapshot">{ name: 'Q4' }</div>
           <div class="box accent-cyan state-snapshot">{ name: 'Q4',
   items: [{ id: 1 }] }</div>

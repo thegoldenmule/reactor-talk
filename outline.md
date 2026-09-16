@@ -34,22 +34,17 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
   load an application and it needs to run in hosted environments, like a node server."
 - I: "able to run serially without impeding the render thread of a browser while also able to
   scale horizontally in a server environment."
-- No privileged copy. Every box on this slide is a peer.
 
 ### Three non-negotiables
 
 ![Local-first, append-only, signed intent: what each rules out and forces](img/design-constraints.png)
 
-- Everything after this slide follows from these three.
-- Local-first. I: "both the data and the execution to be locally owned by the user." Rules out
-  a server that wins. Forces command sourcing and one runtime everywhere.
+- Local-first. I: "both the data and the execution to be locally owned by the user."
 - Append-only. II: "each Reactor writes to append-only storage backends (like Swarm or
-  Hypercore), so we can't actually go back and rewrite operations or their order." Forces new
-  operations instead of edits, and the skip value.
+  Hypercore), so we can't actually go back and rewrite operations or their order."
 - Signed intent. II: the stream has "a signed hash chain"; an Action is "a signed user intent."
   II: "do you really want your mutations altered by someone else? Who gets to decide that
-  anyway?" Forces replaying Actions verbatim and rejecting anything that fails verification.
-- Ask the room to keep the three colors in mind. Every alternative gets graded against them.
+  anyway?"
 
 ## Act I — Document Models
 
@@ -73,7 +68,6 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
   stream of the events that create the object."
 - I: "All the sudden we don't just have a username, we have an entire history of usernames along
   with descriptive reasons why the username changed at all."
-- Append-only stops being a constraint here and becomes the data model.
 
 ### Aggregates: many views from one stream
 
@@ -93,7 +87,6 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
   slight but we are aiming for both the data and the execution to be locally owned by the user.
   This means that each user needs to be able to run the command itself to get the resulting
   state change."
-- That is requirement 1 deciding the storage format.
 
 ### The Document Model
 
@@ -106,7 +99,7 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
 - Left: schema first, codegen gives types and reducer stubs. Right: reducer emits a PHDocument,
   "a stream of Operations and the state produced by them."
 - I: "We use the term Operation to refer to the result of an applied Action." Action is the
-  signed intent; Operation is the result. Act III turns on that split.
+  signed intent; Operation is the result.
 - I: "Document Models are themselves documents."
 
 ## Act II — The Reactor
@@ -123,7 +116,7 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
   process, or on some other machine in a faraway place."
 - Event bus. I: "intended to be in-memory while running in a browser (this part is deployed),
   and something more robust in a server environment, like RabbitMQ (this part is not deployed)."
-- Read side: a coordinator hands `Operation[]` to read models. Same thing as aggregates.
+- Read side: a coordinator hands `Operation[]` to read models.
 
 ### A read model: DocumentView
 
@@ -150,8 +143,6 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
 - II: "users want to be able to see each other's work, as close to real-time as possible — but
   they also want to work without hiccups when BART passes under the bay or when their toddler
   unplugs the router."
-- Three approaches people already use, graded against the three requirements plus one more:
-  reducers are user-authored, so order-dependent logic has to work.
 
 ### How games do it
 
@@ -210,10 +201,8 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
 
 ![Authoritative server, CRDTs, OT and Reshuffle graded against the requirements](img/sync-scorecard.png)
 
-- Each row has a well-known product behind it. Each breaks at least one requirement.
 - II: "On the spectrum of CRDTs and OT, it lies much closer to the latter — with some important
   differences."
-- Bottom row is what the next five slides have to deliver.
 
 ### Operational Reshuffle, step 1: sort
 
@@ -254,7 +243,7 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
 - II: "the skip value of 4 on A₇ means that when we create a projection of this stream, we will
   skip the preceding 4 operations."
 - II: "The operation stream with all of the skipped operations removed we call the garbage
-  collected stream." One integer is the whole cost of requirement 2.
+  collected stream."
 
 ### Both sides converge
 
@@ -287,7 +276,7 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
 - One channel per pair of Reactors. Outbox, inbox, dead letter. All FIFO.
 - III: "The dead letter mailbox holds operations that failed in a way that cannot be retried.
   These might result from a bad signature, a hash mismatch, or some other unrecoverable
-  rejection." Requirement 3, on the wire.
+  rejection."
 - III: "Every operation a Reactor outputs is stamped with an ordinal: a monotonically increasing
   integer. These are not globally increasing, only locally increasing." "The ordinal is a total
   order over every operation the Reactor has ever seen, across all documents, in the order it
@@ -336,17 +325,13 @@ The convenience of a centralized SaaS with the sovereignty of local-first.
 
 ![Scorecard again](img/sync-scorecard.png)
 
-- Three requirements we wouldn't trade. Three known approaches, each breaking one. One design
-  that keeps all three and lets users write ordinary reducers.
-- Costs: reads are eventually consistent; skipped operations stay in storage; at-least-once with
-  dedup; timestamps decide the merge order.
+- Costs: eventually consistent reads; skipped operations stay in storage; at-least-once with
+  dedup; timestamps decide merge order.
 
 ### Thanks
 
 Questions?
 
-- Documents are command-sourced streams. The runtime is CQRS. Sync is reshuffle: new
-  operations, never new intent. The wire protocol is four integers.
 
 ---
 

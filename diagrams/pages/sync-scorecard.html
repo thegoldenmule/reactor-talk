@@ -47,10 +47,9 @@
       background: rgba(0,0,0,0.25);
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
       padding: 10px 8px;
-      min-height: 68px;
+      min-height: 52px;
     }
     .cell .g { font-size: 22px; font-weight: var(--font-weight-bold); line-height: 1; }
-    .cell .why { font-size: 9.5px; color: var(--text-muted); text-align: center; line-height: 1.35; }
     .cell.yes .g { color: var(--accent-green); }
     .cell.no  .g { color: #e05a5a; }
     .cell.meh .g { color: #e8863a; }
@@ -72,28 +71,28 @@
           <div class="hd req4">Any reducer<br>(order-dependent ok)</div>
 
           <div class="row-name"><span class="n">Authoritative server</span><span class="s">multiplayer games</span></div>
-          <div class="cell no"><span class="g">✗</span><span class="why">one privileged simulation</span></div>
-          <div class="cell na"><span class="g">—</span><span class="why">not a concern</span></div>
-          <div class="cell no"><span class="g">✗</span><span class="why">server stomps client work</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">any simulation logic</span></div>
+          <div class="cell no"><span class="g">✗</span></div>
+          <div class="cell na"><span class="g">—</span></div>
+          <div class="cell no"><span class="g">✗</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
 
           <div class="row-name"><span class="n">CRDTs</span><span class="s">Figma-style</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">converge without a leader</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">ops are applied as-is</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">ops are applied as-is</span></div>
-          <div class="cell no"><span class="g">✗</span><span class="why">ops must commute; no balance checks</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
+          <div class="cell no"><span class="g">✗</span></div>
 
           <div class="row-name"><span class="n">Operational Transformation</span><span class="s">Google Docs</span></div>
-          <div class="cell meh"><span class="g">~</span><span class="why">usually server-mediated</span></div>
-          <div class="cell no"><span class="g">✗</span><span class="why">rewrites past operations</span></div>
-          <div class="cell no"><span class="g">✗</span><span class="why">others alter your mutation</span></div>
-          <div class="cell meh"><span class="g">~</span><span class="why">transforms are hard to generalize</span></div>
+          <div class="cell meh"><span class="g">~</span></div>
+          <div class="cell no"><span class="g">✗</span></div>
+          <div class="cell no"><span class="g">✗</span></div>
+          <div class="cell meh"><span class="g">~</span></div>
 
           <div class="row-name winner"><span class="n">Operational Reshuffle</span><span class="s">The Reactor</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">every Reactor reshuffles</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">new ops + skip; nothing edited</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">Actions replayed verbatim</span></div>
-          <div class="cell yes"><span class="g">✓</span><span class="why">replay in order; state-bound sigs if needed</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
+          <div class="cell yes"><span class="g">✓</span></div>
         </div>
       </div>
     </div>

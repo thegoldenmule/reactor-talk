@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "The Reactor \u2014 a diagram-only reveal.js talk with speaker notes in outline.md",
   "scripts": {
+    "dev": "node bin/dev.mjs",
     "build": "node bin/build.mjs",
     "render": "python3 bin/render-diagrams.py",
     "serve": "python3 -m http.server 7788 --bind 127.0.0.1",

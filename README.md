@@ -8,16 +8,27 @@ narrative lives in **`outline.md`**, which is also the deck's source.
 outline.md          The outline + speaker notes. Edit this. `###` = one slide.
 index.html          Generated deck (reveal.js). Don't edit; run `npm run build`.
 img/                Diagrams, rendered at 2x from ../ph-diagrams and committed.
+bin/dev.mjs         Dev loop: serve + watch + rebuild + browser reload
 bin/build.mjs       outline.md → index.html
 bin/render-diagrams.py   ../ph-diagrams/pages/*.html → img/*.png (headless Chrome + Pillow crop)
 bin/pdf.py          outline.md + img/ → deck.pdf (backup for a dead browser; no browser involved)
 reveal/             Vendored reveal.js dist — works offline, no npm install needed to present.
 ```
 
+## Iterate
+
+```
+npm run dev          # http://127.0.0.1:7788/
+```
+
+Open that in Chrome and edit. Saving `outline.md` rebuilds the deck and reloads the tab on the
+same slide. Saving a diagram page in `../ph-diagrams/pages/` (or its shared CSS) re-renders the
+affected images first, then reloads. Nothing to install.
+
 ## Present
 
 ```
-npm run serve        # http://127.0.0.1:7788/
+npm run serve        # http://127.0.0.1:7788/  (static, no watcher)
 ```
 
 Open it in Chrome, press `F` for fullscreen and `S` for the speaker view (notes + timer + next

@@ -2,8 +2,8 @@
 // Build index.html (a reveal.js deck) from outline.md.
 //
 // Rules:
-//   `### Heading`            starts a slide. The heading is the slide title, pinned to the
-//                            top-left of the page (outside reveal's scaled slide area).
+//   `### Heading`            starts a slide. The heading becomes the slide's header band; the
+//                            enclosing `##` heading is shown as the section label on the right.
 //   `![alt](img/x.png)`      the slide's diagram, fitted into the area under the title. Slides
 //                            without an image show their plain paragraphs centered instead.
 //   `- bullet` / paragraphs  become speaker notes (press S in the deck).
@@ -28,13 +28,16 @@ const inline = (s) =>
 const slides = [];
 let cur = null;
 let stop = false;
+let sectionName = "";
 for (const raw of md.split("\n")) {
   const line = raw.replace(/\s+$/, "");
   if (/^## (Gaps|Likely)/.test(line)) stop = true;
   if (stop) break;
+  const h2 = line.match(/^## (.+)/);
+  if (h2) sectionName = h2[1].replace(/\s*\(.*\)\s*$/, "").trim();
   const h3 = line.match(/^### (.+)/);
   if (h3) {
-    cur = { title: h3[1].trim(), image: null, alt: "", notes: [], text: [] };
+    cur = { title: h3[1].trim(), section: sectionName, image: null, alt: "", notes: [], text: [] };
     slides.push(cur);
     continue;
   }
@@ -65,12 +68,12 @@ const section = (s, i) => {
         .map((n) => `<li>${inline(n)}</li>`)
         .join("")}</ul></aside>`
     : `<aside class="notes"><h4>${inline(s.title)}</h4></aside>`;
-  const attrs = `data-slide="${i + 1}" data-title="${esc(s.title)}"`;
+  const header = `<header class="hd"><h2>${inline(s.title)}</h2><span class="sec">${inline(s.section)}</span></header>`;
   if (s.image) {
-    return `<section ${attrs}><div class="art"><img src="${s.image}" alt="${esc(s.alt)}"></div>${notes}</section>`;
+    return `<section data-slide="${i + 1}">${header}<div class="art"><img src="${s.image}" alt="${esc(s.alt)}"></div>${notes}</section>`;
   }
   const body = s.text.map((t) => `<p>${inline(t)}</p>`).join("");
-  return `<section ${attrs}><div class="art text">${body}</div>${notes}</section>`;
+  return `<section data-slide="${i + 1}">${header}<div class="art text">${body}</div>${notes}</section>`;
 };
 
 const html = `<!DOCTYPE html>
@@ -86,16 +89,30 @@ const html = `<!DOCTYPE html>
     :root { --r-background-color: #0e0e0d; }
     html, body, .reveal-viewport, .reveal { background: #0e0e0d; }
     .reveal { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; }
-    /* the title lives outside reveal's scaled slide, pinned to the page's top-left corner */
-    .deck-title {
-      position: fixed; top: 28px; left: 40px; z-index: 20; pointer-events: none;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: clamp(20px, 2.1vw, 40px); line-height: 1.2; font-weight: 600;
-      letter-spacing: -0.02em; color: #fff;
-    }
-    /* the slide itself: diagram fitted into the area below the title band */
     .reveal .slides section { top: 0; height: 1080px; padding: 0; text-align: left; }
-    .reveal .art { position: absolute; top: 120px; right: 48px; bottom: 40px; left: 48px; display: flex; align-items: center; justify-content: center; }
+    /* header band: title left, section right, hairline divider with a cyan accent */
+    .reveal .hd {
+      position: absolute; top: 0; left: 0; right: 0; height: 112px;
+      margin: 0 72px; padding-top: 34px; box-sizing: border-box;
+      display: flex; align-items: baseline; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+    }
+    .reveal .hd::after {
+      content: ""; position: absolute; left: 0; bottom: -2px; width: 64px; height: 3px;
+      background: #04d9eb; border-radius: 2px;
+    }
+    .reveal .hd h2 {
+      margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 42px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;
+      text-transform: none; color: #fff; text-shadow: none;
+    }
+    .reveal .hd .sec {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+    }
+    /* diagram fitted into the area under the header */
+    .reveal .art { position: absolute; top: 140px; right: 72px; bottom: 44px; left: 72px; display: flex; align-items: center; justify-content: center; }
     .reveal .art img { max-width: 100%; max-height: 100%; width: auto; height: auto; margin: 0; border: 0; box-shadow: none; background: none; }
     .reveal .art.text { flex-direction: column; text-align: center; }
     .reveal .art.text p { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 48px; color: rgba(255,255,255,0.6); margin: 0 0 0.4em; max-width: 1400px; }
@@ -110,7 +127,6 @@ const html = `<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <div class="deck-title" id="deck-title"></div>
   <div class="reveal">
     <div class="slides">
 ${slides.map(section).map((s) => "      " + s).join("\n")}
@@ -120,7 +136,7 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
   <script src="reveal/plugin/notes.js"></script>
   <script>
     Reveal.initialize({
-      width: 1920, height: 1080, margin: 0.04,
+      width: 1920, height: 1080, margin: 0.02,
       controls: false, progress: false, center: false, hash: true,
       transition: 'none', backgroundTransition: 'none',
       slideNumber: 'c/t', showSlideNumber: 'speaker',
@@ -128,11 +144,7 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
       pdfMaxPagesPerSlide: 1, pdfSeparateFragments: false,
       plugins: [ RevealNotes ]
     });
-    (function () {
-      var el = document.getElementById('deck-title');
-      var set = function () { var s = Reveal.getCurrentSlide(); el.textContent = s ? (s.dataset.title || '') : ''; };
-      Reveal.on('ready', set); Reveal.on('slidechanged', set);
-    })();
+
   </script>
 </body>
 </html>

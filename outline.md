@@ -25,12 +25,12 @@ A structured runtime for local-first applications.
 
 ### Three non-negotiables
 
-![Local-first, append-only, signed intent: what each rules out and forces](img/design-constraints.png)
+![Local-first, append-only, audit trail: what each rules out and forces](img/design-constraints.png)
 
 - Local-first. I: "both the data and the execution to be locally owned by the user."
 - Append-only. II: "each Reactor writes to append-only storage backends (like Swarm or
   Hypercore), so we can't actually go back and rewrite operations or their order."
-- Signed intent. II: the stream has "a signed hash chain"; an Action is "a signed user intent."
+- Audit trail. II: the stream has "a signed hash chain"; an Action is "a signed user intent."
   II: "do you really want your mutations altered by someone else? Who gets to decide that
   anyway?"
 

@@ -28,11 +28,17 @@
     }
     .box.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
     .box.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
-    /* Operations created by the reshuffle, as opposed to ones carried over untouched. */
+    /* Operations created by the reshuffle, as opposed to ones carried over untouched.
+       Each side keeps its Reactor's colour: A cyan, B green. */
     .box.accent-new {
       border: 2px dashed var(--accent-cyan);
       background: var(--accent-cyan-bg);
       color: var(--accent-cyan);
+    }
+    .box.accent-new.is-b {
+      border-color: var(--accent-green);
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
     }
 
     .ts {
@@ -143,6 +149,7 @@
       border-radius: var(--radius-md);
       padding: var(--space-md);
     }
+    .section-box.is-b { border-color: rgba(7, 194, 98, 0.3); }
     .section-label {
       font-size: 12px;
       font-weight: var(--font-weight-semibold);
@@ -153,6 +160,7 @@
       margin-top: var(--space-sm);
       opacity: 0.8;
     }
+    .section-label.is-b { color: var(--accent-green); }
 
     .op-row {
       display: grid;
@@ -220,15 +228,15 @@
         <div class="equals-indicator">=</div>
 
         <!-- B' lands on exactly the same stream -->
-        <div class="section-box">
+        <div class="section-box is-b">
           <div class="op-row">
-            <div class="box accent-cyan">B&prime;&#8321;<span class="ts">t=1</span><span class="hash">a3f1</span></div>
-            <div class="box accent-cyan">B&prime;&#8322;<span class="ts">t=5</span><span class="hash">b7d2</span></div>
-            <div class="box accent-new">B&prime;&#8323;<span class="ts">t=8</span><span class="hash">b2f3</span></div>
-            <div class="box accent-new">B&prime;&#8324;<span class="ts">t=12</span><span class="hash">d8a1</span></div>
-            <div class="box accent-new">B&prime;&#8325;<span class="ts">t=14</span><span class="hash">c4e7</span></div>
+            <div class="box accent-green">B&prime;&#8321;<span class="ts">t=1</span><span class="hash">a3f1</span></div>
+            <div class="box accent-green">B&prime;&#8322;<span class="ts">t=5</span><span class="hash">b7d2</span></div>
+            <div class="box accent-new is-b">B&prime;&#8323;<span class="ts">t=8</span><span class="hash">b2f3</span></div>
+            <div class="box accent-new is-b">B&prime;&#8324;<span class="ts">t=12</span><span class="hash">d8a1</span></div>
+            <div class="box accent-new is-b">B&prime;&#8325;<span class="ts">t=14</span><span class="hash">c4e7</span></div>
           </div>
-          <div class="section-label">B&prime;</div>
+          <div class="section-label is-b">B&prime;</div>
         </div>
 
         <div class="convergence-label">A&prime; = B&prime;</div>

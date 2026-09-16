@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Dev loop: serve the deck, rebuild when outline.md changes, re-render a diagram when its
-// source page in ../ph-diagrams changes, and reload the browser tab after either.
+// Dev loop: serve the deck, rebuild when outline.md or a diagram source (a page or shared CSS in
+// ../ph-diagrams) changes, and reload the browser tab. The build copies the diagram pages the
+// outline uses into diagrams/, so there is no render step in the edit loop.
 //
 //   npm run dev        → http://127.0.0.1:7788/
 //
@@ -60,16 +61,11 @@ const run = (cmd, args, label) =>
     p.on("exit", (code) => { console.log(`  ${label} ${code === 0 ? "ok" : "FAILED"} (${Date.now() - t} ms)`); done(code === 0); });
   });
 
-let timer = null, pendingBuild = false, pendingPages = new Set(), busy = false;
+let timer = null, pendingBuild = false, busy = false;
 async function flush() {
   if (busy) { timer = setTimeout(flush, 100); return; }
   busy = true;
   try {
-    if (pendingPages.size) {
-      const ids = [...pendingPages]; pendingPages.clear();
-      console.log(`render ${ids.join(", ")}`);
-      await run("python3", ["bin/render-diagrams.py", ...ids], "render");
-    }
     if (pendingBuild) {
       pendingBuild = false;
       console.log("build");
@@ -85,18 +81,13 @@ watch(root, { recursive: true }, (_, name) => {
   const n = String(name);
   if (n.startsWith("node_modules") || n.startsWith(".git") || n.startsWith("reveal")) return;
   if (n === "outline.md" || n === "bin/build.mjs") { pendingBuild = true; schedule(); }
-  else if (n.startsWith("img/") && n.endsWith(".png")) schedule();   // re-rendered diagram: just reload
 });
 
 const pagesDir = join(diagrams, "pages");
 if (existsSync(pagesDir)) {
-  const used = () => new Set([...readFileSync(join(root, "outline.md"), "utf8").matchAll(/\]\(img\/([\w-]+)\.png\)/g)].map((m) => m[1]));
-  watch(pagesDir, (_, name) => {
-    if (!name || !String(name).endsWith(".html")) return;
-    const id = basename(String(name), ".html");
-    if (used().has(id)) { pendingPages.add(id); schedule(); }
-  });
-  watch(join(diagrams, "css"), () => { for (const id of used()) pendingPages.add(id); schedule(); });
+  const rebuild = () => { pendingBuild = true; schedule(); };
+  watch(pagesDir, (_, name) => { if (name && String(name).endsWith(".html")) rebuild(); });
+  watch(join(diagrams, "css"), rebuild);
   console.log(`watching diagram sources in ${pagesDir}`);
 } else {
   console.log(`no diagram repo at ${diagrams}; only outline.md is watched`);
@@ -104,5 +95,5 @@ if (existsSync(pagesDir)) {
 
 server.listen(port, "127.0.0.1", () => {
   console.log(`deck at http://127.0.0.1:${port}/  (S = speaker view, F = fullscreen)`);
-  console.log("watching outline.md and img/ — save to rebuild and reload");
+  console.log("watching outline.md — save to rebuild and reload");
 });

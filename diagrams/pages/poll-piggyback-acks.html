@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1100px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: 190px 1fr 190px;
+      gap: var(--space-lg);
+      align-items: stretch;
+    }
+
+    .actor {
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      align-items: center;
+      justify-content: center;
+    }
+    .actor.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
+    .actor.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); }
+    .actor-name { font-size: 15px; font-weight: var(--font-weight-semibold); }
+    .actor.accent-cyan .actor-name  { color: var(--accent-cyan); }
+    .actor.accent-green .actor-name { color: var(--accent-green); }
+    .actor-role {
+      font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: var(--font-weight-semibold);
+    }
+    .actor-state {
+      margin-top: var(--space-sm);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 10px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      justify-content: center;
+    }
+
+    .msg { display: flex; flex-direction: column; gap: var(--space-xs); }
+    .msg-title {
+      font-size: 10px; font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
+    }
+    .msg.right .msg-title { text-align: left; }
+    .msg.left  .msg-title { text-align: right; }
+
+    .arrow {
+      position: relative;
+      height: 2px;
+      background: var(--text-secondary);
+      margin: var(--space-sm) 0;
+    }
+    .arrow.right::after {
+      content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
+      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+      border-left: 10px solid var(--text-secondary);
+    }
+    .arrow.left::before {
+      content: ''; position: absolute; left: -2px; top: 50%; transform: translateY(-50%);
+      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+      border-right: 10px solid var(--text-secondary);
+    }
+
+    .payload {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+    .msg.left .payload { justify-content: flex-end; }
+    .chip {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+    .chip.data { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .chip.ack  { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .chip .k { color: var(--text-muted); }
+
+    .legend {
+      justify-content: center;
+      margin-top: var(--space-xl);
+      margin-bottom: 0;
+    }
+    .legend-dot.purple { background: var(--accent-purple); }
+    .legend-dot.blue   { background: var(--accent-blue); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <div class="lanes">
+
+          <div class="actor accent-cyan">
+            <div class="actor-name">Reactor A</div>
+            <div class="actor-role">polls</div>
+            <div class="actor-state">
+              inbox.ack&nbsp;&nbsp;&nbsp;= 112<br>
+              outbox.latest = 47
+            </div>
+          </div>
+
+          <div class="messages">
+            <div class="msg right">
+              <div class="msg-title">Poll request</div>
+              <div class="payload">
+                <span class="chip data">ops <span class="k">A[42..47]</span></span>
+                <span class="chip ack">ack <span class="k">B ≤ 112</span></span>
+              </div>
+              <div class="arrow right"></div>
+            </div>
+
+            <div class="msg left">
+              <div class="msg-title">Poll response</div>
+              <div class="arrow left"></div>
+              <div class="payload">
+                <span class="chip ack">ack <span class="k">A ≤ 47</span></span>
+                <span class="chip data">ops <span class="k">B[113..]</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="actor accent-green">
+            <div class="actor-name">Reactor B</div>
+            <div class="actor-role">answers</div>
+            <div class="actor-state">
+              inbox.ack&nbsp;&nbsp;&nbsp;= 41 → 47<br>
+              outbox.latest = 112+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><span class="legend-dot purple"></span>data one way</div>
+          <div class="legend-item"><span class="legend-dot blue"></span>acknowledgment the other</div>
+          <div class="legend-item"><span class="legend-dot" style="background: var(--text-muted)"></span>lost reply? re-poll with the same cursors</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

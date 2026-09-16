@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame {
+      max-width: 700px;
+    }
+    .card {
+      height: auto;
+    }
+    .card-body {
+      flex: none;
+      gap: var(--space-md);
+    }
+
+    /* Box component */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+
+    .box-title {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-xs);
+    }
+    .box-detail {
+      font-size: 12px;
+      opacity: 0.75;
+      line-height: var(--line-height-normal);
+    }
+
+    /* Vertical connector with arrow */
+    .v-connector {
+      width: 3px;
+      height: 20px;
+      background: var(--text-primary);
+      margin: var(--space-sm) auto var(--space-md) auto;
+      position: relative;
+    }
+    .v-connector::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+    .v-connector-label {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Main vertical flow */
+    .diagram-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Queue — narrower than full width */
+    .queue-box {
+      width: 60%;
+    }
+
+    /* Executor row — 3 side by side */
+    .executor-row {
+      display: flex;
+      gap: var(--space-md);
+      width: 100%;
+    }
+    .executor-row .box {
+      flex: 1;
+    }
+
+    /* Fork connector: stem → horizontal bar → two arms with arrows */
+    .fork-connector {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .fork-stem {
+      width: 3px;
+      height: 16px;
+      background: var(--text-primary);
+    }
+    .fork-branches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 var(--space-lg);
+      width: 100%;
+      position: relative;
+    }
+    /* Horizontal bar connecting the two branch centers */
+    .fork-branches::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(25% - var(--space-lg) / 4);
+      right: calc(25% - var(--space-lg) / 4);
+      height: 3px;
+      background: var(--text-primary);
+    }
+    .fork-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .fork-arm {
+      width: 3px;
+      height: 28px;
+      background: var(--text-primary);
+      position: relative;
+    }
+    .fork-arm::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+    .fork-arm-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Bottom two-column layout */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 var(--space-lg);
+      width: 100%;
+      margin-top: var(--space-md);
+    }
+    .bottom-col {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* Read model sub-items */
+    .read-model-subs {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+    .read-model-sub {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      color: var(--accent-cyan);
+      text-align: center;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <h2 class="card-title">Reactor Architecture</h2>
+      <p class="card-subtitle">Job processing pipeline</p>
+
+      <div class="card-body">
+        <div class="diagram-flow">
+
+          <!-- Client -->
+          <div class="box accent-green queue-box">
+            <div class="box-title">Client</div>
+          </div>
+
+          <!-- Connector: mutations -->
+          <div class="v-connector">
+            <span class="v-connector-label">mutations</span>
+          </div>
+
+          <!-- Queue -->
+          <div class="box accent-purple queue-box">
+            <div class="box-title">Queue</div>
+          </div>
+
+          <!-- Connector: dequeue jobs -->
+          <div class="v-connector">
+            <span class="v-connector-label">dequeue jobs</span>
+          </div>
+
+          <!-- Executor row -->
+          <div class="executor-row">
+            <div class="box accent-blue">
+              <div class="box-title">Executor</div>
+            </div>
+            <div class="box accent-blue">
+              <div class="box-title">Executor</div>
+            </div>
+            <div class="box accent-blue">
+              <div class="box-title">Executor</div>
+            </div>
+          </div>
+
+          <!-- Fork connector -->
+          <div class="fork-connector">
+            <div class="fork-stem"></div>
+            <div class="fork-branches">
+              <div class="fork-branch">
+                <div class="fork-arm">
+                  <span class="fork-arm-label">operations</span>
+                </div>
+              </div>
+              <div class="fork-branch">
+                <div class="fork-arm">
+                  <span class="fork-arm-label">events</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom columns -->
+          <div class="bottom-row">
+            <!-- Left: Operation Storage -->
+            <div class="bottom-col">
+              <div class="box accent-cyan">
+                <div class="box-title">Operation Log</div>
+              </div>
+            </div>
+
+            <!-- Right: Event Bus → Read Models -->
+            <div class="bottom-col">
+              <div class="box accent-green">
+                <div class="box-title">Event Bus</div>
+              </div>
+
+              <div class="v-connector">
+                <span class="v-connector-label">notify</span>
+              </div>
+
+              <div class="box accent-cyan">
+                <div class="box-title">Read Models</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

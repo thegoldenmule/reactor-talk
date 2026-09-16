@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame {
+      max-width: 800px;
+    }
+    .card {
+      height: auto;
+    }
+    .card-body {
+      flex: none;
+    }
+
+    /* Timeline layout */
+    .timelines {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+    }
+
+    .timeline-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .timeline-label {
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      width: 100px;
+      flex-shrink: 0;
+      text-align: right;
+      line-height: 1.3;
+    }
+    .timeline-label .sublabel {
+      display: block;
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
+      color: var(--text-muted);
+      text-transform: none;
+      letter-spacing: 0;
+      margin-top: 2px;
+    }
+
+    .timeline-track {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      position: relative;
+      height: 40px;
+    }
+
+    /* The horizontal line */
+    .timeline-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+    .timeline-line.client { background: var(--accent-cyan); right: 20%; }
+    .timeline-line.server { background: var(--accent-blue); left: 20%; }
+
+    /* Tick marks */
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Server ticks shifted right by 1 tick spacing */
+    #server-track .ticks {
+      margin-left: 20%;
+    }
+
+    .tick {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tick-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+    .tick-dot.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
+    .tick-dot.accent-blue  { border-color: var(--accent-blue);  background: var(--accent-blue-bg); }
+
+    .tick-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
+      color: var(--text-muted);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+    }
+
+    /* SVG overlay for arrows */
+    .arrow-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    /* Time axis */
+    .time-axis {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .time-axis-line {
+      width: 60px;
+      height: 1px;
+      background: var(--text-muted);
+      position: relative;
+    }
+    .time-axis-line::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--text-muted);
+    }
+
+    /* Legend */
+    .diagram-legend {
+      display: flex;
+      gap: var(--space-lg);
+      margin-top: var(--space-lg);
+      justify-content: center;
+    }
+    .legend-entry {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .legend-swatch {
+      width: 20px;
+      height: 3px;
+      border-radius: 1px;
+    }
+    .legend-swatch.purple { background: var(--accent-purple); }
+    .legend-swatch.green  { background: var(--accent-green); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <h2 class="card-title">Client / Server Game Timelines</h2>
+      <p class="card-subtitle">Local simulation runs ahead; authoritative simulation confirms</p>
+
+      <div class="card-body">
+        <div class="timelines" id="timelines">
+
+          <!-- Client timeline (T0–T4) -->
+          <div class="timeline-row" id="client-row">
+            <div class="timeline-label" style="color: var(--accent-cyan);">
+              Client
+              <span class="sublabel">Local Simulation</span>
+            </div>
+            <div class="timeline-track" id="client-track">
+              <div class="timeline-line client"></div>
+              <div class="ticks" id="client-ticks">
+                <div class="tick"><div class="tick-dot accent-cyan"></div><span class="tick-label">T0</span></div>
+                <div class="tick"><div class="tick-dot accent-cyan"></div><span class="tick-label">T1</span></div>
+                <div class="tick"><div class="tick-dot accent-cyan"></div><span class="tick-label">T2</span></div>
+                <div class="tick"><div class="tick-dot accent-cyan"></div><span class="tick-label">T3</span></div>
+                <div class="tick"><div class="tick-dot accent-cyan"></div><span class="tick-label">T4</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Server timeline (T0–T4, offset right to show lag) -->
+          <div class="timeline-row" id="server-row">
+            <div class="timeline-label" style="color: var(--accent-blue);">
+              Server
+              <span class="sublabel">Authoritative</span>
+            </div>
+            <div class="timeline-track" id="server-track">
+              <div class="timeline-line server"></div>
+              <div class="ticks" id="server-ticks">
+                <div class="tick"><div class="tick-dot accent-blue"></div><span class="tick-label">T0</span></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div><span class="tick-label">T1</span></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div><span class="tick-label">T2</span></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div><span class="tick-label">T3</span></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div><span class="tick-label">T4</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG arrows drawn by script -->
+          <svg class="arrow-overlay" id="arrow-svg"></svg>
+        </div>
+
+        <!-- Legend -->
+        <div class="diagram-legend">
+          <div class="legend-entry">
+            <div class="legend-swatch purple"></div>
+            Input (Client → Server)
+          </div>
+          <div class="legend-entry">
+            <div class="legend-swatch green"></div>
+            State Update (Server → Client)
+          </div>
+        </div>
+
+        <div class="time-axis">
+          <div class="time-axis-line"></div>
+          Time
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Draw diagonal arrows between client and server ticks
+    function drawArrows() {
+      const svg = document.getElementById('arrow-svg');
+      const container = document.getElementById('timelines');
+      const containerRect = container.getBoundingClientRect();
+
+      const clientDots = document.querySelectorAll('#client-ticks .tick-dot');
+      const serverDots = document.querySelectorAll('#server-ticks .tick-dot');
+
+      // Clear previous
+      svg.innerHTML = '';
+
+      // SVG namespace
+      const ns = 'http://www.w3.org/2000/svg';
+
+      // Arrow marker definitions
+      const defs = document.createElementNS(ns, 'defs');
+
+      // Purple arrowhead (client → server / input)
+      const markerPurple = document.createElementNS(ns, 'marker');
+      markerPurple.setAttribute('id', 'arrow-purple');
+      markerPurple.setAttribute('viewBox', '0 0 10 8');
+      markerPurple.setAttribute('refX', '9');
+      markerPurple.setAttribute('refY', '4');
+      markerPurple.setAttribute('markerWidth', '8');
+      markerPurple.setAttribute('markerHeight', '6');
+      markerPurple.setAttribute('orient', 'auto');
+      const pathP = document.createElementNS(ns, 'path');
+      pathP.setAttribute('d', 'M0,0 L10,4 L0,8 Z');
+      pathP.setAttribute('fill', '#a93cce');
+      markerPurple.appendChild(pathP);
+      defs.appendChild(markerPurple);
+
+      // Green arrowhead (server → client / state update)
+      const markerGreen = document.createElementNS(ns, 'marker');
+      markerGreen.setAttribute('id', 'arrow-green');
+      markerGreen.setAttribute('viewBox', '0 0 10 8');
+      markerGreen.setAttribute('refX', '9');
+      markerGreen.setAttribute('refY', '4');
+      markerGreen.setAttribute('markerWidth', '8');
+      markerGreen.setAttribute('markerHeight', '6');
+      markerGreen.setAttribute('orient', 'auto');
+      const pathG = document.createElementNS(ns, 'path');
+      pathG.setAttribute('d', 'M0,0 L10,4 L0,8 Z');
+      pathG.setAttribute('fill', '#07c262');
+      markerGreen.appendChild(pathG);
+      defs.appendChild(markerGreen);
+
+      svg.appendChild(defs);
+
+      function dotCenter(dot) {
+        const r = dot.getBoundingClientRect();
+        return {
+          x: r.left + r.width / 2 - containerRect.left,
+          y: r.top + r.height / 2 - containerRect.top
+        };
+      }
+
+      function makeLine(from, to, color, markerId, label) {
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', from.x);
+        line.setAttribute('y1', from.y);
+        line.setAttribute('x2', to.x);
+        line.setAttribute('y2', to.y);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('marker-end', `url(#${markerId})`);
+        line.setAttribute('stroke-dasharray', '6,4');
+        svg.appendChild(line);
+
+        if (label) {
+          const text = document.createElementNS(ns, 'text');
+          text.setAttribute('x', to.x + 8);
+          text.setAttribute('y', to.y - 12);
+          text.setAttribute('fill', color);
+          text.setAttribute('font-size', '11');
+          text.setAttribute('font-weight', '600');
+          text.setAttribute('font-family', 'Inter, system-ui, sans-serif');
+          text.textContent = label;
+          svg.appendChild(text);
+        }
+      }
+
+      // Input arrows: client tick → same-labeled server tick
+      // Because server is offset right, same index arrows go diagonally down-right
+      // Client T1 → Server T1, Client T2 → Server T2
+      const inputPairs = [
+        [1, 1],
+        [2, 2],
+      ];
+      inputPairs.forEach(([ci, si]) => {
+        if (clientDots[ci] && serverDots[si]) {
+          makeLine(dotCenter(clientDots[ci]), dotCenter(serverDots[si]), '#a93cce', 'arrow-purple');
+        }
+      });
+
+      // State update arrows: server tick → client tick (+ 2 ticks for return latency)
+      // Server T1 → Client T3, Server T2 → Client T4
+      const updatePairs = [
+        [1, 3],
+        [2, 4],
+      ];
+      updatePairs.forEach(([si, ci]) => {
+        if (serverDots[si] && clientDots[ci]) {
+          makeLine(dotCenter(serverDots[si]), dotCenter(clientDots[ci]), '#07c262', 'arrow-green', 'reconcile');
+        }
+      });
+    }
+
+    // Draw on load and resize
+    window.addEventListener('load', drawArrows);
+    window.addEventListener('resize', drawArrows);
+  </script>
+</body>
+</html>

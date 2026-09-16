@@ -1,23 +1,29 @@
 #!/usr/bin/env node
-// Build index.html (a reveal.js deck) from outline.md.
+// Build the deck from outline.md. One command does everything:
+//   1. copies the diagram sources this deck uses out of ../ph-diagrams (override with
+//      PH_DIAGRAMS) into diagrams/pages/ and diagrams/css/, byte for byte;
+//   2. writes index.html (a reveal.js deck) that shows each diagram page live in an iframe,
+//      scaled to fit under the slide header. No PNG rendering anywhere.
 //
-// Rules:
+// Outline rules:
 //   `### Heading`            starts a slide. The heading becomes the slide's header band; the
 //                            enclosing `##` heading is shown as the section label on the right.
-//   `![alt](img/x.png)`      the slide's diagram, fitted into the area under the title. Slides
-//                            without an image show their plain paragraphs centered instead.
+//   `![alt](img/<id>.png)`   the slide's diagram: <id> names ../ph-diagrams/pages/<id>.html.
+//                            (The img/ spelling is kept for outline compatibility; no PNG is
+//                            read.) Slides without a diagram show their plain paragraphs centered.
 //   `- bullet` / paragraphs  become speaker notes (press S in the deck).
 //   `##` / `#` headings, `---` rules and everything before the first `###` are ignored.
 //   The `## Appendix` section and anything after it still produce slides; sections after
 //   `## Gaps` / `## Likely` do not (they are prep notes, not slides).
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync, unlinkSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const DIAGRAMS = process.env.PH_DIAGRAMS || join(root, "..", "ph-diagrams");
 const md = readFileSync(join(root, "outline.md"), "utf8");
 
-const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const inline = (s) =>
   esc(s)
     .replace(/`([^`]+)`/g, "<code>$1</code>")
@@ -37,15 +43,15 @@ for (const raw of md.split("\n")) {
   if (h2) sectionName = h2[1].replace(/\s*\(.*\)\s*$/, "").trim();
   const h3 = line.match(/^### (.+)/);
   if (h3) {
-    cur = { title: h3[1].trim(), section: sectionName, image: null, alt: "", notes: [], text: [] };
+    cur = { title: h3[1].trim(), section: sectionName, diagram: null, alt: "", notes: [], text: [] };
     slides.push(cur);
     continue;
   }
   if (/^#/.test(line)) { cur = null; continue; } // any other heading ends the current slide
   if (!cur || line === "---") continue;
-  const img = line.match(/^!\[(.*?)\]\((img\/[\w-]+\.png)\)/);
-  if (img && !cur.image) {
-    cur.image = img[2];
+  const img = line.match(/^!\[(.*?)\]\(img\/([\w-]+)\.png\)/);
+  if (img && !cur.diagram) {
+    cur.diagram = img[2];
     cur.alt = img[1];
     continue;
   }
@@ -61,6 +67,34 @@ for (const raw of md.split("\n")) {
   if (line.trim()) cur.text.push(line.trim());
 }
 
+// ---- diagram sources ---------------------------------------------------------------------
+const manifestPath = join(DIAGRAMS, "manifest.json");
+if (!existsSync(manifestPath)) {
+  console.error(`diagram repo not found at ${DIAGRAMS} (set PH_DIAGRAMS)`);
+  process.exit(1);
+}
+const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+const widthOf = new Map(manifest.pages.map((p) => [p.id, (p.viewport || manifest.defaultViewport).width]));
+const used = [...new Set(slides.filter((s) => s.diagram).map((s) => s.diagram))];
+
+const missing = used.filter((id) => !existsSync(join(DIAGRAMS, "pages", `${id}.html`)));
+if (missing.length) {
+  console.error(`missing diagram page(s) in ${join(DIAGRAMS, "pages")}: ${missing.join(", ")}`);
+  process.exit(1);
+}
+for (const id of used) if (!widthOf.has(id)) console.warn(`  note: "${id}" is not in manifest.json; using default viewport width`);
+
+const pagesDir = join(root, "diagrams", "pages");
+const cssDir = join(root, "diagrams", "css");
+mkdirSync(pagesDir, { recursive: true });
+mkdirSync(cssDir, { recursive: true });
+for (const f of readdirSync(join(DIAGRAMS, "css"))) if (f.endsWith(".css")) copyFileSync(join(DIAGRAMS, "css", f), join(cssDir, f));
+for (const id of used) copyFileSync(join(DIAGRAMS, "pages", `${id}.html`), join(pagesDir, `${id}.html`));
+for (const f of readdirSync(pagesDir)) {
+  const id = f.replace(/\.html$/, "");
+  if (f.endsWith(".html") && !used.includes(id)) unlinkSync(join(pagesDir, f));
+}
+
 // ---- render ------------------------------------------------------------------------------
 const section = (s, i) => {
   const notes = s.notes.length
@@ -69,8 +103,9 @@ const section = (s, i) => {
         .join("")}</ul></aside>`
     : `<aside class="notes"><h4>${inline(s.title)}</h4></aside>`;
   const header = `<header class="hd"><h2>${inline(s.title)}</h2><span class="sec">${inline(s.section)}</span></header>`;
-  if (s.image) {
-    return `<section data-slide="${i + 1}">${header}<div class="art"><img src="${s.image}" alt="${esc(s.alt)}"></div>${notes}</section>`;
+  if (s.diagram) {
+    const w = widthOf.get(s.diagram) ?? manifest.defaultViewport.width;
+    return `<section data-slide="${i + 1}">${header}<div class="art"><div class="fit"><iframe src="diagrams/pages/${s.diagram}.html" data-w="${w}" style="width:${w}px" scrolling="no" title="${esc(s.alt)}"></iframe></div></div>${notes}</section>`;
   }
   const body = s.text.map((t) => `<p>${inline(t)}</p>`).join("");
   return `<section data-slide="${i + 1}">${header}<div class="art text">${body}</div>${notes}</section>`;
@@ -111,9 +146,11 @@ const html = `<!DOCTYPE html>
       font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
       color: rgba(255,255,255,0.38);
     }
-    /* diagram fitted into the area under the header */
-    .reveal .art { position: absolute; top: 140px; right: 72px; bottom: 44px; left: 72px; display: flex; align-items: center; justify-content: center; }
-    .reveal .art img { max-width: 100%; max-height: 100%; width: auto; height: auto; margin: 0; border: 0; box-shadow: none; background: none; }
+    /* diagram fitted into the area under the header: the page is embedded unscaled in an
+       iframe inside .fit, and .fit is scaled/positioned by the script below */
+    .reveal .art { position: absolute; top: 140px; right: 72px; bottom: 44px; left: 72px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .reveal .art .fit { position: absolute; left: 0; top: 0; transform-origin: top left; }
+    .reveal .art iframe { border: 0; background: transparent; pointer-events: none; display: block; margin: 0; max-width: none; max-height: none; box-shadow: none; }
     .reveal .art.text { flex-direction: column; text-align: center; }
     .reveal .art.text p { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 48px; color: rgba(255,255,255,0.6); margin: 0 0 0.4em; max-width: 1400px; }
     /* keep the slide number as the only chrome, and tiny */
@@ -145,10 +182,52 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
       plugins: [ RevealNotes ]
     });
 
+    // Fit each diagram iframe into the art box (1776 x 896 slide units, see .art above).
+    // The iframe already carries its design width inline so pages lay out (and draw any
+    // JS overlays) at the right width on first load.
+    // The iframe is sized to the page's design width and its card height (+24px above and
+    // below, as the page's .frame padding gives), then .fit is scaled to fit and centered.
+    (function () {
+      var BOX_W = 1776, BOX_H = 896, PAD = 48;
+      function fit(iframe) {
+        var doc = iframe.contentDocument;
+        var card = doc && doc.querySelector('.card');
+        if (!card) return;
+        var w = parseInt(iframe.dataset.w, 10) || 1200;
+        var h = card.offsetHeight + PAD;
+        if (!h || h === PAD) return;
+        var s = Math.min(BOX_W / w, BOX_H / h);
+        iframe.style.width = w + 'px';
+        iframe.style.height = h + 'px';
+        var box = iframe.parentNode;
+        box.style.width = w + 'px';
+        box.style.height = h + 'px';
+        box.style.transform = 'scale(' + s + ')';
+        box.style.left = ((BOX_W - w * s) / 2) + 'px';
+        box.style.top = ((BOX_H - h * s) / 2) + 'px';
+        // pages that draw overlays with JS on load/resize (arrows) redraw against the final size
+        if (iframe.contentWindow && (iframe.dataset.h !== String(h))) {
+          iframe.dataset.h = String(h);
+          try { iframe.contentWindow.dispatchEvent(new Event('resize')); } catch (e) {}
+        }
+      }
+      function fitCurrent() {
+        var slide = Reveal.getCurrentSlide();
+        if (!slide) return;
+        slide.querySelectorAll('.art iframe').forEach(fit);
+      }
+      document.querySelectorAll('.art iframe').forEach(function (f) {
+        f.addEventListener('load', function () { fit(f); });
+        if (f.contentDocument && f.contentDocument.readyState === 'complete') fit(f);
+      });
+      Reveal.on('ready', fitCurrent);
+      Reveal.on('slidechanged', fitCurrent);
+      Reveal.on('resize', fitCurrent);
+    })();
   </script>
 </body>
 </html>
 `;
 writeFileSync(join(root, "index.html"), html);
-console.log(`wrote index.html: ${slides.length} slides (${slides.filter((s) => s.image).length} diagrams)`);
-for (const s of slides) if (!s.image && !s.text.length) console.warn(`  note: "${s.title}" has no image and no text`);
+console.log(`wrote index.html: ${slides.length} slides (${slides.filter((s) => s.diagram).length} diagrams, ${used.length} pages copied)`);
+for (const s of slides) if (!s.diagram && !s.text.length) console.warn(`  note: "${s.title}" has no diagram and no text`);

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1200px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .constraints {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+    }
+    .constraint {
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .constraint.cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg); }
+    .constraint.green  { border-color: var(--accent-green);  background: var(--accent-green-bg); }
+    .constraint.purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); }
+    .c-name { font-size: 20px; font-weight: var(--font-weight-bold); letter-spacing: -0.02em; }
+    .cyan .c-name   { color: var(--accent-cyan); }
+    .green .c-name  { color: var(--accent-green); }
+    .purple .c-name { color: var(--accent-purple); }
+    .c-def { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    .c-list { display: flex; flex-direction: column; gap: 6px; }
+    .c-list-label {
+      font-size: 9px; font-weight: var(--font-weight-semibold); letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 2px;
+    }
+    .c-list-label.out { color: #e05a5a; }
+    .c-list-label.in  { color: var(--text-primary); }
+    .c-item {
+      font-size: 11.5px; line-height: 1.4;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: rgba(0,0,0,0.25);
+      color: var(--text-secondary);
+      display: flex; gap: 8px; align-items: baseline;
+    }
+    .c-item .g { font-weight: var(--font-weight-bold); flex-shrink: 0; }
+    .c-item.out .g { color: #e05a5a; }
+    .c-item.in .g  { color: var(--accent-green); }
+    .c-item.in { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <div class="constraints">
+
+          <div class="constraint cyan">
+            <div class="c-name">Local-first</div>
+            <div class="c-def">Data <em>and</em> execution live on the user's machine. Every peer is authoritative. Work continues offline.</div>
+            <div class="c-list">
+              <div class="c-list-label out">Rules out</div>
+              <div class="c-item out"><span class="g">✗</span>A privileged server copy that "wins"</div>
+            </div>
+            <div class="c-list">
+              <div class="c-list-label in">Forces</div>
+              <div class="c-item in"><span class="g">→</span>Command sourcing: ship intent, replay it locally</div>
+            </div>
+          </div>
+
+          <div class="constraint green">
+            <div class="c-name">Append-only</div>
+            <div class="c-def">Operations are written to append-only backends (Swarm, Hypercore). History is never edited.</div>
+            <div class="c-list">
+              <div class="c-list-label out">Rules out</div>
+              <div class="c-item out"><span class="g">✗</span>Reordering or rewriting past operations</div>
+            </div>
+            <div class="c-list">
+              <div class="c-list-label in">Forces</div>
+              <div class="c-item in"><span class="g">→</span>Create new operations instead of editing old ones</div>
+            </div>
+          </div>
+
+          <div class="constraint purple">
+            <div class="c-name">Audit trail</div>
+            <div class="c-def">Every Action is signed by its author and every Operation is hash-chained to the last. Who changed what is always verifiable.</div>
+            <div class="c-list">
+              <div class="c-list-label out">Rules out</div>
+              <div class="c-item out"><span class="g">✗</span>Altering another user's signed operation (OT)</div>
+            </div>
+            <div class="c-list">
+              <div class="c-list-label in">Forces</div>
+              <div class="c-item in"><span class="g">→</span>Replay Actions verbatim; new Operations only</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

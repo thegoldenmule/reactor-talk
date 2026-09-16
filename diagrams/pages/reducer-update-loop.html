@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame {
+      max-width: 700px;
+    }
+    .card {
+      height: auto;
+    }
+    .card-body {
+      flex: none;
+    }
+
+    /* Horizontal flow: inputs → reducer → outputs */
+    .h-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    /* Shared box style */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 15px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+    }
+    .box.accent-cyan  { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-blue  { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+
+    /* Stacked pair (State/Command on left, Next State/Events on right) */
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    /* Reducer box — taller to match the stacked pairs */
+    .box.reducer {
+      padding: var(--space-xl) var(--space-lg);
+    }
+    .box.reducer .box-title {
+      font-size: 16px;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Next State box — same height as Reducer */
+    .box.match-reducer {
+      align-self: center;
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    /* Horizontal connector arrow */
+    .h-connector {
+      width: 20px;
+      height: 3px;
+      background: var(--text-primary);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .h-connector::after {
+      content: '';
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <h2 class="card-title">Reducer Update Loop</h2>
+      <p class="card-subtitle">Unidirectional state transitions via pure functions</p>
+
+      <div class="card-body">
+        <div class="h-flow">
+
+          <!-- Inputs: State + Command stacked -->
+          <div class="stack">
+            <div class="box accent-cyan">State</div>
+            <div class="box accent-purple">Command</div>
+          </div>
+
+          <div class="h-connector"></div>
+
+          <!-- Reducer -->
+          <div class="box accent-blue reducer">
+            <div class="box-title">Reducer</div>
+          </div>
+
+          <div class="h-connector"></div>
+
+          <!-- Output: Next State, matching Reducer height -->
+          <div class="box accent-cyan match-reducer">Next State</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

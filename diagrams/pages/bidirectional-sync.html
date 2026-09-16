@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1200px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+    }
+    .box.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
+    .box.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+    .box.accent-new {
+      border: 2px dashed var(--accent-cyan);
+      background: var(--accent-cyan-bg);
+      color: var(--accent-cyan);
+    }
+
+    .ts {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      margin-top: 1px;
+    }
+
+    .hash {
+      font-size: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      opacity: 0.7;
+      margin-top: 1px;
+    }
+
+    /* Reactor row with sync arrows */
+    .reactor-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-lg);
+      align-items: center;
+    }
+    .reactor-label {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 12px;
+    }
+
+    .sync-arrows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .sync-arrow-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    .sync-arrow-line-left {
+      width: 60px;
+      height: 2px;
+      background: var(--accent-cyan);
+      position: relative;
+    }
+    .sync-arrow-line-left::before {
+      content: '';
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-right: 7px solid var(--accent-cyan);
+    }
+    .sync-arrow-line-right {
+      width: 60px;
+      height: 2px;
+      background: var(--accent-green);
+      position: relative;
+    }
+    .sync-arrow-line-right::after {
+      content: '';
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid var(--accent-green);
+    }
+    .sync-arrow-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+    }
+    .sync-arrow-label.label-cyan  { color: var(--accent-cyan); }
+    .sync-arrow-label.label-green { color: var(--accent-green); }
+
+    /* Arrow down */
+    .arrow-down {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--space-lg) 0;
+    }
+    .arrow-down-line {
+      width: 2px;
+      height: 20px;
+      background: var(--text-muted);
+    }
+    .arrow-down-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: var(--space-xs) 0;
+    }
+    .arrow-down-head {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-muted);
+    }
+
+    /* Section box and labels */
+    .section-box {
+      border: 1px dashed rgba(0, 209, 209, 0.3);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-top: var(--space-sm);
+      opacity: 0.8;
+    }
+
+    .op-row {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Equals indicator */
+    .equals-indicator {
+      font-size: 28px;
+      font-weight: var(--font-weight-bold);
+      color: var(--accent-cyan);
+      text-align: center;
+      line-height: 1;
+      margin: var(--space-md) 0;
+    }
+
+    .convergence-label {
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-cyan);
+      text-align: center;
+      margin-top: var(--space-md);
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body" style="padding-top: 24px; padding-bottom: 24px;">
+
+        <!-- Reactor labels with sync arrows -->
+        <div class="reactor-row">
+          <div class="box accent-cyan reactor-label" style="justify-self: center;">Reactor A</div>
+          <div class="sync-arrows">
+            <div class="sync-arrow-wrapper">
+              <div class="sync-arrow-label label-cyan">reshuffled ops</div>
+              <div class="sync-arrow-line-left"></div>
+            </div>
+            <div class="sync-arrow-wrapper">
+              <div class="sync-arrow-line-right"></div>
+              <div class="sync-arrow-label label-green">reshuffled ops</div>
+            </div>
+          </div>
+          <div class="box accent-green reactor-label" style="justify-self: center;">Reactor B</div>
+        </div>
+
+        <!-- Arrow down -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">garbage collect</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- A′ GC'd stream -->
+        <div class="section-box">
+          <div class="op-row">
+            <div class="box accent-cyan">A′₁ <span class="ts">t=1</span><span class="hash">a3f1</span></div>
+            <div class="box accent-cyan">A′₂ <span class="ts">t=5</span><span class="hash">b7d2</span></div>
+            <div class="box accent-new">A′₃ <span class="ts">t=8</span><span class="hash">b2f3</span></div>
+            <div class="box accent-new">A′₄ <span class="ts">t=12</span><span class="hash">d8a1</span></div>
+            <div class="box accent-new">A′₅ <span class="ts">t=14</span><span class="hash">c4e7</span></div>
+            <div class="box accent-new">A′₆ <span class="ts">t=18</span><span class="hash">f1b9</span></div>
+            <div class="box accent-new">A′₇ <span class="ts">t=21</span><span class="hash">a7d4</span></div>
+            <div class="box accent-new">A′₈ <span class="ts">t=27</span><span class="hash">e2c6</span></div>
+            <div class="box accent-new">A′₉ <span class="ts">t=30</span><span class="hash">b9f8</span></div>
+            <div class="box accent-new">A′₁₀ <span class="ts">t=34</span><span class="hash">d3a5</span></div>
+            <div class="box accent-new">A′₁₁ <span class="ts">t=39</span><span class="hash">f6e1</span></div>
+          </div>
+          <div class="section-label">A&prime; &mdash; 11 operations</div>
+        </div>
+
+        <!-- Equals -->
+        <div class="equals-indicator">=</div>
+
+        <!-- B′ GC'd stream -->
+        <div class="section-box">
+          <div class="op-row">
+            <div class="box accent-cyan">B′₁ <span class="ts">t=1</span><span class="hash">a3f1</span></div>
+            <div class="box accent-cyan">B′₂ <span class="ts">t=5</span><span class="hash">b7d2</span></div>
+            <div class="box accent-new">B′₃ <span class="ts">t=8</span><span class="hash">b2f3</span></div>
+            <div class="box accent-new">B′₄ <span class="ts">t=12</span><span class="hash">d8a1</span></div>
+            <div class="box accent-new">B′₅ <span class="ts">t=14</span><span class="hash">c4e7</span></div>
+            <div class="box accent-new">B′₆ <span class="ts">t=18</span><span class="hash">f1b9</span></div>
+            <div class="box accent-new">B′₇ <span class="ts">t=21</span><span class="hash">a7d4</span></div>
+            <div class="box accent-new">B′₈ <span class="ts">t=27</span><span class="hash">e2c6</span></div>
+            <div class="box accent-new">B′₉ <span class="ts">t=30</span><span class="hash">b9f8</span></div>
+            <div class="box accent-new">B′₁₀ <span class="ts">t=34</span><span class="hash">d3a5</span></div>
+            <div class="box accent-new">B′₁₁ <span class="ts">t=39</span><span class="hash">f6e1</span></div>
+          </div>
+          <div class="section-label">B&prime; &mdash; 11 operations</div>
+        </div>
+
+        <div class="convergence-label">A&prime; = B&prime; &mdash; identical streams</div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card  { height: auto; }
+    .card-body { flex: none; }
+
+    /* Shared box style */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 15px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+    }
+    .box.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
+    .box.accent-blue  { border-color: var(--accent-blue);  background: var(--accent-blue-bg);  color: var(--accent-blue); }
+    .box.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+
+    /* Compact event pill */
+    .event-pill {
+      font-size: 13px;
+      padding: var(--space-sm) var(--space-md);
+      white-space: nowrap;
+    }
+
+    /* ── Main diagram grid ── */
+    .diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      column-gap: 0;
+      row-gap: 0;
+    }
+
+    /* Event stream entering from left */
+    .events-group {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: center;
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    /* Event stream exiting to right */
+    .events-group-right {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: center;
+      justify-self: start;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* Tall function box in the middle */
+    .fn-box {
+      grid-column: 2;
+      grid-row: 1;
+      min-height: 90px;
+      padding: var(--space-xl) var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fn-label {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 15px;
+    }
+
+    /* Stream exit on right */
+    .exit-group {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: center;
+      justify-self: start;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Vertical arrow section below function */
+    .v-section {
+      grid-column: 2;
+      grid-row: 2;
+      justify-self: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-sm) 0;
+    }
+
+    /* Result section below arrow */
+    .result-section {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ── Horizontal connector arrow ── */
+    .h-conn {
+      width: 14px;
+      height: 2px;
+      background: var(--text-primary);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .h-conn.arrow::after {
+      content: '';
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--text-primary);
+    }
+
+    /* ── Vertical connector arrow ── */
+    .v-conn {
+      width: 2px;
+      height: 20px;
+      background: var(--text-primary);
+      position: relative;
+    }
+    .v-conn.arrow::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--text-primary);
+    }
+
+    /* Stream continuation dots */
+    .stream-dots {
+      color: var(--text-muted);
+      font-size: 20px;
+      letter-spacing: 3px;
+      line-height: 1;
+    }
+
+    /* ── Result table ── */
+    .result-box {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      min-width: 280px;
+    }
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 12px;
+    }
+    .result-table th {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-align: left;
+      border-bottom: 1px solid var(--border-glass);
+    }
+    .result-table td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+    }
+    .result-table tr:last-child td {
+      border-bottom: none;
+    }
+    .result-table .val {
+      color: var(--accent-cyan);
+    }
+    .result-table .dim {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+    /* Highlight the latest/changed value */
+    .result-table .changed {
+      color: var(--accent-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <h2 class="card-title">Aggregate</h2>
+      <p class="card-subtitle">Folding a stream of events into a result</p>
+
+      <div class="card-body">
+        <div class="diagram">
+
+          <!-- Left: events before fold -->
+          <div class="events-group">
+            <div class="box accent-green event-pill">UserCreated</div>
+            <div class="h-conn arrow"></div>
+          </div>
+
+          <!-- Center: function box -->
+          <div class="box accent-blue fn-box">
+            <span class="fn-label">fold()</span>
+          </div>
+
+          <!-- Right: events after fold + continuation -->
+          <div class="events-group-right">
+            <div class="h-conn arrow"></div>
+            <div class="box accent-green event-pill">NameChanged</div>
+            <div class="h-conn arrow"></div>
+            <div class="box accent-green event-pill">EmailSet</div>
+            <div class="h-conn arrow"></div>
+            <span class="stream-dots">···</span>
+          </div>
+
+          <!-- Arrow down from function -->
+          <div class="v-section">
+            <div class="v-conn arrow"></div>
+          </div>
+
+          <!-- Aggregated result table -->
+          <div class="result-section">
+            <div class="box accent-cyan result-box">
+              <table class="result-table">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>name</th>
+                    <th>email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="val">UserCreated</td>
+                    <td class="changed">Alice</td>
+                    <td class="dim">—</td>
+                  </tr>
+                  <tr>
+                    <td class="val">NameChanged</td>
+                    <td class="changed">Bob</td>
+                    <td class="dim">—</td>
+                  </tr>
+                  <tr>
+                    <td class="val">EmailSet</td>
+                    <td>Bob</td>
+                    <td class="changed">bob@co.io</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1200px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    /* Two-column comparison */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+    }
+
+    .variant {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .variant.default { border-color: rgba(4, 217, 235, 0.35); }
+    .variant.secure  { border-color: rgba(169, 60, 206, 0.45); position: relative; }
+
+    /* Binding arrow on the secure variant */
+    .bind-arrow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .bind-arrow path {
+      fill: none;
+      stroke: var(--accent-green);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 3;
+    }
+    .bind-arrow .arrow-label {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 9px;
+      fill: var(--accent-green);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .variant-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .variant-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+    .variant.default .variant-title { color: var(--accent-cyan); }
+    .variant.secure  .variant-title { color: var(--accent-purple); }
+
+    .variant-tag {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .variant.default .variant-tag {
+      background: var(--accent-cyan-bg);
+      color: var(--accent-cyan);
+    }
+    .variant.secure .variant-tag {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+    }
+
+    /* Operation block */
+    .op {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .op-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .op-content {
+      display: flex;
+      align-items: stretch;
+      gap: var(--space-sm);
+    }
+    .op-state, .op-action {
+      flex: 1;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-elevated);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .op-plus {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: var(--font-weight-bold);
+      flex-shrink: 0;
+    }
+
+    .op-state {
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    .op-action {
+      color: var(--text-secondary);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    /* Next op: action slot becomes detailed JSON */
+    .op.next .op-action {
+      flex: 2;
+      justify-content: flex-start;
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      text-transform: none;
+      letter-spacing: normal;
+      font-size: 11px;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    .variant.default .op.next .op-action {
+      border-color: var(--accent-cyan);
+      background: var(--accent-cyan-bg);
+    }
+    .variant.secure .op.next .op-action {
+      border-color: var(--accent-purple);
+      background: var(--accent-purple-bg);
+    }
+    .op.next .op-state {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 10px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .op.next .op-state .h-label { color: var(--text-muted); }
+
+    .code { font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace); font-size: 11px; }
+    .code .brace { color: var(--text-muted); }
+    .code .key   { color: var(--text-primary); }
+    .code .str   { color: var(--accent-green); }
+    .code .cyan  { color: var(--accent-cyan); }
+    .code .purple { color: var(--accent-purple); }
+    .code .muted { color: var(--text-muted); }
+    .code .indent { display: inline-block; width: 12px; }
+
+    .connector {
+      display: flex;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .outcome {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 12px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+    }
+    .outcome .mark {
+      font-size: 14px;
+      font-weight: var(--font-weight-bold);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .outcome.bad {
+      background: rgba(224, 82, 82, 0.08);
+      border-color: rgba(224, 82, 82, 0.25);
+      color: #e78686;
+    }
+    .outcome.bad .mark { color: #e05252; }
+    .outcome.good {
+      background: var(--accent-green-bg);
+      border-color: rgba(7, 194, 98, 0.3);
+      color: var(--accent-green);
+    }
+    .outcome .lbl { font-weight: var(--font-weight-semibold); }
+    .outcome .desc { color: var(--text-secondary); font-weight: var(--font-weight-regular); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="compare">
+
+          <!-- Default: payload-only signature -->
+          <div class="variant default">
+            <div class="variant-header">
+              <div class="variant-title">Payload-only signature</div>
+              <div class="variant-tag">Default</div>
+            </div>
+
+            <!-- Previous op (elided) -->
+            <div class="op prev">
+              <div class="op-label">Previous operation</div>
+              <div class="op-content">
+                <div class="op-state">state</div>
+                <div class="op-plus">+</div>
+                <div class="op-action">action</div>
+              </div>
+            </div>
+
+            <div class="connector">&darr;</div>
+
+            <!-- Next op (detailed) -->
+            <div class="op next">
+              <div class="op-label">Next operation</div>
+              <div class="op-content">
+                <div class="op-state">state</div>
+                <div class="op-plus">+</div>
+                <div class="op-action">
+<span class="code"><span class="brace">{</span><br>
+<span class="indent"></span><span class="key">type</span>: <span class="str">"SIGN_STATEMENT"</span>,<br>
+<span class="indent"></span><span class="key">payload</span>: <span class="brace">{</span> … <span class="brace">}</span>,<br>
+<span class="indent"></span><span class="key">signature</span>: <span class="cyan">sig(payload)</span><br>
+<span class="brace">}</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="outcome bad">
+              <span class="mark">&times;</span>
+              <div>
+                <span class="lbl">Independent of state</span><br>
+                <span class="desc">signature remains valid even when state changes due to reshuffle</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- High-security: payload + state hash -->
+          <div class="variant secure">
+            <svg class="bind-arrow">
+              <!-- From bottom of prev-op state pill, curve down to signature line -->
+              <path d="M 140 128 C 140 220, 180 278, 228 278" />
+            </svg>
+
+            <div class="variant-header">
+              <div class="variant-title">Payload + input-state hash</div>
+              <div class="variant-tag">High security</div>
+            </div>
+
+            <!-- Previous op (elided) -->
+            <div class="op prev">
+              <div class="op-label">Previous operation</div>
+              <div class="op-content">
+                <div class="op-state">state</div>
+                <div class="op-plus">+</div>
+                <div class="op-action">action</div>
+              </div>
+            </div>
+
+            <div class="connector">&darr;</div>
+
+            <!-- Next op (detailed) -->
+            <div class="op next">
+              <div class="op-label">Next operation</div>
+              <div class="op-content">
+                <div class="op-state">state</div>
+                <div class="op-plus">+</div>
+                <div class="op-action">
+<span class="code"><span class="brace">{</span><br>
+<span class="indent"></span><span class="key">type</span>: <span class="str">"SIGN_STATEMENT"</span>,<br>
+<span class="indent"></span><span class="key">payload</span>: <span class="brace">{</span> … <span class="brace">}</span>,<br>
+<span class="indent"></span><span class="key">signature</span>: <span class="purple">sig(payload + H(state))</span><br>
+<span class="brace">}</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="outcome good">
+              <span class="mark">&check;</span>
+              <div>
+                <span class="lbl">Bound to state</span><br>
+                <span class="desc" style="color: var(--text-secondary);">action requires an explicit state</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

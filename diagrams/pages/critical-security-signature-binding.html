@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 960px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    /* Single-column layout filling the full card width */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .variant {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .variant.secure  { border-color: rgba(169, 60, 206, 0.45); position: relative; }
+
+    /* Binding arrow on the secure variant */
+    .bind-arrow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .bind-arrow path {
+      fill: none;
+      stroke: var(--accent-green);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 3;
+    }
+
+    .variant-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .variant-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+    .variant.secure  .variant-title { color: var(--accent-purple); }
+
+    .variant-tag {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .variant.secure .variant-tag {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+    }
+
+    /* Operation block */
+    .op {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .op-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .op-content {
+      display: flex;
+      align-items: stretch;
+      gap: var(--space-sm);
+    }
+    .op-state, .op-action {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-elevated);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .op-state { flex: 1; }
+    .op-action { flex: 2; }
+    .op-plus {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: var(--font-weight-bold);
+      flex-shrink: 0;
+    }
+
+    .op-state {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+      font-size: 10px;
+    }
+
+    .op-action {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      color: var(--text-secondary);
+      font-weight: var(--font-weight-semibold);
+      font-size: 10px;
+    }
+
+    /* Next op: action slot becomes detailed JSON */
+    .op.next .op-action {
+      justify-content: flex-start;
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      text-transform: none;
+      letter-spacing: normal;
+      font-size: 11px;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+    .variant.secure .op.next .op-action {
+      border-color: var(--accent-purple);
+      background: var(--accent-purple-bg);
+    }
+
+    .code { font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace); font-size: 11px; }
+    .code .brace { color: var(--text-muted); }
+    .code .key   { color: var(--text-primary); }
+    .code .str   { color: var(--accent-green); }
+    .code .purple { color: var(--accent-purple); }
+    .code .indent { display: inline-block; width: 12px; }
+
+    .connector {
+      display: flex;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .outcome {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 12px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+    }
+    .outcome .mark {
+      font-size: 14px;
+      font-weight: var(--font-weight-bold);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .outcome.good {
+      background: var(--accent-green-bg);
+      border-color: rgba(7, 194, 98, 0.3);
+      color: var(--accent-green);
+    }
+    .outcome .lbl { font-weight: var(--font-weight-semibold); }
+    .outcome .desc { color: var(--text-secondary); font-weight: var(--font-weight-regular); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="compare">
+
+          <!-- High-security: payload + state hash -->
+          <div class="variant secure">
+            <svg class="bind-arrow">
+              <!-- From bottom of prev-op id pill, curve down to signature line -->
+              <path d="M 155 128 C 155 220, 370 280, 462 280" />
+              <!-- From bottom of prev-op state pill, curve down to signature line -->
+              <path d="M 410 128 C 410 220, 440 280, 462 280" />
+            </svg>
+
+            <div class="variant-header">
+              <div class="variant-title">Payload + input-state hash + id</div>
+              <div class="variant-tag">Critical security</div>
+            </div>
+
+            <!-- Previous op (elided) -->
+            <div class="op prev">
+              <div class="op-label">Previous operation</div>
+              <div class="op-content">
+                <div class="op-state">id</div>
+                <div class="op-state">state</div>
+                <div class="op-plus">+</div>
+                <div class="op-action">action</div>
+              </div>
+            </div>
+
+            <div class="connector">&darr;</div>
+
+            <!-- Next op (detailed) -->
+            <div class="op next">
+              <div class="op-label">Next operation</div>
+              <div class="op-content">
+                <div class="op-state">id</div>
+                <div class="op-state">state</div>
+                <div class="op-plus">+</div>
+                <div class="op-action">
+<span class="code"><span class="brace">{</span><br>
+<span class="indent"></span><span class="key">type</span>: <span class="str">"SIGN_STATEMENT"</span>,<br>
+<span class="indent"></span><span class="key">payload</span>: <span class="brace">{</span> … <span class="brace">}</span>,<br>
+<span class="indent"></span><span class="key">signature</span>: <span class="purple">sig(payload + H(state) + id)</span><br>
+<span class="brace">}</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="outcome good">
+              <span class="mark">&check;</span>
+              <div>
+                <span class="lbl">Bound to state and order</span><br>
+                <span class="desc" style="color: var(--text-secondary);">action requires specific state and order</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

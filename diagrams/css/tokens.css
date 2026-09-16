@@ -1,0 +1,60 @@
+/* Design Tokens — Powerhouse.io derived */
+:root {
+  /* Backgrounds */
+  --bg-base: #0e0e0d;
+  --bg-surface: #14151a;
+  --bg-elevated: #1f2228;
+  --bg-card: rgba(20, 21, 26, 0.85);
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.38);
+
+  /* Accents */
+  --accent-cyan: #04d9eb;
+  --accent-purple: #a93cce;
+  --accent-blue: #0285ff;
+  --accent-green: #07c262;
+
+  /* Accent backgrounds (low opacity for fills) */
+  --accent-cyan-bg: rgba(4, 217, 235, 0.12);
+  --accent-purple-bg: rgba(169, 60, 206, 0.12);
+  --accent-blue-bg: rgba(2, 133, 255, 0.12);
+  --accent-green-bg: rgba(7, 194, 98, 0.12);
+
+  /* Borders */
+  --border-glass: rgba(255, 255, 255, 0.14);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* Radius */
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.6);
+}

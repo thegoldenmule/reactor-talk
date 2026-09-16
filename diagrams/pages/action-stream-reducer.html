@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1200px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+
+    .box.state-snapshot {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      text-align: left;
+      white-space: pre;
+      line-height: 1.5;
+    }
+
+    .op-row {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+    }
+    .op-row .box {
+      flex: 1;
+    }
+
+    .arrow-down {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--space-lg) 0;
+    }
+    .arrow-down-line {
+      width: 2px;
+      height: 20px;
+      background: var(--text-muted);
+    }
+    .arrow-down-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: var(--space-xs) 0;
+    }
+    .arrow-down-head {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body" style="padding-top: 24px; padding-bottom: 24px;">
+
+        <!-- Actions row -->
+        <div class="op-row">
+          <div class="box accent-purple">CREATE_BUDGET</div>
+          <div class="box accent-purple">SET_LINEITEM</div>
+          <div class="box accent-purple">SET_AMOUNT</div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">reduce</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- Reducer -->
+        <div class="box accent-blue" style="width: 100%;">Reducer</div>
+
+        <!-- Arrow -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- States row -->
+        <div class="op-row">
+          <div class="box accent-cyan state-snapshot">{ name: 'Q4' }</div>
+          <div class="box accent-cyan state-snapshot">{ name: 'Q4',
+  items: [{ id: 1 }] }</div>
+          <div class="box accent-cyan state-snapshot">{ name: 'Q4',
+  items: [{ id: 1,
+    amount: 5000 }] }</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

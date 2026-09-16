@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1100px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .box.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
+    .box.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+    .box.accent-orange { border-color: #e8863a; background: rgba(232, 134, 58, 0.08); color: #e8863a; }
+    .box.accent-new {
+      border: 2px dashed var(--accent-cyan);
+      background: var(--accent-cyan-bg);
+      color: var(--accent-cyan);
+    }
+    .box.greyed {
+      opacity: 0.25;
+    }
+
+    .ts {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      margin-top: 1px;
+    }
+
+    .hash {
+      font-size: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      opacity: 0.7;
+      margin-top: 1px;
+    }
+
+    .op-row {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .section-box {
+      border: 1px dashed rgba(232, 134, 58, 0.4);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+    }
+    .section-box.new-ops {
+      border-color: rgba(0, 209, 209, 0.3);
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: #e8863a;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-top: var(--space-sm);
+      opacity: 0.8;
+    }
+    .section-label.cyan {
+      color: var(--accent-cyan);
+    }
+
+    .arrow-down {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--space-lg) 0;
+    }
+    .arrow-down-line {
+      width: 2px;
+      height: 20px;
+      background: var(--text-muted);
+    }
+    .arrow-down-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: var(--space-xs) 0;
+    }
+    .arrow-down-head {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-muted);
+    }
+
+    /* Bottom stream grid */
+    .bottom-stream {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      grid-template-rows: 32px auto;
+      column-gap: var(--space-sm);
+      padding-top: 16px;
+    }
+    .skip-arcs {
+      grid-column: 3 / 8;
+      grid-row: 1;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .bottom-stream > :not(.skip-arcs):not(.skip-label) {
+      grid-row: 2;
+    }
+    .skip-label {
+      grid-column: 7;
+      grid-row: 1;
+      align-self: start;
+      justify-self: center;
+      font-size: 8px;
+      font-weight: var(--font-weight-bold);
+      color: #e8863a;
+      white-space: nowrap;
+      background: rgba(232, 134, 58, 0.12);
+      border: 1px solid rgba(232, 134, 58, 0.3);
+      border-radius: var(--radius-xs);
+      padding: 1px 4px;
+      letter-spacing: 0.02em;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body" style="padding-top: 24px; padding-bottom: 24px;">
+
+        <!-- Conflicted operations -->
+        <div class="section-box">
+          <div class="op-row">
+            <div class="box accent-orange">B₂ <span class="ts">t=8</span><span class="hash">d1b3</span></div>
+            <div class="box accent-orange">A₃ <span class="ts">t=12</span><span class="hash">e9c4</span></div>
+            <div class="box accent-orange">B₃ <span class="ts">t=14</span><span class="hash">a8f5</span></div>
+            <div class="box accent-orange">A₄ <span class="ts">t=18</span><span class="hash">f2a8</span></div>
+            <div class="box accent-orange">B₄ <span class="ts">t=21</span><span class="hash">e3d7</span></div>
+            <div class="box accent-orange">A₅ <span class="ts">t=27</span><span class="hash">c1d9</span></div>
+            <div class="box accent-orange">B₅ <span class="ts">t=30</span><span class="hash">f7b1</span></div>
+            <div class="box accent-orange">A₆ <span class="ts">t=34</span><span class="hash">d4e2</span></div>
+            <div class="box accent-orange">B₆ <span class="ts">t=39</span><span class="hash">a2e8</span></div>
+          </div>
+          <div class="section-label">9 operations in conflict</div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">replay from merge base</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- New operations A₇–A₁₅ -->
+        <div class="section-box new-ops">
+          <div class="op-row">
+            <div class="box accent-new">A₇ <span class="ts">t=8</span><span class="hash">b2f3</span></div>
+            <div class="box accent-new">A₈ <span class="ts">t=12</span><span class="hash">d8a1</span></div>
+            <div class="box accent-new">A₉ <span class="ts">t=14</span><span class="hash">c4e7</span></div>
+            <div class="box accent-new">A₁₀ <span class="ts">t=18</span><span class="hash">f1b9</span></div>
+            <div class="box accent-new">A₁₁ <span class="ts">t=21</span><span class="hash">a7d4</span></div>
+            <div class="box accent-new">A₁₂ <span class="ts">t=27</span><span class="hash">e2c6</span></div>
+            <div class="box accent-new">A₁₃ <span class="ts">t=30</span><span class="hash">b9f8</span></div>
+            <div class="box accent-new">A₁₄ <span class="ts">t=34</span><span class="hash">d3a5</span></div>
+            <div class="box accent-new">A₁₅ <span class="ts">t=39</span><span class="hash">f6e1</span></div>
+          </div>
+          <div class="section-label cyan">9 new operations</div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">append to stream</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- Full stream A₁–A₁₅ -->
+        <div class="bottom-stream">
+          <svg class="skip-arcs" viewBox="0 0 100 30" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 90,28 Q 80,4 70,28" stroke="#e8863a" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+            <path d="M 70,28 Q 60,4 50,28" stroke="#e8863a" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+            <path d="M 50,28 Q 40,4 30,28" stroke="#e8863a" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+            <path d="M 30,28 Q 20,4 10,28" stroke="#e8863a" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="box accent-cyan">A₁ <span class="ts">t=1</span><span class="hash">a3f1</span></div>
+          <div class="box accent-cyan">A₂ <span class="ts">t=5</span><span class="hash">b7d2</span></div>
+          <div class="box accent-cyan greyed">A₃ <span class="ts">t=12</span><span class="hash">e9c4</span></div>
+          <div class="box accent-cyan greyed">A₄ <span class="ts">t=18</span><span class="hash">f2a8</span></div>
+          <div class="box accent-cyan greyed">A₅ <span class="ts">t=27</span><span class="hash">c1d9</span></div>
+          <div class="box accent-cyan greyed">A₆ <span class="ts">t=34</span><span class="hash">d4e2</span></div>
+          <div class="skip-label">skip=4</div>
+          <div class="box accent-new">A₇ <span class="ts">t=8</span><span class="hash">b2f3</span></div>
+          <div class="box accent-new">A₈ <span class="ts">t=12</span><span class="hash">d8a1</span></div>
+          <div class="box accent-new">A₉ <span class="ts">t=14</span><span class="hash">c4e7</span></div>
+          <div class="box accent-new">A₁₀ <span class="ts">t=18</span><span class="hash">f1b9</span></div>
+          <div class="box accent-new">A₁₁ <span class="ts">t=21</span><span class="hash">a7d4</span></div>
+          <div class="box accent-new">A₁₂ <span class="ts">t=27</span><span class="hash">e2c6</span></div>
+          <div class="box accent-new">A₁₃ <span class="ts">t=30</span><span class="hash">b9f8</span></div>
+          <div class="box accent-new">A₁₄ <span class="ts">t=34</span><span class="hash">d3a5</span></div>
+          <div class="box accent-new">A₁₅ <span class="ts">t=39</span><span class="hash">f6e1</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

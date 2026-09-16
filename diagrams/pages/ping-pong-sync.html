@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    .box.accent-orange { border-color: #e8863a; background: rgba(232, 134, 58, 0.08); color: #e8863a; }
+    .box.accent-new {
+      border: 2px dashed var(--accent-cyan);
+      background: var(--accent-cyan-bg);
+      color: var(--accent-cyan);
+    }
+
+    .ts {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      margin-top: 1px;
+    }
+    .hash {
+      font-size: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      opacity: 0.7;
+      margin-top: 1px;
+    }
+
+    .op-row {
+      display: flex;
+      gap: var(--space-xs);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .section-box {
+      border: 1px dashed rgba(232, 134, 58, 0.4);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+    }
+    .section-box.stream-a { border-color: rgba(0, 209, 209, 0.3); }
+    .section-box.stream-b { border-color: rgba(0, 200, 140, 0.3); }
+    .section-box.converged { border-color: rgba(0, 209, 209, 0.3); }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-top: var(--space-sm);
+      opacity: 0.8;
+    }
+    .section-label.cyan  { color: var(--accent-cyan); }
+    .section-label.green { color: var(--accent-green); }
+
+    .arrow-down {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--space-md) 0;
+    }
+    .arrow-down-line {
+      width: 2px;
+      height: 16px;
+      background: var(--text-muted);
+    }
+    .arrow-down-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: var(--space-xs) 0;
+    }
+    .arrow-down-head {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-muted);
+    }
+
+    /* Two-column sync layout */
+    .sync-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-md);
+      align-items: start;
+    }
+
+    .sync-arrows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      align-self: center;
+    }
+    .sync-arrow-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .sync-arrow-label {
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+    }
+    .sync-arrow-label.label-cyan  { color: var(--accent-cyan); }
+    .sync-arrow-label.label-green { color: var(--accent-green); }
+
+    .sync-arrow-line-left {
+      width: 50px;
+      height: 2px;
+      background: var(--accent-cyan);
+      position: relative;
+    }
+    .sync-arrow-line-left::before {
+      content: '';
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-right: 6px solid var(--accent-cyan);
+    }
+    .sync-arrow-line-right {
+      width: 50px;
+      height: 2px;
+      background: var(--accent-green);
+      position: relative;
+    }
+    .sync-arrow-line-right::after {
+      content: '';
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--accent-green);
+    }
+
+    /* Converged result row */
+    .result-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+    .equals-indicator {
+      font-size: 24px;
+      font-weight: var(--font-weight-bold);
+      color: var(--accent-cyan);
+      text-align: center;
+      line-height: 1;
+    }
+    .convergence-label {
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-cyan);
+      text-align: center;
+      margin-top: var(--space-xs);
+      letter-spacing: 0.04em;
+    }
+
+    /* Round dividers */
+    .round-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: var(--space-lg) 0 var(--space-md);
+    }
+    .round-divider::before,
+    .round-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      border-top: 1px dashed var(--border-glass);
+    }
+    .round-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-bold);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+
+    /* Between-rounds new work */
+    .between-rounds {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-md);
+      align-items: center;
+      margin: var(--space-md) 0;
+    }
+    .idle-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-align: center;
+      opacity: 0.5;
+    }
+    .new-work-box {
+      border: 1px dashed rgba(0, 200, 140, 0.4);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    .new-work-label {
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Continues */
+    .continues {
+      text-align: center;
+      font-size: 20px;
+      font-weight: var(--font-weight-bold);
+      color: var(--text-muted);
+      letter-spacing: 0.3em;
+      margin-top: var(--space-lg);
+      opacity: 0.5;
+    }
+    .continues-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-align: center;
+      letter-spacing: 0.06em;
+      opacity: 0.5;
+      margin-top: var(--space-xs);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body" style="padding-top: 24px; padding-bottom: 24px;">
+
+        <!-- ═══════ ROUND 1 ═══════ -->
+        <div class="round-divider">
+          <span class="round-label">Round 1</span>
+        </div>
+
+        <!-- Stream A and Stream B side by side with sync arrows -->
+        <div class="sync-grid">
+
+          <!-- Stream A -->
+          <div class="section-box stream-a">
+            <div class="section-label cyan">Stream A</div>
+            <div class="op-row" style="margin-top: var(--space-sm);">
+              <div class="box accent-cyan">A₁ <span class="ts">t=1</span><span class="hash">a3f1</span></div>
+              <div class="box accent-cyan">A₂ <span class="ts">t=5</span><span class="hash">b7d2</span></div>
+              <div class="box accent-cyan">A₃ <span class="ts">t=12</span><span class="hash">e9c4</span></div>
+              <div class="box accent-cyan">A₄ <span class="ts">t=18</span><span class="hash">f2a8</span></div>
+              <div class="box accent-cyan">A₅ <span class="ts">t=27</span><span class="hash">c1d9</span></div>
+              <div class="box accent-cyan">A₆ <span class="ts">t=34</span><span class="hash">d4e2</span></div>
+            </div>
+          </div>
+
+          <!-- Sync arrows -->
+          <div class="sync-arrows">
+            <div class="sync-arrow-wrapper">
+              <div class="sync-arrow-label label-cyan">A&rsquo;s ops</div>
+              <div class="sync-arrow-line-right"></div>
+            </div>
+            <div class="sync-arrow-wrapper">
+              <div class="sync-arrow-line-left"></div>
+              <div class="sync-arrow-label label-green">B&rsquo;s ops</div>
+            </div>
+          </div>
+
+          <!-- Stream B -->
+          <div class="section-box stream-b">
+            <div class="section-label green">Stream B</div>
+            <div class="op-row" style="margin-top: var(--space-sm);">
+              <div class="box accent-green">B₁ <span class="ts">t=1</span><span class="hash">a3f1</span></div>
+              <div class="box accent-green">B₂ <span class="ts">t=8</span><span class="hash">d1b3</span></div>
+              <div class="box accent-green">B₃ <span class="ts">t=14</span><span class="hash">a8f5</span></div>
+              <div class="box accent-green">B₄ <span class="ts">t=21</span><span class="hash">e3d7</span></div>
+              <div class="box accent-green">B₅ <span class="ts">t=30</span><span class="hash">f7b1</span></div>
+              <div class="box accent-green">B₆ <span class="ts">t=39</span><span class="hash">a2e8</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Arrow: reshuffle + GC -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">reshuffle &amp; converge</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- Converged result -->
+        <div class="result-row">
+          <div class="section-box converged">
+            <div class="section-label cyan">A&prime;</div>
+            <div class="op-row" style="margin-top: var(--space-xs);">
+              <div class="box accent-new">A₁&prime; <span class="ts">t=1</span></div>
+              <div class="box accent-new">A₂&prime; <span class="ts">t=5</span></div>
+              <div class="box accent-new">A₃&prime; <span class="ts">t=8</span></div>
+              <div class="box accent-new">A₄&prime; <span class="ts">t=12</span></div>
+              <div class="box accent-new">A₅&prime; <span class="ts">t=14</span></div>
+              <div class="box accent-new">A₆&prime; <span class="ts">t=18</span></div>
+            </div>
+          </div>
+          <div class="equals-indicator">=</div>
+          <div class="section-box converged">
+            <div class="section-label cyan">B&prime;</div>
+            <div class="op-row" style="margin-top: var(--space-xs);">
+              <div class="box accent-new">A₁&prime; <span class="ts">t=1</span></div>
+              <div class="box accent-new">A₂&prime; <span class="ts">t=5</span></div>
+              <div class="box accent-new">A₃&prime; <span class="ts">t=8</span></div>
+              <div class="box accent-new">A₄&prime; <span class="ts">t=12</span></div>
+              <div class="box accent-new">A₅&prime; <span class="ts">t=14</span></div>
+              <div class="box accent-new">A₆&prime; <span class="ts">t=18</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="convergence-label">A&prime; = B&prime; &mdash; identical streams</div>
+
+        <!-- Between rounds: B keeps working -->
+        <div class="between-rounds" style="margin-top: var(--space-lg);">
+          <div class="idle-label">A idle</div>
+          <div></div>
+          <div class="new-work-box">
+            <div class="new-work-label">B new operations</div>
+            <div class="op-row">
+              <div class="box accent-green">B₇ <span class="ts">t=42</span><span class="hash">g1c3</span></div>
+              <div class="box accent-green">B₈ <span class="ts">t=47</span><span class="hash">h5a9</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ ROUND 2 ═══════ -->
+        <div class="round-divider">
+          <span class="round-label">Round 2</span>
+        </div>
+
+        <!-- Stream A' (unchanged) and Stream B' + new ops -->
+        <div class="sync-grid">
+
+          <!-- Stream A (converged, no new ops) -->
+          <div class="section-box stream-a">
+            <div class="section-label cyan">Stream A&prime;</div>
+            <div class="op-row" style="margin-top: var(--space-sm);">
+              <div class="box accent-new">A₁&prime; <span class="ts">t=1</span></div>
+              <div class="box accent-new">A₂&prime; <span class="ts">t=5</span></div>
+              <div class="box accent-new">A₃&prime; <span class="ts">t=8</span></div>
+              <div class="box accent-new">A₄&prime; <span class="ts">t=12</span></div>
+              <div class="box accent-new">A₅&prime; <span class="ts">t=14</span></div>
+              <div class="box accent-new">A₆&prime; <span class="ts">t=18</span></div>
+            </div>
+          </div>
+
+          <!-- Sync arrows -->
+          <div class="sync-arrows">
+            <div class="sync-arrow-wrapper">
+              <div class="sync-arrow-label label-cyan" style="opacity:0.4">no new ops</div>
+              <div class="sync-arrow-line-right" style="opacity:0.3"></div>
+            </div>
+            <div class="sync-arrow-wrapper">
+              <div class="sync-arrow-line-left"></div>
+              <div class="sync-arrow-label label-green">B₇, B₈</div>
+            </div>
+          </div>
+
+          <!-- Stream B (converged + B₇, B₈) -->
+          <div class="section-box stream-b">
+            <div class="section-label green">Stream B&prime; + new</div>
+            <div class="op-row" style="margin-top: var(--space-sm);">
+              <div class="box accent-new">A₁&prime; <span class="ts">t=1</span></div>
+              <div class="box accent-new">A₂&prime; <span class="ts">t=5</span></div>
+              <div class="box accent-new">A₃&prime; <span class="ts">t=8</span></div>
+              <div class="box accent-new">A₄&prime; <span class="ts">t=12</span></div>
+              <div class="box accent-new">A₅&prime; <span class="ts">t=14</span></div>
+              <div class="box accent-new">A₆&prime; <span class="ts">t=18</span></div>
+              <div class="box accent-green">B₇ <span class="ts">t=42</span></div>
+              <div class="box accent-green">B₈ <span class="ts">t=47</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Arrow: reshuffle + GC -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">reshuffle &amp; converge</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- Converged result round 2 -->
+        <div class="result-row">
+          <div class="section-box converged">
+            <div class="section-label cyan">A&Prime;</div>
+            <div class="op-row" style="margin-top: var(--space-xs);">
+              <div class="box accent-new">A₁&Prime; <span class="ts">t=1</span></div>
+              <div class="box accent-new">A₂&Prime; <span class="ts">t=5</span></div>
+              <div class="box accent-new">A₃&Prime; <span class="ts">t=8</span></div>
+              <div class="box accent-new">A₄&Prime; <span class="ts">t=12</span></div>
+              <div class="box accent-new">A₅&Prime; <span class="ts">t=14</span></div>
+              <div class="box accent-new">A₆&Prime; <span class="ts">t=18</span></div>
+              <div class="box accent-new">A₇&Prime; <span class="ts">t=42</span></div>
+              <div class="box accent-new">A₈&Prime; <span class="ts">t=47</span></div>
+            </div>
+          </div>
+          <div class="equals-indicator">=</div>
+          <div class="section-box converged">
+            <div class="section-label cyan">B&Prime;</div>
+            <div class="op-row" style="margin-top: var(--space-xs);">
+              <div class="box accent-new">A₁&Prime; <span class="ts">t=1</span></div>
+              <div class="box accent-new">A₂&Prime; <span class="ts">t=5</span></div>
+              <div class="box accent-new">A₃&Prime; <span class="ts">t=8</span></div>
+              <div class="box accent-new">A₄&Prime; <span class="ts">t=12</span></div>
+              <div class="box accent-new">A₅&Prime; <span class="ts">t=14</span></div>
+              <div class="box accent-new">A₆&Prime; <span class="ts">t=18</span></div>
+              <div class="box accent-new">A₇&Prime; <span class="ts">t=42</span></div>
+              <div class="box accent-new">A₈&Prime; <span class="ts">t=47</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="convergence-label">A&Prime; = B&Prime; &mdash; identical streams</div>
+
+        <!-- Continues -->
+        <div class="continues">&#8942;</div>
+        <div class="continues-label">continues as needed</div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

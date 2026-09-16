@@ -1,0 +1,380 @@
+/* Components — Shared visual components for all diagram types */
+
+/* ========================================
+   Layout
+   ======================================== */
+
+.frame {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-xl);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-xs);
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.card-source {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: var(--space-md);
+}
+
+/* ========================================
+   Data Chart: Legend
+   ======================================== */
+
+.legend {
+  display: flex;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   Data Chart: Bars
+   ======================================== */
+
+.bar-group {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  flex: 1;
+  min-height: 0;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.bar-stack {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.bar {
+  flex: 1;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  height: calc(var(--value) * 1%);
+  min-height: 2px;
+  transition: height 0.3s ease;
+  position: relative;
+}
+
+.value-label {
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.axis-labels {
+  display: flex;
+  justify-content: space-around;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.axis-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  flex: 1;
+}
+
+/* ========================================
+   Flow Chart
+   ======================================== */
+
+.flow-container {
+  display: grid;
+  gap: var(--space-md);
+  align-items: center;
+  justify-items: center;
+  flex: 1;
+}
+
+.flow-node {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  white-space: nowrap;
+  position: relative;
+}
+
+.flow-node--start,
+.flow-node--end {
+  border-radius: 100px;
+  padding: var(--space-sm) var(--space-xl);
+}
+
+.flow-node--decision {
+  border-radius: var(--radius-sm);
+  transform: rotate(45deg);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-node--decision > span {
+  transform: rotate(-45deg);
+  font-size: 12px;
+}
+
+/* Flow arrows */
+.flow-arrow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-arrow--right {
+  width: 100%;
+  height: 2px;
+  background: var(--border-glass);
+}
+
+.flow-arrow--right::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  border: 5px solid transparent;
+  border-left: 7px solid var(--border-glass);
+}
+
+.flow-arrow--down {
+  height: 100%;
+  width: 2px;
+  background: var(--border-glass);
+  min-height: 20px;
+}
+
+.flow-arrow--down::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  border: 5px solid transparent;
+  border-top: 7px solid var(--border-glass);
+}
+
+.flow-arrow--branch {
+  width: 100%;
+  height: 2px;
+  background: var(--border-glass);
+  border-style: dashed;
+}
+
+.flow-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  position: absolute;
+  white-space: nowrap;
+}
+
+/* ========================================
+   Architecture Diagram
+   ======================================== */
+
+.arch-layer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+}
+
+.arch-layer-label {
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  width: 80px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.arch-component {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.arch-component-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.arch-connector {
+  width: 2px;
+  height: 24px;
+  background: var(--border-glass);
+  margin: 0 auto;
+  position: relative;
+}
+
+.arch-connector::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top: 5px solid var(--border-glass);
+}
+
+.arch-group {
+  display: flex;
+  gap: var(--space-md);
+  flex: 1;
+  border: 1px dashed var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  position: relative;
+}
+
+.arch-group-label {
+  position: absolute;
+  top: -9px;
+  left: var(--space-md);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--bg-surface);
+  padding: 0 var(--space-sm);
+}
+
+/* ========================================
+   Accent Colors
+   ======================================== */
+
+.accent-cyan { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+.accent-purple { border-color: var(--accent-purple); color: var(--accent-purple); }
+.accent-blue { border-color: var(--accent-blue); color: var(--accent-blue); }
+.accent-green { border-color: var(--accent-green); color: var(--accent-green); }
+
+.flow-node.accent-cyan,
+.arch-component.accent-cyan {
+  border-color: var(--accent-cyan);
+  background: var(--accent-cyan-bg);
+  color: var(--accent-cyan);
+}
+
+.flow-node.accent-purple,
+.arch-component.accent-purple {
+  border-color: var(--accent-purple);
+  background: var(--accent-purple-bg);
+  color: var(--accent-purple);
+}
+
+.flow-node.accent-blue,
+.arch-component.accent-blue {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-bg);
+  color: var(--accent-blue);
+}
+
+.flow-node.accent-green,
+.arch-component.accent-green {
+  border-color: var(--accent-green);
+  background: var(--accent-green-bg);
+  color: var(--accent-green);
+}
+
+.bar.accent-cyan { background: var(--accent-cyan); }
+.bar.accent-purple { background: var(--accent-purple); }
+.bar.accent-blue { background: var(--accent-blue); }
+.bar.accent-green { background: var(--accent-green); }
+
+.legend-dot.accent-cyan { background: var(--accent-cyan); }
+.legend-dot.accent-purple { background: var(--accent-purple); }
+.legend-dot.accent-blue { background: var(--accent-blue); }
+.legend-dot.accent-green { background: var(--accent-green); }
+
+/* ========================================
+   Text Utilities
+   ======================================== */
+
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+
+/* ========================================
+   Spacing Utilities
+   ======================================== */
+
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }

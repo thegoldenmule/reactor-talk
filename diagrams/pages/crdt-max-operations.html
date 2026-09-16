@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    /* Box component */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-purple   { border-color: var(--accent-purple);   background: var(--accent-purple-bg);   color: var(--accent-purple); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+
+    .box-title {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Vertical connector — downward arrow */
+    .v-connector {
+      width: 3px;
+      height: 20px;
+      background: var(--text-primary);
+      margin: var(--space-sm) auto;
+      position: relative;
+    }
+    .v-connector::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+
+    /* Two-column grid */
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 var(--space-md);
+      align-items: start;
+      position: relative;
+    }
+
+    /* SVG arrow overlay */
+    .arrow-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Side wrappers with dashed borders */
+    .side-wrapper {
+      border: 1px dashed var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      padding-top: var(--space-lg);
+      position: relative;
+    }
+    .side-wrapper-label {
+      position: absolute;
+      top: -9px;
+      left: var(--space-md);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-sm);
+      color: var(--text-muted);
+    }
+
+    /* Column flow */
+    .col-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* Center exchange column */
+    .exchange-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding-top: var(--space-lg);
+    }
+
+    /* Spacer to align arrows with the right vertical positions */
+    .exchange-spacer {
+      height: 78px;
+    }
+
+    /* Arrow rows in center column */
+    .arrow-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+      margin: var(--space-sm) 0;
+    }
+    .arrow-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+    }
+    .arrow-label-right {
+      color: var(--accent-cyan);
+    }
+    .arrow-label-left {
+      color: var(--accent-purple);
+    }
+
+    /* Horizontal arrow line — rightward (A → B) */
+    .h-arrow {
+      width: 60px;
+      height: 2px;
+      position: relative;
+    }
+    .h-arrow-right {
+      background: var(--accent-cyan);
+    }
+    .h-arrow-right::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid var(--accent-cyan);
+    }
+
+    /* Horizontal arrow line — leftward (B → A) */
+    .h-arrow-left {
+      background: var(--accent-purple);
+    }
+    .h-arrow-left::after {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-right: 7px solid var(--accent-purple);
+    }
+
+    /* Convergence footer */
+    .convergence {
+      margin-top: var(--space-lg);
+    }
+    .convergence .box {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 13px;
+      letter-spacing: -0.01em;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <div class="three-col">
+
+          <!-- SVG arrow overlay -->
+          <svg class="arrow-overlay" id="arrowSvg">
+            <defs>
+              <marker id="arrowhead-orange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="#F59E0B" />
+              </marker>
+            </defs>
+          </svg>
+
+          <!-- Client A -->
+          <div class="side-wrapper">
+            <span class="side-wrapper-label">Client A</span>
+            <div class="col-flow">
+              <div class="box accent-cyan">
+                <div class="box-title">x = 0</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-purple" data-arrow="a-max5">
+                <div class="box-title">max(x, 5)</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-cyan">
+                <div class="box-title">x = 5</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-purple" data-arrow="a-max6">
+                <div class="box-title">max(x, 6)</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-green">
+                <div class="box-title">x = 6</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Client B -->
+          <div class="side-wrapper">
+            <span class="side-wrapper-label">Client B</span>
+            <div class="col-flow">
+              <div class="box accent-cyan">
+                <div class="box-title">x = 0</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-purple" data-arrow="b-max6">
+                <div class="box-title">max(x, 6)</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-cyan">
+                <div class="box-title">x = 6</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-purple" data-arrow="b-max5">
+                <div class="box-title">max(x, 5)</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-green">
+                <div class="box-title">x = 6</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    function drawArrows() {
+      const svg = document.getElementById('arrowSvg');
+      const grid = svg.parentElement;
+      const gridRect = grid.getBoundingClientRect();
+
+      // Clear existing lines
+      svg.querySelectorAll('line').forEach(l => l.remove());
+
+      function boxCenter(attr) {
+        const el = grid.querySelector(`[data-arrow="${attr}"]`);
+        const r = el.getBoundingClientRect();
+        return {
+          x: r.left + r.width / 2 - gridRect.left,
+          y: r.top + r.height / 2 - gridRect.top
+        };
+      }
+
+      function boxEdge(attr, side) {
+        const el = grid.querySelector(`[data-arrow="${attr}"]`);
+        const r = el.getBoundingClientRect();
+        return {
+          x: (side === 'right' ? r.right : r.left) - gridRect.left,
+          y: r.top + r.height / 2 - gridRect.top
+        };
+      }
+
+      function addLine(from, to) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', from.x);
+        line.setAttribute('y1', from.y);
+        line.setAttribute('x2', to.x);
+        line.setAttribute('y2', to.y);
+        line.setAttribute('stroke', '#F59E0B');
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke-dasharray', '6 4');
+        line.setAttribute('marker-end', 'url(#arrowhead-orange)');
+        svg.appendChild(line);
+      }
+
+      // A's max(x,5) right edge → B's max(x,5) left edge
+      addLine(
+        boxEdge('a-max5', 'right'),
+        boxEdge('b-max5', 'left')
+      );
+
+      // B's max(x,6) left edge → A's max(x,6) right edge
+      addLine(
+        boxEdge('b-max6', 'left'),
+        boxEdge('a-max6', 'right')
+      );
+    }
+
+    drawArrows();
+  </script>
+</body>
+</html>

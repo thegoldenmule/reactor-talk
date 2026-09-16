@@ -7,10 +7,11 @@ narrative lives in **`outline.md`**, which is also the deck's source.
 ```
 outline.md          The outline + speaker notes. Edit this. `###` = one slide.
 index.html          Generated deck (reveal.js). Don't edit; run `npm run build`.
-img/                Diagrams, rendered at 2x from ../ph-diagrams and committed.
+diagrams/           Build-time copy of the diagram pages + CSS the outline uses. Don't edit here.
+img/                Diagram PNGs; only feed the PDF backup.
 bin/dev.mjs         Dev loop: serve + watch + rebuild + browser reload
-bin/build.mjs       outline.md → index.html
-bin/render-diagrams.py   ../ph-diagrams/pages/*.html → img/*.png (headless Chrome + Pillow crop)
+bin/build.mjs       outline.md → index.html, and copies the needed ../ph-diagrams pages into diagrams/
+bin/render-diagrams.py   ../ph-diagrams/pages/*.html → img/*.png (PDF backup only)
 bin/pdf.py          outline.md + img/ → deck.pdf (backup for a dead browser; no browser involved)
 reveal/             Vendored reveal.js dist — works offline, no npm install needed to present.
 ```
@@ -22,8 +23,8 @@ npm run dev          # http://127.0.0.1:7788/
 ```
 
 Open that in Chrome and edit. Saving `outline.md` rebuilds the deck and reloads the tab on the
-same slide. Saving a diagram page in `../ph-diagrams/pages/` (or its shared CSS) re-renders the
-affected images first, then reloads. Nothing to install.
+same slide. Saving a diagram page in `../ph-diagrams/pages/` (or its shared CSS) rebuilds and
+reloads too; the build copies the pages the outline uses into `diagrams/`. Nothing to install.
 
 ## Present
 
@@ -41,10 +42,9 @@ Backup: `deck.pdf` opened fullscreen in Preview.
 
 1. Change `outline.md` (notes, order, which diagram each slide uses).
 2. `npm run build`.
-3. Need a diagram changed? Edit it in `../ph-diagrams/pages/`, then `npm run render` (or
-   `python3 bin/render-diagrams.py <page-id>` for one). Set `PH_DIAGRAMS=/path` if the diagram
-   repo lives elsewhere.
-4. `npm run pdf` to refresh the backup.
+3. Need a diagram changed? Edit it in `../ph-diagrams/pages/` and rebuild. Set
+   `PH_DIAGRAMS=/path` if the diagram repo lives elsewhere.
+4. `npm run render` then `npm run pdf` to refresh the PDF backup (the only thing `img/` is for).
 
 The render and PDF scripts depend on Python 3 with Pillow (`pip install pillow`); rendering also
 needs Google Chrome.app.

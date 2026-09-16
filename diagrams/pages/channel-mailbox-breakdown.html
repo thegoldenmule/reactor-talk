@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card { height: auto; }
+    .card-body { flex: none; }
+
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    .box.accent-orange { border-color: #e8863a; background: rgba(232, 134, 58, 0.08); color: #e8863a; }
+
+    .ts {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      margin-top: 1px;
+    }
+
+    .hash {
+      font-size: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-weight: var(--font-weight-medium);
+      display: block;
+      opacity: 0.7;
+      margin-top: 1px;
+    }
+
+    .op-row {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .section-box {
+      border: 1px dashed rgba(0, 209, 209, 0.3);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+    }
+    .section-box.green {
+      border-color: rgba(0, 200, 120, 0.3);
+    }
+    .section-box.orange {
+      border-color: rgba(232, 134, 58, 0.3);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-top: var(--space-sm);
+      opacity: 0.8;
+    }
+    .section-label.green { color: var(--accent-green); }
+    .section-label.orange { color: #e8863a; }
+
+    .arrow-down {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--space-lg) 0;
+    }
+    .arrow-down-line {
+      width: 2px;
+      height: 20px;
+      background: var(--text-muted);
+    }
+    .arrow-down-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: var(--space-xs) 0;
+    }
+    .arrow-down-head {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-muted);
+    }
+
+    .reactor-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .mailbox-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .fifo-badge {
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      opacity: 0.5;
+      letter-spacing: 0.06em;
+      text-align: center;
+      margin-bottom: var(--space-xs);
+    }
+
+    .error-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+    .error-wrapper .box {
+      opacity: 0.6;
+    }
+    .error-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #c0392b;
+      color: #fff;
+      font-size: 8px;
+      font-weight: var(--font-weight-bold);
+      padding: 1px 4px;
+      border-radius: 6px;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body" style="padding-top: 24px; padding-bottom: 24px;">
+
+        <!-- Reactor A and Reactor B side by side -->
+        <div class="reactor-pair">
+          <div class="section-box">
+            <div class="op-row">
+              <div class="box accent-cyan">A₃ <span class="ts">t=12</span><span class="hash">e9c4</span></div>
+              <div class="box accent-cyan">A₄ <span class="ts">t=18</span><span class="hash">f2a8</span></div>
+              <div class="box accent-cyan">A₅ <span class="ts">t=27</span><span class="hash">c1d9</span></div>
+            </div>
+            <div class="section-label">Reactor A</div>
+          </div>
+          <div class="section-box green">
+            <div class="op-row">
+              <div class="box accent-green">B₃ <span class="ts">t=14</span><span class="hash">a8f5</span></div>
+              <div class="box accent-green">B₄ <span class="ts">t=21</span><span class="hash">e3d7</span></div>
+              <div class="box accent-green">B₅ <span class="ts">t=30</span><span class="hash">f7b1</span></div>
+            </div>
+            <div class="section-label green">Reactor B</div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">write to outbox</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- Channel mailboxes -->
+        <div class="mailbox-row">
+          <div class="section-box green">
+            <div class="fifo-badge">FIFO</div>
+            <div class="op-row">
+              <div class="box accent-cyan">A₃ <span class="ts">t=12</span><span class="hash">e9c4</span></div>
+              <div class="box accent-cyan">A₄ <span class="ts">t=18</span><span class="hash">f2a8</span></div>
+              <div class="box accent-cyan">A₅ <span class="ts">t=27</span><span class="hash">c1d9</span></div>
+            </div>
+            <div class="section-label green">Outbox</div>
+          </div>
+          <div class="section-box">
+            <div class="fifo-badge">FIFO</div>
+            <div class="op-row">
+              <div class="box accent-green">B₃ <span class="ts">t=14</span><span class="hash">a8f5</span></div>
+              <div class="box accent-green">B₄ <span class="ts">t=21</span><span class="hash">e3d7</span></div>
+              <div class="box accent-green">B₅ <span class="ts">t=30</span><span class="hash">f7b1</span></div>
+            </div>
+            <div class="section-label">Inbox</div>
+          </div>
+          <div class="section-box orange">
+            <div class="fifo-badge">FIFO</div>
+            <div class="op-row">
+              <div class="error-wrapper">
+                <div class="box accent-orange">B₃ <span class="ts">t=14</span><span class="hash">a8f5</span></div>
+                <span class="error-badge">&#10005;</span>
+              </div>
+            </div>
+            <div class="section-label orange">Dead Letter</div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="arrow-down">
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-label">deliver to inbox</div>
+          <div class="arrow-down-line"></div>
+          <div class="arrow-down-head"></div>
+        </div>
+
+        <!-- Receiving reactors -->
+        <div class="reactor-pair">
+          <div class="section-box">
+            <div class="op-row">
+              <div class="box accent-green">B₄ <span class="ts">t=21</span><span class="hash">e3d7</span></div>
+              <div class="box accent-green">B₅ <span class="ts">t=30</span><span class="hash">f7b1</span></div>
+            </div>
+            <div class="section-label">Reactor A Inbox</div>
+          </div>
+          <div class="section-box green">
+            <div class="op-row">
+              <div class="box accent-cyan">A₃ <span class="ts">t=12</span><span class="hash">e9c4</span></div>
+              <div class="box accent-cyan">A₄ <span class="ts">t=18</span><span class="hash">f2a8</span></div>
+              <div class="box accent-cyan">A₅ <span class="ts">t=27</span><span class="hash">c1d9</span></div>
+            </div>
+            <div class="section-label green">Reactor B Inbox</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

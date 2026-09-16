@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card { height: auto; }
+    .card-body { flex: none; gap: var(--space-md); }
+
+    /* Box component */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+
+    .box-title {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+    }
+    .box-detail {
+      font-size: 12px;
+      opacity: 0.75;
+      line-height: var(--line-height-normal);
+    }
+
+    /* Vertical connector — downward arrow */
+    .v-connector {
+      width: 3px;
+      height: 20px;
+      background: var(--text-primary);
+      margin: var(--space-sm) auto var(--space-md) auto;
+      position: relative;
+    }
+    .v-connector::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+
+    /* Vertical connector — upward arrow */
+    .v-connector--up {
+      width: 3px;
+      height: 20px;
+      background: var(--text-primary);
+      margin: var(--space-md) auto var(--space-sm) auto;
+      position: relative;
+    }
+    .v-connector--up::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 8px solid var(--text-primary);
+    }
+
+    /* 3-column CQRS grid — bottom-aligned so Event Bus meets Executor level */
+    .cqrs-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0 var(--space-md);
+      align-items: end;
+    }
+
+    /* Side wrappers with dashed borders */
+    .side-wrapper {
+      border: 1px dashed var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      padding-top: var(--space-lg);
+      position: relative;
+    }
+    .side-wrapper-label {
+      position: absolute;
+      top: -9px;
+      left: var(--space-md);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-sm);
+      color: var(--text-muted);
+    }
+
+    /* Executor dashed wrapper — indicates N× scalable */
+    .executor-wrapper {
+      border: 2px dashed var(--text-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+      padding-top: var(--space-md);
+      position: relative;
+    }
+    .executor-wrapper-label {
+      position: absolute;
+      top: -10px;
+      left: var(--space-sm);
+      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-xs);
+      color: var(--text-primary);
+    }
+
+    /* Column flow */
+    .col-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* Center bridge — bottom-aligned with wrapper padding offset */
+    .center-bridge {
+      margin-bottom: var(--space-md);
+    }
+
+    /* Event bus row */
+    .event-bus-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .h-line {
+      height: 3px;
+      width: 16px;
+      background: var(--accent-green);
+      flex-shrink: 0;
+    }
+    .h-line--arrow {
+      position: relative;
+    }
+    .h-line--arrow::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid var(--accent-green);
+    }
+
+    .event-bus-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      padding: var(--space-xs) var(--space-sm);
+      border: 1px solid var(--accent-green);
+      border-radius: var(--radius-sm);
+      background: var(--accent-green-bg);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* Op Store — left column, below the write-side wrapper */
+    .op-store-cell {
+      grid-column: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding-top: var(--space-sm);
+    }
+    .op-store-cell .v-connector {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <h2 class="card-title">Reactor CQRS</h2>
+      <p class="card-subtitle">Write/read side separation with independent scaling</p>
+
+      <div class="card-body">
+        <div class="cqrs-grid">
+
+          <!-- Row 1, Col 1: Write Side -->
+          <div class="side-wrapper">
+            <span class="side-wrapper-label">Write Side</span>
+            <div class="col-flow">
+              <div class="box accent-purple">
+                <div class="box-title">Commands</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="box accent-blue">
+                <div class="box-title">Job Queue</div>
+              </div>
+              <div class="v-connector"></div>
+              <div class="executor-wrapper">
+                <span class="executor-wrapper-label">N&times;</span>
+                <div class="box accent-blue">
+                  <div class="box-title">Executor</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 1, Col 2: Event Bus bridge -->
+          <div class="center-bridge">
+            <div class="event-bus-row">
+              <div class="h-line"></div>
+              <div class="event-bus-label">Event<br>Bus</div>
+              <div class="h-line h-line--arrow"></div>
+            </div>
+          </div>
+
+          <!-- Row 1, Col 3: Read Side -->
+          <div class="side-wrapper">
+            <span class="side-wrapper-label">Read Side</span>
+            <div class="col-flow">
+              <div class="box accent-purple">
+                <div class="box-title">Queries</div>
+              </div>
+              <div class="v-connector--up"></div>
+              <div class="executor-wrapper">
+                <span class="executor-wrapper-label">N&times;</span>
+                <div class="box accent-cyan">
+                  <div class="box-title">Read Models</div>
+                </div>
+              </div>
+              <div class="v-connector--up"></div>
+              <div class="box accent-blue">
+                <div class="box-title">Coordinator</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2, Col 1: Op Store (separate, outside write-side wrapper) -->
+          <div class="op-store-cell">
+            <div class="v-connector"></div>
+            <div class="box accent-green">
+              <div class="box-title">Op Store</div>
+              <div class="box-detail">Event persistence</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

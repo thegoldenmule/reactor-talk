@@ -1,372 +1,352 @@
 # The Reactor — talk outline
 
-A 20-minute walk through Powerhouse's local-first document runtime, told almost entirely in
-diagrams. This file is the single source of truth for the deck: `bin/build.mjs` turns every
-`###` heading below into one slide (its first `img/` image becomes the slide; its bullets become
-speaker notes, visible in reveal's speaker view via `S`). `##` headings are structure for the
-reader and produce no slides. Edit here, then `npm run build`.
+Source of the deck: each `###` below is one slide, its image is the slide, its bullets are the
+speaker notes (press `S`). `##` headings produce nothing. `npm run build` after editing.
 
-Source material: the two published deep dives and the in-progress third
-(Medium: "Document Models and The Reactor", "Reconciling local-first event streams",
-"Optimizing distributed synchronization"). Nothing below goes beyond what those say; the gaps
-are flagged at the end.
+Quoted lines are from the three Medium deep dives: I (Document Models and The Reactor),
+II (Reconciling local-first event streams), III (Optimizing distributed synchronization, draft).
 
-The argument of the talk: three requirements (local-first, append-only, signed intent) are
-non-negotiable, and every design choice that follows is forced by them. State the requirements
-early, score every alternative against them, and close on the same scorecard.
-
-Timing target: 20 min total. Opening ≈ 2, Act I ≈ 4, Act II ≈ 3, Act III ≈ 8, Act IV ≈ 3.
-Most slides are 30–60 s; the four reshuffle steps are one idea told in four frames and should
-move fast.
+Timing: 20 min. Opening 2, Act I 4, Act II 3, Act III 8, Act IV 3.
 
 ---
 
-## Opening (2 min)
+## Opening
 
 ### The Reactor
 
-Local-first documents that sync.
+The convenience of a centralized SaaS with the sovereignty of local-first.
 
-- Who I am in one breath: hands-on technical lead; ~1 year at Powerhouse on this runtime.
-- Powerhouse: local-first tooling for open organizations to coordinate people, code, and capital.
-  Products on top: Achra (coordination hub), Vetra (data + workflows), identity, payments, an AI
-  agent. All of it sits on the thing in this talk.
-- The product stance that drives the engineering: agency and ownership for the user, without
-  giving up the convenience of centralized SaaS. That sentence is the whole design constraint.
-- Framing for a non-domain audience: think "git for structured documents, that also syncs live."
+- Hands-on tech lead. About a year at Powerhouse on this runtime.
+- I: "Powerhouse provides a local-first tool-set that allows open organizations to
+  collaboratively coordinate people, code and capital."
+- I: "our goal is to provide users true agency and ownership, without sacrificing the typical
+  merits of centralized services."
+- I: "We are aiming for the convenience of a centralized SaaS with the sovereignty of
+  local-first. No magic allowed."
 
 ### The ask
 
 ![The Reactor runs everywhere and syncs](img/reactor-environments.png)
 
-- Same runtime, everywhere: browser, Node server, CLI, mobile, edge, ETL. Data *and*
-  execution live on the user's machine first; sync is eventually consistent.
-- Two very different performance envelopes from one codebase: run serially without blocking a
-  render thread in a browser, and scale horizontally on a server across many documents.
-- Every one of these is a full peer — there is no privileged copy. That is not an implementation
-  detail; it is the first of three requirements the whole design answers to.
+- I: "both data storage and execution need to happen on your machine first, with seamless
+  'eventually consistent' synchronization across devices."
+- I: "The Reactor needs to be able to run everywhere. It needs to run in your browser when you
+  load an application and it needs to run in hosted environments, like a node server."
+- I: "able to run serially without impeding the render thread of a browser while also able to
+  scale horizontally in a server environment."
+- No privileged copy. Every box on this slide is a peer.
 
 ### Three non-negotiables
 
 ![Local-first, append-only, signed intent: what each rules out and forces](img/design-constraints.png)
 
-- This slide is the spine of the talk. Everything after it is a consequence.
-- Requirement 1, local-first: data *and* execution on the user's machine, every peer
-  authoritative, work continues offline. It rules out a privileged server copy that wins and
-  reducers that only run server-side. It forces command sourcing (ship intent, replay locally),
-  one runtime everywhere, and eventual consistency.
-- Requirement 2, append-only: the operation log is a hash-chained audit trail on append-only
-  backends (Swarm, Hypercore). History is never edited. Rules out reordering, rewriting, or
-  deleting past operations. Forces new operations instead of edits, skip values with a
-  garbage-collected view, and projections that rebuild from the log.
-- Requirement 3, signed intent: every Action is signed by its author and must verify on every
-  peer. Nobody's mutation may be altered by someone else. Rules out transforming other users'
-  operations (OT) and silently discarding a peer's work. Forces replaying Actions verbatim,
-  signature tiers that can bind state and order, and dead-lettering anything that fails
-  verification.
-- Why these are real and not self-imposed: the product promise is agency and ownership without
-  giving up the convenience of centralized SaaS, for individuals, organizations, even countries.
-  Ownership of data without ownership of execution is hollow (req 1). An audit trail you can
-  quietly rewrite is not an audit trail (req 2). Ownership without proof of authorship is not
-  ownership (req 3).
-- Tell the audience: "keep the three colors in mind; I'll grade every alternative against them."
+- Everything after this slide follows from these three.
+- Local-first. I: "both the data and the execution to be locally owned by the user." Rules out
+  a server that wins. Forces command sourcing and one runtime everywhere.
+- Append-only. II: "each Reactor writes to append-only storage backends (like Swarm or
+  Hypercore), so we can't actually go back and rewrite operations or their order." Forces new
+  operations instead of edits, and the skip value.
+- Signed intent. II: the stream has "a signed hash chain"; an Action is "a signed user intent."
+  II: "do you really want your mutations altered by someone else? Who gets to decide that
+  anyway?" Forces replaying Actions verbatim and rejecting anything that fails verification.
+- Ask the room to keep the three colors in mind. Every alternative gets graded against them.
 
-## Act I — Document Models (4 min)
+## Act I — Document Models
 
 ### Where we started: the reducer
 
 ![Flux/Redux reducer loop](img/reducer-update-loop.png)
 
-- If you know flux/redux you know this: a pure function takes state + a command and returns the
-  next state. Every change is plain data plus a pure function: trivial to isolate and test.
-- What flux papers over: (1) how do you reconstruct state you never had, (2) how do you sync
-  state across users on append-only storage, (3) how does it scale. Two of those are
-  requirements 1 and 2 knocking on the door.
+- I: "a function, called a reducer, takes a state object and a command and outputs the next
+  state."
+- I: "The flux pattern breaks down every state change into simple data and pure functions,
+  making them extremely easy to isolate and test."
+- I: "how do you reconstruct state if you didn't already have it, and secondly (though related),
+  how would you synchronize state between multiple users, especially given the constraint of
+  append-only storage? Oh and a nit-picky third: how the heck do you scale this approach?"
 
 ### Event sourcing: state as a stream
 
 ![State as a stream of events](img/event-sourcing.png)
 
-- Older idea than flux: don't store the object, store the stream of events that made it.
-- Payoff: state at *any* point in time, with the reasons attached. Not just a username; the
-  whole history of usernames and why each changed.
-- This is requirement 2 turned into an asset: an append-only log isn't a constraint we tolerate,
-  it's the data model. Auditability falls out for free.
+- I: "This architecture describes an object's state not as some explicit object, but as a
+  stream of the events that create the object."
+- I: "All the sudden we don't just have a username, we have an entire history of usernames along
+  with descriptive reasons why the username changed at all."
+- Append-only stops being a constraint here and becomes the data model.
 
 ### Aggregates: many views from one stream
 
 ![Folding a stream into an aggregate](img/event-sourcing-aggregates.png)
 
-- Walk the stream with a `fold()` and you can build anything: a count, a table, an index.
-- The killer property: you don't need to know which aggregates you'll want at launch. Ship,
-  run for three years, then rebuild a brand-new view from the beginning of the stream.
+- I: "we could move along an event stream and count the number of times the username was
+  changed. That would create a single number: an aggregate."
+- I: "we don't really need to know what aggregates we'll need when we launch. We could ship the
+  product, have it in production for three years, and only then think about unique-for-all-time
+  usernames."
 
 ### Command sourcing: store the intent, not the result
 
 ![Action stream reduced to states](img/action-stream-reducer.png)
 
-- Our twist: we store the *command* (we call it an Action), not the event it produced.
-- Why: requirement 1. Both the data and the execution must be locally owned, so each user's
-  machine runs the reducer itself to get the resulting state. Storing results would put the
-  execution somewhere else. This changes the shape of the reducer slightly.
-- Bonus that pays off later: what we store is the signed Action (requirement 3), so the unit of
-  storage is exactly the unit of authorship.
+- I: "in command sourcing, we don't store the output, we store the command. The difference seems
+  slight but we are aiming for both the data and the execution to be locally owned by the user.
+  This means that each user needs to be able to run the command itself to get the resulting
+  state change."
+- That is requirement 1 deciding the storage format.
 
 ### The Document Model
 
 ![Document model: specification + reducer → PHDocument](img/document-model-architecture.png)
 
-- Three parts: a state schema, an action schema, and a reducer that applies actions to state.
-- Left: the spec. Author schema first; codegen gives you types, reducer stubs, and validation.
-- Right: the reducer emits a PHDocument, which is the stream of Operations plus the state they
-  produce. Operation = an applied Action plus metadata (ordinal, timestamp, hash). This
-  Action-vs-Operation split is the hinge of Act III: the Action is the signed intent
-  (requirement 3), the Operation is the result, and only one of them is sacred.
-- Document Models are themselves documents: changing a schema is an action in an operation
-  stream. Like git hosting its own source.
+- I: "A Document Model defines the shape of documents and the logic that can be executed to
+  change (or mutate) a document's state. They are defined in three parts: a state schema, an
+  action schema (the shape of mutation payloads), and a reducer which applies actions to the
+  state."
+- Left: schema first, codegen gives types and reducer stubs. Right: reducer emits a PHDocument,
+  "a stream of Operations and the state produced by them."
+- I: "We use the term Operation to refer to the result of an applied Action." Action is the
+  signed intent; Operation is the result. Act III turns on that split.
+- I: "Document Models are themselves documents."
 
-## Act II — The Reactor (3 min)
+## Act II — The Reactor
 
 ### The runtime: CQRS
 
 ![Reactor CQRS: write side, event bus, read side](img/reactor-cqrs.png)
 
-- The Reactor is the management and execution runtime for Document Models. Requirement 1 says
-  it has to run everywhere and be authoritative everywhere, so it has to be cheap in a browser
-  and scalable on a server from one codebase.
-- Reads and writes are separated so each side scales independently. The price is a little
-  consistency: reads are asynchronous projections. Be upfront about that tradeoff.
-- Write side: a queue feeds N executors that run the user-authored reducers. Reducers are pure,
-  so executors are location-transparent: in-process, a worker, another process, another machine.
-  In a browser, that's one executor cranking in serial.
-- Middle: the event bus carries operations from writes to reads. In-memory in the browser; a
-  real broker (e.g. RabbitMQ) is the plan for server deployments, not yet shipped.
-- Read side: a coordinator hands `Operation[]` to read models. Read models are aggregates,
-  CQRS-flavored.
+- I: "the actual management and execution runtime is called The Reactor."
+- I: "this pattern separates writes and reads, allowing us to operate and scale each end of The
+  Reactor independently (at the slight cost of consistency)."
+- Write side: queue into N executors running the authored reducers. I: "These executors are
+  'location transparent'... we could run them pretty much anywhere: in worker, a different
+  process, or on some other machine in a faraway place."
+- Event bus. I: "intended to be in-memory while running in a browser (this part is deployed),
+  and something more robust in a server environment, like RabbitMQ (this part is not deployed)."
+- Read side: a coordinator hands `Operation[]` to read models. Same thing as aggregates.
 
 ### A read model: DocumentView
 
 ![DocumentView projects operations into a Postgres table](img/read-model.png)
 
-- Built-in read model: folds the stream into a "latest state per document" Postgres table.
-- Because it's decoupled, the authoritative op store can be arbitrarily slow ("the slowest
-  blockchain on the moon") and reads stay fast.
-- Another built-in, DocumentIndexer, filters relational operations to build a graph of
-  document relationships for fast traversal.
+- I: "The built-in DocumentView is a read model... that builds a table of latest document state
+  in a Postgres table."
+- I: "The authoritative store of operations could be the slowest blockchain on the moon, but we
+  would still get fast reads from a turbocharged read model."
+- Also built in: DocumentIndexer, "a graph of relationships between documents."
 
 ### Read models don't care where they write
 
 ![Analytics read model into a time-series DB](img/analytics-read-model.png)
 
-- Analytics read model: what changed, how, and why, into a completely separate time-series
-  database. The Reactor doesn't care what a read model does with the stream.
+- I: "our document analytics read model... collects analytics information about how documents
+  are being changed and how... This data is stored in a completely separate time-series
+  database. Reactor don't care."
 
-## Act III — Sync: reconciling event streams (8 min)
+## Act III — Sync
 
 #### The ask, restated (no slide)
 
-- (No slide; say it over the previous one or the next.) Users want to see each other's work
-  as close to real time as possible, and keep working when the network drops. Web, CLI,
-  mobile: every peer authoritative, nobody's work discarded.
-- Structure of this act: three known approaches, each graded against the three requirements
-  plus one product requirement (users author arbitrary reducers, so order-dependent logic must
-  work). Then the one that passes.
+- II: "users want to be able to see each other's work, as close to real-time as possible — but
+  they also want to work without hiccups when BART passes under the bay or when their toddler
+  unplugs the router."
+- Three approaches people already use, graded against the three requirements plus one more:
+  reducers are user-authored, so order-dependent logic has to work.
 
 ### How games do it
 
 ![Client/server game timelines](img/game-timelines.png)
 
-- My background is games; multiplayer was local-first before it was cool.
-- Local simulation runs optimistically and slightly ahead; an authoritative server simulation
-  wins and the client reconciles. That's why you get shot around corners.
-- It's a continuum (Animal Crossing loose, Counter-Strike strict), but always one privileged
-  simulation.
-- Grade: fails requirement 1 (one privileged copy) and requirement 3 (the server stomps client
-  work; nobody consented to that). Passes "any reducer": a game simulation is arbitrary logic.
+- II: "real-time multiplayer video games were 'local-first' before it was cool."
+- II: "the client reconciles the difference between the state it calculated optimistically...
+  and the state it received authoritatively at a later time. This is how you get shot around
+  corners."
+- II: "Authoritative games rely entirely on a centralized server. We want to make every Reactor
+  authoritative. In addition, no one wants their work discarded when some other simulation
+  'wins'." Fails 1 and 3.
 
 ### How Figma does it: CRDTs
 
 ![CRDT commutativity with max()](img/crdt-max-operations.png)
 
-- Conflict-free replicated data types: local-first, eventually consistent. Two clients apply
-  `max(x,5)` and `max(x,6)` in either order and converge on 6.
-- Grade so far: passes requirements 1, 2 and 3 cleanly. Ops are applied as-is, nobody's intent
-  is touched, nothing is rewritten. Sounds perfect for us.
+- II: "CRDTs allow users to do work local-first and eventually come to a consensus on what the
+  result should be."
+- `max(x, 5)` and `max(x, 6)` in either order give 6. Passes 1, 2 and 3.
+- II: "This sounds like it could be a perfect fit for The Reactor!"
 
 ### Where CRDTs stop
 
 ![Reducer with a balance check diverges](img/crdt-withdraw-divergence.png)
 
-- CRDTs don't generalize like reducers do. A balance check (`if balance >= amount`) is
-  order-dependent by design. Apply the two withdrawals in different orders and the clients
-  disagree forever.
-- Thank God your bank doesn't use CRDTs. Also: they're tricky primitives to hand to every
-  developer authoring a Document Model.
-- Grade: fails the reducer requirement. Document Models are user-authored, and order-dependent
-  logic like a balance check is the normal case, not the edge case. We can't ask every author to
-  prove commutativity. So we lean on the architecture we already have.
+- II: "CRDTs do not generalize to the same degree that Flux reducers do. That is, you cannot
+  replace every reducer with a CRDT."
+- II: "thank God your bank doesn't use CRDTs."
+- II: "CRDTs are fairly tricky primitives for developers to work with anyway." Reducers here are
+  written by users. Fails the reducer requirement.
 
 ### Back to the stream: interleave by timestamp
 
 ![Two action streams interleaved by timestamp](img/action-stream-interleaving.png)
 
-- Two Reactors, one document, two operation streams. The obvious move: interleave by timestamp.
-- Each Operation carries the Action, an ordinal, a timestamp, and a hash of the resulting state.
+- II: "Each operation specifies the Action that was run, an ordinal (an integer for counting), a
+  timestamp, and a hash of the resulting state."
+- II: "Clearly what we want to be able to do is interleave these streams by timestamp."
 
 ### Why you can't just interleave
 
 ![Interleaving breaks the state-hash chain](img/interleaving-breaks-hashes.png)
 
-- Operations are immutable and hash-chained. Reordering means rewriting every operation after
-  the first mismatch: this is Operational Transformation territory (Google Docs).
-- Two objections, and they are exactly requirements 3 and 2. Semantic: do you want *your*
-  mutations rewritten by someone else, on a sensitive document, and who decides? A transformed
-  operation no longer matches its author's signature. Physical: our storage backends are
-  append-only (Swarm, Hypercore); we literally cannot go back and rewrite.
-- Grade: OT fails requirement 2 and requirement 3 outright, is usually server-mediated (weak on
-  requirement 1), and transforms are notoriously hard to generalize.
+- II: "operations are immutable objects that include information about what order they ran in
+  and a resulting state hash. If we reorder them, then we'd need to mutate the immutable
+  operation."
+- II: "In OT, you essentially rewrite operations coming from other clients so that they make
+  sense."
+- II: "do you really want your mutations altered by someone else? Who gets to decide that
+  anyway?" Fails 3.
+- II: "each Reactor writes to append-only storage backends... so we can't actually go back and
+  rewrite operations or their order." Fails 2.
 
 ### The scorecard
 
 ![Authoritative server, CRDTs, OT and Reshuffle graded against the requirements](img/sync-scorecard.png)
 
-- Three known approaches, each with a well-known product behind it, each failing at least one
-  non-negotiable. That is the case for building something: not novelty for its own sake, but
-  no off-the-shelf approach satisfies all three requirements plus arbitrary reducers.
-- Read the bottom row as a spec, not a boast: every Reactor reshuffles (req 1); new operations
-  plus skip, nothing edited (req 2); Actions replayed verbatim (req 3); replay in order so
-  order-dependent reducers work, with state-bound signatures for the cases where even reordering
-  is unacceptable.
-- The next five slides show how the bottom row is earned.
+- Each row has a well-known product behind it. Each breaks at least one requirement.
+- II: "On the spectrum of CRDTs and OT, it lies much closer to the latter — with some important
+  differences."
+- Bottom row is what the next five slides have to deliver.
 
 ### Operational Reshuffle, step 1: sort
 
 ![Sort mixed A+B operations by timestamp](img/ops-sorted-by-timestamp.png)
 
-- Two rules make the whole scheme work, and they are requirements 2 and 3 restated as
-  mechanics. (1) Operations can't change, but we can create new ones; command sourcing gives us
-  that freedom as long as projections end up the same. (2) We never rewrite intent: new
-  Operations, never new Actions. That's the difference from OT.
-- Step 1: take streams A and B and order by timestamp.
+- II: "Operations cannot be changed, but we can create new ones." Requirement 2.
+- II: "We never rewrite a user's intent... We can create new Operations but we can never create
+  new Actions. This is the main difference between Operational Reshuffle and Operational
+  Transformation." Requirement 3.
+- Step 1: "we take event streams A and B and order them by timestamp."
 
 ### Step 2: find the merge base
 
 ![Merge base and the conflicted range](img/merge-base-highlighted.png)
 
-- Walk from the start; matching hashes mean the same operation. The first place A expects one
-  thing and the merged order needs another is the divergence point: the merge base, in git terms.
-- Here: 9 operations in conflict, 4 already in A, 5 from B.
+- II: "we walk from start to front to find where the streams diverge, relative to A."
+- Same hash means same operation. First mismatch is the divergence. II: "In more familiar git
+  terminology, this would be called the 'merge base'."
+- II: "we now have 9 operations in a conflicted state: 4 from A and 5 from B."
 
 ### Step 3: replay from the merge base
 
 ![Replay actions in timestamp order as new operations](img/reshuffled-new-ops.png)
 
-- Re-run the 9 *Actions* in timestamp order on top of the merge base, producing 9 *new*
-  Operations. Same timestamps, new hashes: reducer results can change with order, and the
-  ordinal is part of the hash.
-- The Action signatures are untouched. The user's intent did not change. Requirement 3 holds
-  through the merge without any special casing: the thing we signed is the thing we replay.
+- Replay the 9 Actions in timestamp order. Nine new Operations.
+- II: "the hashes of each of the new operations will be different than the original, but the
+  timestamps remain the same... the ordinal is part of the hash."
+- II: "This hash, however, is different than the signature (which itself is a hash) on the
+  Action. That is, the user's intent did not change."
 
 ### Step 4: skip, then garbage-collect
 
 ![Skip value and the garbage-collected stream](img/skip-value-gc-stream.png)
 
-- The 4 stale ops are already in append-only storage. Requirement 2 says we can't delete them,
-  so the first new operation carries `skip=4`: projections ignore the preceding four. The skip
-  value is the whole cost of honoring append-only, and it is one integer.
-- The stream with skipped ops removed is the garbage-collected stream, A′. Most projections use
-  it, but event sourcing means a projection could just as well count skipped ops.
+- II: "since 4 of these operations are already in A, they have already been written to the
+  append-only operation store. Blast those fickle audit trails! We can't delete these, so
+  instead we need to skip them."
+- II: "the skip value of 4 on A₇ means that when we create a projection of this stream, we will
+  skip the preceding 4 operations."
+- II: "The operation stream with all of the skipped operations removed we call the garbage
+  collected stream." One integer is the whole cost of requirement 2.
 
 ### Both sides converge
 
 ![Bidirectional sync: A′ = B′](img/bidirectional-sync.png)
 
-- Run the same procedure on both peers, exchanging reshuffled ops, and A′ equals B′. Repeat as
-  each side keeps working (ping-pong; appendix slide if asked).
+- Same procedure on both peers, exchange reshuffled ops, A′ = B′. Repeats as work continues
+  (ping-pong, appendix).
 
 ### When reordering intent is itself unacceptable
 
 ![Payload-only vs payload + input-state-hash signatures](img/signature-binding.png)
 
-- Example: several parties sign a statement; if the statement changes, signatures must reset.
-  We can sync the stream consistently and still break the reducer's semantic guarantee.
-- So the Action signature is tiered. Default: sign the payload only (survives reshuffle).
-  High security: also sign a hash of the input state, so the action only applies against that
-  exact state. Critical: add the previous Operation id, which rejects on *any* reshuffle or
-  state change (appendix slide).
-- Net: reshuffle preserves intent by default and can optionally pin resulting state too. This
-  is requirement 3 at full strength: the signature decides what "my intent" even means, and the
-  protocol has no way to override it.
+- II: "There are scenarios in which even re-ordering user intent is not desirable." Multiple
+  parties sign a statement; if it changes, "the parties need to start over."
+- II: "While we can technically sync all the changes into a consistent event stream, the
+  semantic guarantees of the reducer would be broken."
+- II: "By default, the action signature is only on the action payload, but in high security
+  applications, we can also include a hash of the input state."
+- Edge case: statement changes and changes back; hashes match again. Add the previous Operation
+  id (appendix). II: "This type of signature will reject on any reshuffle and any state change."
+- II: "Operational Reshuffle, by default, preserves intent through reshuffle and can optionally
+  preserve resulting state change as well."
 
-## Act IV — Over the network (3 min)
+## Act IV — Over the network
 
 ### Channels and mailboxes
 
 ![Inbox, outbox, dead-letter mailboxes between two Reactors](img/channel-mailbox-breakdown.png)
 
-- A channel connects two Reactors; each side has three FIFO mailboxes. Outbox: what I'm
-  pushing. Inbox: what I've received. Dead letter: operations that failed unrecoverably (bad
-  signature, hash mismatch) and must not be retried. The dead letter box is where requirement 3
-  is enforced on the wire: a bad signature never enters the log.
-- Ordinals: every operation a Reactor emits gets a locally monotonic integer, a total order over
-  everything that Reactor has ever seen, across all documents. Not global: two Reactors will
-  have different ordinals for the same operation.
+- One channel per pair of Reactors. Outbox, inbox, dead letter. All FIFO.
+- III: "The dead letter mailbox holds operations that failed in a way that cannot be retried.
+  These might result from a bad signature, a hash mismatch, or some other unrecoverable
+  rejection." Requirement 3, on the wire.
+- III: "Every operation a Reactor outputs is stamped with an ordinal: a monotonically increasing
+  integer. These are not globally increasing, only locally increasing." "The ordinal is a total
+  order over every operation the Reactor has ever seen, across all documents, in the order it
+  saw them."
 
 ### The entire sync state is four integers
 
 ![Sync cursors: inbox/outbox × ack/latest](img/sync-cursors.png)
 
-- Per channel: inbox.ack (highest remote ordinal durably applied), inbox.latest (highest seen),
-  outbox.ack (highest local ordinal the remote has durably applied), outbox.latest (highest
-  local ordinal produced that matches the filter).
-- Three properties: ack ≤ latest; cursors only ever increase (no message, failure, or retry
-  moves one backwards); "synced" means ack == latest in both directions.
-- Resilience falls out: lost reply → re-poll with the same cursors, the remote resends
-  everything after ack. Duplicate push → dedupe by action id (the Action is the immutable
-  signed intent, so requirement 3 hands us idempotency for free; reapplying is a no-op). Process crash → read two cursors from storage and resume; the
-  mailboxes rebuild themselves.
-- Distributed-systems words: delivery at-least-once, application idempotent, progress monotonic.
+- III: "inbox.ack: the highest remote ordinal we have durably applied. inbox.latest: the highest
+  remote ordinal we have seen. outbox.ack: the highest local ordinal the remote has durably
+  applied. outbox.latest: the highest local ordinal we've produced that matches the filter."
+- III: "That's it. The entire synchronization state between two Reactors is a measly four
+  integers (if JS had integers)."
+- III: "ack ≤ latest." "They only ever increase. There is no message, failure, or retry that
+  moves a cursor backwards." "'Synced' just means ack == latest in both directions."
+- III: "if the poll response gets lost due to some sort of network hiccup, we can simply ask
+  again with the same cursors. The server re-sends everything after the ack. We can't miss
+  operations, because ack only advances once we've actually applied them."
+- III: "If we... push the same operations twice... the Reactor dedupes by action id."
+- III: "What about a crash where the whole process dies? All the Reactor needs to do is read two
+  cursors out of storage and resume. The mailboxes rebuild themselves."
+- III: "delivery is at-least-once, application is idempotent, and progress is monotonic."
 
 ### One poll, both directions
 
 ![Poll request carries data one way and acks the other](img/poll-piggyback-acks.png)
 
-- Optimizations. Acks piggyback on polls: no separate ack request. My poll carries my inbox
-  cursors (acking your outbox); your response carries your ack ordinal (acking mine).
-- Writes are buffered in the outbox for a short window or max batch size, but batches must
-  respect dependencies. Example: creating a document is CREATE_DOCUMENT + UPDATE_DOCUMENT
-  submitted as one atomic batch, because the UPDATE casts the document to a model type and
-  version. (Bonus: shipping a new model version is just another UPDATE_DOCUMENT.)
-- Polling, not WebSockets, for now. Fine for our use cases; you wouldn't build Counter-Strike
-  on it.
-- At-least-once, not exactly-once: duplicates-plus-dedup beat a distributed transaction scheme.
-  Idempotency inside and outside the Reactor makes it safe.
-- Debuggability: a channel inspector shows state, filter, and each mailbox; channels support
-  pause, resume, flush, and manual poll, so a human (or an LLM with tool calls) can step sync
-  one message at a time.
+- III: "Acks piggyback on polls. There is no separate ack request... every message carries data
+  in one direction and acknowledgment in the other."
+- III: "Writes are buffered." Outbox holds ops "for a short window (or until a max batch size)."
+  Batches respect dependencies: CREATE_DOCUMENT and UPDATE_DOCUMENT "need to be applied
+  atomically."
+- Polling for now. III: "obviously you wouldn't want to build Counter-Strike with polling."
+- III: "At-least-once, not exactly-once. We chose duplicates-plus-dedup over some sort of
+  complicated, distributed transaction scheme. Why make it complicated when you can make it
+  simple?"
+- III: "Mailboxes support pause, resume, and flush, so you can freeze a channel, let operations
+  stack up, and step through them one at a time."
+- III: "This has made sync simultaneously much simpler to debug at the slow speed of my brain and
+  much faster to debug at the fast speed of an LLM exploring with tool calls."
 
-## Close (1 min)
+## Close
 
 ### The case, restated
 
 ![Scorecard again](img/sync-scorecard.png)
 
-- Same slide as before, now earned. Three requirements we would not trade: local-first,
-  append-only, signed intent. Three well-known approaches, each breaking at least one. One
-  design that keeps all three and still lets users write ordinary reducers.
-- The costs, said plainly: reads are eventually consistent (CQRS); stale operations stay in
-  storage forever behind a skip value; sync is at-least-once with dedup; timestamps order the
-  merge. Those are the prices of the three requirements, and I'd pay them again.
+- Three requirements we wouldn't trade. Three known approaches, each breaking one. One design
+  that keeps all three and lets users write ordinary reducers.
+- Costs: reads are eventually consistent; skipped operations stay in storage; at-least-once with
+  dedup; timestamps decide the merge order.
 
 ### Thanks
 
 Questions?
 
-- Recap in one line each: documents are command-sourced streams; the runtime is CQRS so reads
-  and writes scale apart; sync is reshuffle (new operations, never new intent); the wire
-  protocol is four monotonic cursors.
-- Invite the tradeoff conversation: consistency on the read side, polling vs push, at-least-once,
-  timestamp ordering.
+- Documents are command-sourced streams. The runtime is CQRS. Sync is reshuffle: new
+  operations, never new intent. The wire protocol is four integers.
 
 ---
 
@@ -376,75 +356,54 @@ Questions?
 
 ![Reactor architecture: queue → executors → op log + event bus](img/reactor-architecture.png)
 
-- Lower-level view of the write side: client mutations → queue → executors → operation log and
-  event bus → read models.
+- Write side in more detail: mutations, queue, executors, operation log and event bus, read
+  models.
 
 ### Critical-security signature
 
 ![Payload + input-state hash + previous operation id](img/critical-security-signature-binding.png)
 
-- Signature over payload + H(state) + previous Operation id. The id is a composite that includes
-  a monotonically increasing index, so this rejects on any reshuffle and any state change.
-- Answers "what if the statement changes, then changes back": state hashes would match again;
-  the operation id would not.
+- II: "We can actually put one more thing in the Action signature if we really want to lock it
+  down: the previous Operation id."
+- II: "Since the Operation id is actually a composite id that includes a monotonically
+  increasing index... This type of signature will reject on any reshuffle and any state change."
 
 ### Ping-pong: rounds of convergence
 
 ![Multiple rounds of bidirectional sync](img/ping-pong-sync.png)
 
-- Round 1 converges to A′ = B′. B keeps working; round 2 converges to A″ = B″. Continues as
-  needed.
+- Round 1 converges to A′ = B′. B keeps working. Round 2 converges to A″ = B″.
 
 ### One-way sync
 
 ![Reactor A's reshuffled operations applied to B](img/one-way-sync.png)
 
-- The simplest case: A reshuffles and B applies A's new operations onto its stream.
+- A reshuffles; B applies A's new operations onto its stream.
 
 ---
 
 ## Gaps to fill before the talk
 
-The third deep dive is still a draft and the export I worked from was truncated. These points
-are referenced by name in the draft but the detail is missing from my sources; fill them in
-from memory or leave them for Q&A:
+Part III is a draft and the export I had was truncated. Named in the draft, detail missing:
 
-- "Touch-and-poll": what exactly a `touchChannel` does versus a poll, and when it fires.
-- Filters: the draft describes them as per-dimension membership tests where an empty value means
-  "no restriction", with an example of a CLI tool that should receive operations for
-  everything. Which dimensions (document id, model type, branch, scope)?
-- Buffering: how the outbox handles arbitrary dependencies between operations beyond the
-  create/update example.
-- "For next time": the draft ends on Physics being the bane of every distributed scheme; if you
-  have the mathematical model teased at the end of part two, that's a strong discussion topic.
-- A real screenshot of the Channel Inspector would make a better slide than the poll diagram.
+- "Touch-and-poll": what `touchChannel` does versus a poll, and when it fires.
+- Filters: "Each dimension is a membership test, and an empty value means 'no restriction'."
+  Which dimensions?
+- Outbox buffering: how dependencies beyond create/update are handled.
+- The "For next time" ending: "the bane of every distributed scheme is our old pal, Physics."
+- A real screenshot of the Channel Inspector would beat the poll diagram.
 
-## Likely discussion questions (15–20 min block)
+## Likely discussion questions
 
-Prepared prompts, not slides. Where the articles don't answer, that's noted so you're not
-caught improvising.
-
-- Are the three requirements real, or self-imposed? Answer from the product promise: ownership
-  of data without ownership of execution is hollow; an audit trail you can rewrite isn't one;
-  ownership without proof of authorship isn't ownership. Then admit which would be relaxed first
-  if the product changed (probably strict append-only backends), and what that would buy.
-- Why not CRDTs plus an escape hatch for the order-dependent cases? The honest answer from the
-  articles: reducers are user-authored, and order dependence is the common case, so the escape
-  hatch would be the main road.
-- Timestamps: reshuffle orders by client timestamps. What about clock skew, or a malicious
-  client backdating actions? (Not addressed in the articles; the state-bound signature tiers
-  are part of the answer for high-stakes documents.)
-- Consistency: how stale can a read model be, and how does a UI know? (CQRS tradeoff is
-  acknowledged in part one; subscriptions exist per part two's intro.)
-- Growth: skipped operations stay in append-only storage forever. Storage growth, snapshotting,
-  compaction?
-- Executor location transparency: what actually ships today (worker? separate process?) versus
-  the design.
-- Event bus on servers: RabbitMQ is stated as intended, not deployed. What's the interim?
-- Why polling over WebSockets, and what latency users actually see.
-- Why not exactly-once: the dedup-by-action-id argument.
-- Reducer authoring: how do you keep user-authored reducers pure and deterministic across
-  peers (same input, same hash)? Codegen and validation from the schema are part one's answer.
-- Testing a sync protocol: the pause/resume/flush/manual-poll channel controls, and using an
-  LLM to step through sync issues.
-- What you'd change: be ready with one honest answer.
+- Are the three requirements real or self-imposed? Which would you relax first, and for what?
+- Why not CRDTs with an escape hatch for order-dependent cases?
+- Clock skew and backdated timestamps. Not covered in the articles; state-bound signatures are
+  part of the answer for high-stakes documents.
+- How stale can a read model be, and how does a UI know?
+- Skipped operations stay forever. Storage growth, snapshots, compaction?
+- What actually ships for executor placement and the server event bus, versus the design.
+- Polling vs WebSockets; the latency users see.
+- Why at-least-once and not exactly-once.
+- Keeping user-authored reducers deterministic across peers.
+- Testing the protocol: pause, resume, flush, manual poll; stepping through with an LLM.
+- What you'd change.

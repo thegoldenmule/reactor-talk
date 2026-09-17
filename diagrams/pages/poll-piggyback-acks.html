@@ -10,12 +10,13 @@
   <link rel="stylesheet" href="../css/components.css">
   <style>
     /* Two messages, one each way. Each carries operations in its own direction and an
-       acknowledgement of the other side's operations coming back — so every row holds one
-       cyan chip and one green chip, and which is which swaps between the rows. That swap is
-       the whole point of the slide.
+       acknowledgement of the other side's operations coming back. What each message carries
+       is the sender's inbox cursors, and an inbox's cursors are always stated in the OTHER
+       reactor's ordinal space — so the request is green (B's numbers) and the response cyan
+       (A's numbers). That flip is the whole point of the slide.
 
-       A's ordinals are in the 40s and B's in the 110s because they are separate ordinal
-       spaces; an ack always names the other reactor's numbers.
+       A's ordinals are in the 40s and B's in the 110s because they are genuinely separate
+       spaces. 45 and 47 are B's inbox cursors from the previous slide, unchanged.
 
        Endpoint boxes, pill tags and line treatment match sync-cursors. Everything is placed
        explicitly. */
@@ -81,8 +82,8 @@
     }
     .chip.cyan  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
     .chip.green { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
-    /* the acknowledgement rides along; the payload is the headline */
-    .chip.ride  { opacity: 0.6; }
+    /* same convention as sync-cursors: latest is the leading edge, ack is the settled one */
+    .chip.dim   { opacity: 0.55; }
 
     .arrow {
       position: relative;
@@ -114,8 +115,8 @@
           <div class="msg" style="grid-row: 1;">
             <div class="msg-label">poll request</div>
             <div class="chips">
-              <span class="chip cyan">ops A 46&ndash;48</span>
-              <span class="chip green ride">ack B &le; 112</span>
+              <span class="chip green">inbox.ack 112</span>
+              <span class="chip green dim">inbox.latest 114</span>
             </div>
             <div class="arrow to-b"></div>
           </div>
@@ -126,8 +127,8 @@
           <div class="msg" style="grid-row: 2;">
             <div class="arrow to-a"></div>
             <div class="chips">
-              <span class="chip green">ops B 113&ndash;115</span>
-              <span class="chip cyan ride">ack A &le; 47</span>
+              <span class="chip cyan">inbox.ack 45</span>
+              <span class="chip cyan dim">inbox.latest 47</span>
             </div>
             <div class="msg-label">poll response</div>
           </div>

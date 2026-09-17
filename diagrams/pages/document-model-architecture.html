@@ -229,6 +229,16 @@
       padding: 0 var(--space-sm);
     }
 
+    /* The two generated types, side by side */
+    .type-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+    .type-group .box {
+      padding: var(--space-md) var(--space-sm);
+    }
+
     .output-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -248,7 +258,7 @@
           <!-- Column Headers -->
           <div class="col-header spec">Specification</div>
           <div class="col-header codegen"></div>
-          <div class="col-header reducer">Reducer</div>
+          <div class="col-header reducer">Types</div>
 
           <!-- Left Column: Spec -->
           <div class="col-spec">
@@ -284,9 +294,15 @@
 
           <!-- Right Column: Reducer -->
           <div class="col-reducer">
-            <div class="box accent-blue">
-              <div class="box-title">Action</div>
-              <div class="box-detail">{ type, input }</div>
+            <div class="type-group">
+              <div class="box accent-blue">
+                <div class="box-title">Action</div>
+                <div class="box-detail">{ type, input }</div>
+              </div>
+              <div class="box accent-blue">
+                <div class="box-title">State</div>
+                <div class="box-detail">{ ... }</div>
+              </div>
             </div>
             <div class="v-connector"></div>
             <div class="box accent-blue" style="padding: var(--space-lg);">

@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="../css/components.css">
   <style>
     .frame {
-      max-width: 700px;
+      max-width: 860px;
     }
     .card {
       height: auto;
@@ -21,12 +21,13 @@
       flex: none;
     }
 
-    /* Two-column grid with center bridge */
+    /* Two-column grid with center bridge. The bridge column is a fixed width so the
+       PHDocument row below the wrapper can repeat the template and line up exactly. */
     .diagram-grid {
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
       gap: 0 var(--space-lg);
-      align-items: start;
+      align-items: stretch;
     }
 
     /* Column headers */
@@ -159,6 +160,55 @@
       letter-spacing: normal;
     }
 
+    .model-flow {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Document Model wrapper — everything the author writes: the spec and the reducer.
+       The PHDocument the reducer produces is deliberately outside it. */
+    .dm-wrapper {
+      border: 2px dashed var(--text-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg) var(--space-md) var(--space-md);
+      position: relative;
+    }
+    .dm-wrapper-label {
+      position: absolute;
+      top: -10px;
+      left: var(--space-md);
+      font-size: 12px;
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-sm);
+      color: var(--text-primary);
+    }
+
+    /* Line out of the Reducer: fills whatever column height is left, then punches through
+       the wrapper's bottom padding and border on its way to the PHDocument. */
+    .lead-out {
+      flex: 1 0 var(--space-lg);
+      width: 3px;
+      background: var(--text-primary);
+      margin: var(--space-sm) auto calc(-1 * var(--space-md) - 2px) auto;
+    }
+
+    /* PHDocument row — same column template and side padding as the wrapper's content box,
+       so its column 3 sits exactly under the reducer column. */
+    .ph-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
+      gap: 0 var(--space-lg);
+      border: 0 solid transparent;
+      border-left-width: 2px;
+      border-right-width: 2px;
+      padding: 0 var(--space-md);
+    }
+    .ph-cell { grid-column: 3; }
+    .ph-cell .v-connector { margin-top: 0; }
+
     /* PHDocument wrapper — dotted border around State + Operations */
     .phdocument-wrapper {
       border: 1px dashed var(--accent-green);
@@ -190,7 +240,10 @@
   <div class="frame">
     <div class="card">
       <div class="card-body">
-        <div class="diagram-grid">
+       <div class="model-flow">
+        <div class="dm-wrapper">
+         <span class="dm-wrapper-label">Document Model</span>
+         <div class="diagram-grid">
 
           <!-- Column Headers -->
           <div class="col-header spec">Specification</div>
@@ -242,6 +295,15 @@
                 f(state, action) &rarr; (state', operation[])
               </div>
             </div>
+            <div class="lead-out"></div>
+          </div>
+
+         </div>
+        </div>
+
+        <!-- The reducer's output: outside the Document Model border -->
+        <div class="ph-row">
+          <div class="ph-cell">
             <div class="v-connector"></div>
             <div class="phdocument-wrapper">
               <span class="phdocument-wrapper-label">PHDocument</span>
@@ -255,8 +317,8 @@
               </div>
             </div>
           </div>
-
         </div>
+       </div>
       </div>
     </div>
   </div>

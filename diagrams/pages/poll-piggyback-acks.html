@@ -9,54 +9,47 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* What a poll actually moves, cursor by cursor.
+    /* One idea: an ack crosses the wire and lands on the other reactor's opposite cursor.
+       Two rows, one each way, so the poll carries an acknowledgement in both directions.
 
-       Each row is one cursor crossing the wire and landing on the other reactor's opposite
-       cursor — an inbox ack on one side sets an outbox ack on the other. The middle row is
-       the exception the slide exists to show: inbox.latest crosses too, but lands on
-       nothing; the server uses it only to filter which operations to return.
+       One box style throughout. Colour is the ordinal space, and it never changes along a
+       crossing: the green row is B's ordinals, the cyan row is A's. The value repeats across
+       a row because that is what "sets the opposite cursor" means.
 
-       A crossing never changes ordinal space, so each row is a single colour. Green rows are
-       B's ordinals (A's inbox holds B's operations), the cyan row is A's. Source:
-       packages/reactor/src/sync/design.md and resolvers.ts:1118 / :1178.
-
-       Endpoint boxes, pill tags and the line-with-arrowhead match sync-cursors. Everything
-       is placed explicitly. */
-    .frame { max-width: 1100px; }
+       inbox.latest also crosses but sets nothing on the remote — it only filters which
+       operations come back. That is in the speaker notes, not here; drawing it needed a
+       third arrow and a third box style and cost more than it explained. */
+    .frame { max-width: 1000px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wrap {
       display: grid;
-      grid-template-columns: 1fr 250px 1fr;
+      grid-template-columns: 1fr 260px 1fr;
       column-gap: var(--space-lg);
-      row-gap: var(--space-lg);
+      row-gap: var(--space-xl);
       align-items: center;
     }
 
-    .endpoint {
+    .who {
       grid-row: 1;
-      border: 1px solid var(--border-glass);
-      border-radius: var(--radius-md);
-      padding: var(--space-sm) var(--space-md);
-      font-size: 14px;
-      font-weight: var(--font-weight-semibold);
+      font-size: 16px;
+      font-weight: var(--font-weight-bold);
       text-align: center;
-      background: var(--bg-elevated);
     }
-    .endpoint.a { grid-column: 1; border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
-    .endpoint.b { grid-column: 3; border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+    .who.a { grid-column: 1; color: var(--accent-cyan); }
+    .who.b { grid-column: 3; color: var(--accent-green); }
 
     .left  { grid-column: 1; justify-self: end; }
     .right { grid-column: 3; justify-self: start; }
 
     .chip {
       display: inline-block;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: var(--font-weight-semibold);
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 6px 11px;
+      padding: 8px 13px;
       border-radius: var(--radius-xs);
       border: 1px solid;
       white-space: nowrap;
@@ -64,19 +57,10 @@
     }
     .chip.cyan  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
     .chip.green { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
-    /* lands nowhere */
-    .chip.none {
-      color: var(--text-muted);
-      border-color: var(--border-glass);
-      border-style: dashed;
-      background: transparent;
-      text-transform: none;
-      letter-spacing: 0;
-    }
 
-    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 7px; }
     .hop-label {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: var(--font-weight-semibold);
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -93,13 +77,6 @@
     }
     .arrow.to-b::after { right: -1px; border-left:  8px solid var(--border-glass); }
     .arrow.to-a::after { left:  -1px; border-right: 8px solid var(--border-glass); }
-    /* the one that carries no cursor with it */
-    .arrow.filters {
-      background: none;
-      border-top: 2px dashed var(--border-glass);
-      height: 0;
-    }
-    .arrow.filters::after { right: -1px; border-left: 8px solid var(--border-glass); opacity: 0.5; }
   </style>
 </head>
 <body>
@@ -108,10 +85,9 @@
       <div class="card-body">
         <div class="wrap">
 
-          <div class="endpoint a">Reactor A</div>
-          <div class="endpoint b">Reactor B</div>
+          <div class="who a">Reactor A</div>
+          <div class="who b">Reactor B</div>
 
-          <!-- ack crosses and sets the opposite cursor -->
           <div class="left"  style="grid-row: 2;"><span class="chip green">inbox.ack 112</span></div>
           <div class="hop"   style="grid-row: 2;">
             <div class="hop-label">poll request</div>
@@ -119,21 +95,12 @@
           </div>
           <div class="right" style="grid-row: 2;"><span class="chip green">outbox.ack 112</span></div>
 
-          <!-- latest crosses but sets nothing -->
-          <div class="left"  style="grid-row: 3;"><span class="chip green">inbox.latest 114</span></div>
+          <div class="left"  style="grid-row: 3;"><span class="chip cyan">outbox.ack 45</span></div>
           <div class="hop"   style="grid-row: 3;">
-            <div class="hop-label">poll request</div>
-            <div class="arrow to-b filters"></div>
-          </div>
-          <div class="right" style="grid-row: 3;"><span class="chip none">filters the response</span></div>
-
-          <!-- and the same crossing in the other direction -->
-          <div class="left"  style="grid-row: 4;"><span class="chip cyan">outbox.ack 45</span></div>
-          <div class="hop"   style="grid-row: 4;">
             <div class="hop-label">poll response</div>
             <div class="arrow to-a"></div>
           </div>
-          <div class="right" style="grid-row: 4;"><span class="chip cyan">inbox.ack 45</span></div>
+          <div class="right" style="grid-row: 3;"><span class="chip cyan">inbox.ack 45</span></div>
 
         </div>
       </div>

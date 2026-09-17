@@ -217,27 +217,22 @@ A structured runtime for local-first applications.
 - II: "CRDTs are fairly tricky primitives for developers to work with anyway." Reducers here are
   written by users. Fails the reducer requirement.
 
-### Back to the stream: interleave by timestamp
+### Why not just OT?
 
-![Two action streams interleaved by timestamp](img/action-stream-interleaving.png)
+![OT rewrites the operation that arrives from the other client](img/why-not-ot.png)
 
-- II: "Each operation specifies the Action that was run, an ordinal (an integer for counting), a
-  timestamp, and a hash of the resulting state."
-- II: "Clearly what we want to be able to do is interleave these streams by timestamp."
-
-### Why you can't just interleave
-
-![Interleaving breaks the state-hash chain](img/interleaving-breaks-hashes.png)
-
+- II: "In OT, you essentially rewrite operations coming from other clients so that they make
+  sense."
 - II: "operations are immutable objects that include information about what order they ran in
   and a resulting state hash. If we reorder them, then we'd need to mutate the immutable
   operation."
-- II: "In OT, you essentially rewrite operations coming from other clients so that they make
-  sense."
-- II: "do you really want your mutations altered by someone else? Who gets to decide that
-  anyway?" Fails 3.
 - II: "each Reactor writes to append-only storage backends... so we can't actually go back and
   rewrite operations or their order." Fails 2.
+- II: "do you really want your mutations altered by someone else? Who gets to decide that
+  anyway?" Fails 3.
+- II: "We never rewrite a user's intent... We can create new Operations but we can never create
+  new Actions. This is the main difference between Operational Reshuffle and Operational
+  Transformation."
 
 ### The scorecard
 

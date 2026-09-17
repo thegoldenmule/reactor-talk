@@ -18,8 +18,9 @@
     .card-body { flex: none; }
 
     .wire {
+      position: relative;
       display: grid;
-      grid-template-columns: 150px 1fr 132px 1fr;
+      grid-template-columns: 150px 1fr 46px 1fr;
       row-gap: var(--space-md);
       column-gap: var(--space-lg);
       align-items: stretch;
@@ -54,7 +55,7 @@
     /* The one channel the pair shares, running the full height between them */
     .channel {
       grid-column: 3;
-      grid-row: 1 / 5;
+      grid-row: 1 / 6;
       justify-self: center;
       width: 100%;
       display: flex;
@@ -63,32 +64,32 @@
       border-left: 1px dashed var(--border-glass);
       border-right: 1px dashed var(--border-glass);
     }
-    .channel {
-      flex-direction: column;
-      gap: var(--space-sm);
-    }
-    .ch-name {
+    .channel span {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
       font-size: 11px;
       font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.1em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--text-muted);
-      text-align: center;
     }
-    /* one arrow each way across the channel, in the colour of whose ops travel it */
-    .ch-arrow { width: 88px; height: 2px; position: relative; }
-    .ch-arrow.to-b { background: var(--accent-cyan); }
-    .ch-arrow.to-b::after {
-      content: ''; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
-      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-      border-left: 9px solid var(--accent-cyan);
+
+    /* Outbox -> the other side's inbox, drawn as two diagonals that cross inside the
+       channel. At the 1200px design width the content box is 1088 and the columns compute
+       to 150 / 410 / 46 / 410 with 24px gaps, so this SVG is exactly the 914px from the
+       start of Reactor A's column to the end of Reactor B's: viewBox units are CSS pixels
+       1:1, and the crossing lands at x=457, the channel's centre. */
+    .cross {
+      grid-column: 2 / 5;
+      justify-self: center;
+      display: block;
+      overflow: visible;
     }
-    .ch-arrow.to-a { background: var(--accent-green); }
-    .ch-arrow.to-a::before {
-      content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
-      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-      border-right: 9px solid var(--accent-green);
-    }
+    .cross line { stroke-width: 2; }
+    .cross .a-line { stroke: var(--accent-cyan); }
+    .cross .b-line { stroke: var(--accent-green); }
+    .cross .a-head { fill: var(--accent-cyan); }
+    .cross .b-head { fill: var(--accent-green); }
 
     /* Mailbox contents */
     .mb {
@@ -146,11 +147,7 @@
           <!-- row 1: the two Reactors, and the channel between them -->
           <div></div>
           <div class="side-head a">Reactor A</div>
-          <div class="channel">
-            <div class="ch-name">one channel</div>
-            <div class="ch-arrow to-b"></div>
-            <div class="ch-arrow to-a"></div>
-          </div>
+          <div class="channel"><span>one channel</span></div>
           <div class="side-head b">Reactor B</div>
 
           <!-- row 2 -->
@@ -172,7 +169,15 @@
             </div>
           </div>
 
-          <!-- row 3: each side holds what the other sent -->
+          <!-- each outbox delivers into the other side's inbox -->
+          <svg class="cross" width="914" height="76" viewBox="0 0 914 76" aria-hidden="true">
+            <line class="a-line" x1="205" y1="4" x2="697" y2="66" />
+            <polygon class="a-head" points="697,58 712,68 694,74" />
+            <line class="b-line" x1="709" y1="4" x2="217" y2="66" />
+            <polygon class="b-head" points="217,58 202,68 220,74" />
+          </svg>
+
+          <!-- row: each side holds what the other sent -->
           <div class="kind">
             <div class="kind-name">Inbox</div>
           </div>

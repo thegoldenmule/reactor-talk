@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card { height: auto; }
+    .card-body { flex: none; gap: var(--space-md); }
+
+    /* Box component */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+
+    .box-title {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+    }
+    .box-detail {
+      font-size: 12px;
+      opacity: 0.75;
+      line-height: var(--line-height-normal);
+      margin-top: var(--space-xs);
+    }
+
+    /* Main vertical flow */
+    .diagram-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .queue-box { width: 64%; }
+
+    /* ---- fan connectors ------------------------------------------------- */
+    /* Centers of the outer columns in a 3-up grid: 100%/6 - gap/3 from each edge */
+    .fan {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .fan-stem {
+      width: 3px;
+      height: 16px;
+      background: var(--text-primary);
+    }
+    .fan-branches {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0 var(--space-md);
+      width: 100%;
+      position: relative;
+    }
+    .fan-bar {
+      position: absolute;
+      left: calc(100% / 6 - var(--space-md) / 3);
+      right: calc(100% / 6 - var(--space-md) / 3);
+      height: 3px;
+      background: var(--text-primary);
+    }
+    .fan--out .fan-bar { top: 0; }
+    .fan--in  .fan-bar { bottom: 0; }
+
+    .fan-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .fan-arm {
+      width: 3px;
+      height: 26px;
+      background: var(--text-primary);
+      position: relative;
+    }
+    /* Arrowheads: fan-out points into the executors, fan-in points into the store */
+    .fan--out .fan-arm::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+    .fan-stem--arrow {
+      width: 3px;
+      height: 22px;
+      background: var(--text-primary);
+      position: relative;
+    }
+    .fan-stem--arrow::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+    /* Leave room for the arrowhead that hangs below the line */
+    .fan--out { margin-bottom: var(--space-sm); }
+    .fan--in  { margin-top: var(--space-sm); margin-bottom: var(--space-sm); }
+
+    /* ---- drive columns --------------------------------------------------- */
+    .drive-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0 var(--space-md);
+      width: 100%;
+    }
+    .drive {
+      border: 2px dashed var(--text-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+      padding-top: var(--space-md);
+      position: relative;
+    }
+    .drive-label {
+      position: absolute;
+      top: -10px;
+      left: var(--space-sm);
+      font-size: 11px;
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-xs);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .drive .box { padding: var(--space-md) var(--space-sm); }
+
+    /* Reducer nested inside the executor */
+    .reducer {
+      margin-top: var(--space-sm);
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      color: var(--accent-cyan);
+      text-align: center;
+    }
+
+    /* ---- op store / connection pool -------------------------------------- */
+    .pool { width: 78%; }
+    .pool-conns {
+      display: flex;
+      gap: var(--space-xs);
+      margin-top: var(--space-sm);
+    }
+    .pool-conn {
+      flex: 1;
+      border: 1px solid var(--accent-green);
+      border-radius: var(--radius-xs);
+      padding: 2px var(--space-xs);
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent-green);
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <div class="diagram-flow">
+
+          <!-- Job queue -->
+          <div class="box accent-purple queue-box">
+            <div class="box-title">Job Queue</div>
+            <div class="box-detail">jobs partitioned by drive</div>
+          </div>
+
+          <!-- Fan out into the drive columns -->
+          <div class="fan fan--out">
+            <div class="fan-stem"></div>
+            <div class="fan-branches">
+              <div class="fan-bar"></div>
+              <div class="fan-branch"><div class="fan-arm"></div></div>
+              <div class="fan-branch"><div class="fan-arm"></div></div>
+              <div class="fan-branch"><div class="fan-arm"></div></div>
+            </div>
+          </div>
+
+          <!-- One executor column per drive -->
+          <div class="drive-row">
+            <div class="drive">
+              <span class="drive-label">Drive A</span>
+              <div class="box accent-blue">
+                <div class="box-title">Executor</div>
+                <div class="reducer">Reducer</div>
+              </div>
+            </div>
+            <div class="drive">
+              <span class="drive-label">Drive B</span>
+              <div class="box accent-blue">
+                <div class="box-title">Executor</div>
+                <div class="reducer">Reducer</div>
+              </div>
+            </div>
+            <div class="drive">
+              <span class="drive-label">Drive C</span>
+              <div class="box accent-blue">
+                <div class="box-title">Executor</div>
+                <div class="reducer">Reducer</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fan back in to the shared store -->
+          <div class="fan fan--in">
+            <div class="fan-branches">
+              <div class="fan-bar"></div>
+              <div class="fan-branch"><div class="fan-arm"></div></div>
+              <div class="fan-branch"><div class="fan-arm"></div></div>
+              <div class="fan-branch"><div class="fan-arm"></div></div>
+            </div>
+            <div class="fan-stem--arrow"></div>
+          </div>
+
+          <!-- Op store: a Postgres connection pool -->
+          <div class="box accent-green pool">
+            <div class="box-title">Op Store</div>
+            <div class="box-detail">Postgres connection pool</div>
+            <div class="pool-conns">
+              <span class="pool-conn">conn</span>
+              <span class="pool-conn">conn</span>
+              <span class="pool-conn">conn</span>
+              <span class="pool-conn">conn</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

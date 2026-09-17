@@ -146,6 +146,10 @@ A structured runtime for local-first applications.
   and something more robust in a server environment, like RabbitMQ (this part is not deployed)."
 - Read side: a coordinator hands `Operation[]` to read models.
 
+### Inside the Job Queue
+
+![The job queue fans into per-drive executors that share one Postgres op store](img/job-queue-executors.png)
+
 ### A read model: DocumentView
 
 ![DocumentView projects operations into a Postgres table](img/read-model.png)

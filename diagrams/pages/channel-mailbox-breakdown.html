@@ -21,6 +21,7 @@
       position: relative;
       display: grid;
       grid-template-columns: 150px 1fr 46px 1fr;
+      grid-template-rows: 44px 112px 112px 112px;
       row-gap: var(--space-md);
       column-gap: var(--space-lg);
       align-items: stretch;
@@ -37,9 +38,8 @@
        which is what put Reactor B's mailboxes inside the divider. */
     .r-head   { grid-row: 1; }
     .r-outbox { grid-row: 2; }
-    .r-cross  { grid-row: 3; }
-    .r-inbox  { grid-row: 4; }
-    .r-dead   { grid-row: 5; }
+    .r-inbox  { grid-row: 3; }
+    .r-dead   { grid-row: 4; }
     .c-a      { grid-column: 2; }
     .c-b      { grid-column: 4; }
     .kind-name {
@@ -65,7 +65,7 @@
     /* The one channel the pair shares, running the full height between them */
     .channel {
       grid-column: 3;
-      grid-row: 1 / 6;
+      grid-row: 1 / 5;
       justify-self: center;
       width: 100%;
       display: flex;
@@ -90,12 +90,16 @@
        to 150 / 410 / 46 / 410 with 24px gaps, so this SVG is exactly the 914px from the
        start of Reactor A's column to the end of Reactor B's: viewBox units are CSS pixels
        1:1, and the crossing lands at x=457, the channel's centre. */
+    /* Overlay, not a grid item — absolutely positioned children are out of flow, so the
+       arrows add no vertical space. With the rows fixed above, .wire is exactly 1088x428 at
+       the design width, so the viewBox maps 1:1 and the endpoints can be stated in pixels:
+       x=584 is the right edge of Reactor A's column, x=678 the left edge of Reactor B's,
+       y=116 and y=244 the vertical centres of the outbox and inbox rows. */
     .cross {
-      grid-column: 2 / 5;
-      grid-row: 3;
-      justify-self: center;
-      align-self: center;   /* the default stretch blows the row height out */
-      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      pointer-events: none;
       overflow: visible;
     }
     .cross line { stroke-width: 2; }
@@ -182,14 +186,6 @@
             </div>
           </div>
 
-          <!-- each outbox delivers into the other side's inbox -->
-          <svg class="cross" width="914" height="64" viewBox="0 0 914 64" aria-hidden="true">
-            <line class="a-line" x1="205" y1="6" x2="696" y2="56.5" />
-            <polygon class="a-head" points="709,58 694.6,61.5 695.6,51.6" />
-            <line class="b-line" x1="709" y1="6" x2="218" y2="56.5" />
-            <polygon class="b-head" points="205,58 218.4,51.6 219.4,61.5" />
-          </svg>
-
           <!-- row: each side holds what the other sent -->
           <div class="kind r-inbox">
             <div class="kind-name">Inbox</div>
@@ -220,6 +216,14 @@
           <div class="mb r-dead c-b">
             <div class="empty">empty</div>
           </div>
+
+          <!-- right edge of each outbox, across the channel, to the other side's inbox -->
+          <svg class="cross" width="1088" height="428" viewBox="0 0 1088 428" aria-hidden="true">
+            <line class="a-line" x1="584" y1="116" x2="670" y2="234" />
+            <polygon class="a-head" points="678,244 665.7,235.7 673.7,229.8" />
+            <line class="b-line" x1="678" y1="116" x2="592" y2="234" />
+            <polygon class="b-head" points="584,244 588.3,229.8 596.3,235.7" />
+          </svg>
 
         </div>
       </div>

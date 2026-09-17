@@ -125,7 +125,8 @@ const section = (s, i) => {
   }
   if (!s.text.length) {
     // Section divider: the title alone, centered, no header band.
-    return `<section data-slide="${i + 1}" class="divider"><div class="mid"><h2>${inline(s.title)}</h2></div>${notes}</section>`;
+    // The header band stays (hairline + cyan tick), but empty — the title moves to the centre.
+    return `<section data-slide="${i + 1}" class="divider"><header class="hd"></header><div class="mid"><h2>${inline(s.title)}</h2></div>${notes}</section>`;
   }
   const body = s.text.map((t) => `<p>${inline(t)}</p>`).join("");
   return `<section data-slide="${i + 1}">${header}<div class="art text">${body}</div>${notes}</section>`;
@@ -176,9 +177,10 @@ const html = `<!DOCTYPE html>
     .reveal .art.text { flex-direction: column; text-align: center; }
     .reveal .art.text p { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 48px; color: rgba(255,255,255,0.6); margin: 0 0 0.4em; max-width: 1400px; }
     /* section divider: title centered on an otherwise empty frame */
-    /* reveal forces display:block on the current section, so the centering lives on .mid */
+    /* reveal forces display:block on the current section, so the centering lives on .mid.
+       .mid takes the same box as .art, so the title sits where a diagram would. */
     .reveal .divider .mid {
-      position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+      position: absolute; top: 164px; right: 72px; bottom: 44px; left: 72px;
       display: flex; align-items: center; justify-content: center; text-align: center;
     }
     .reveal .divider h2 {

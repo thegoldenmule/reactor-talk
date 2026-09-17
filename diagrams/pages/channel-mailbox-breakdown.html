@@ -127,9 +127,15 @@
       display: flex;
       align-items: center;
     }
-    .ops { display: flex; gap: var(--space-sm); width: 100%; }
+    /* Fixed three-column track, not flex: a mailbox holding two operations must draw
+       them at the same width as one holding three. */
+    .ops {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+      width: 100%;
+    }
     .op {
-      flex: 1;
       border: 1px solid;
       border-radius: var(--radius-sm, 8px);
       padding: 8px 4px;
@@ -173,7 +179,7 @@
 
           <div class="side-head a r-head c-a">Reactor A</div>
           <div class="channel r-head">
-            <span>one channel</span>
+            <span>channel</span>
             <!-- right edge of each outbox, across the channel, to the other inbox -->
             <svg class="cross" width="94" height="128" viewBox="0 0 94 128" aria-hidden="true">
               <line class="a-line" x1="0" y1="0" x2="86" y2="118" />

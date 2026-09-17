@@ -252,26 +252,29 @@
         svg.appendChild(el);
       }
 
-      const a1 = dotCenter(aDots[1]), a3 = dotCenter(aDots[3]), a4 = dotCenter(aDots[4]);
-      const b0 = dotCenter(bDots[0]), b2 = dotCenter(bDots[2]), b4 = dotCenter(bDots[4]);
-      const s1 = dotCenter(sDots[1]), s2 = dotCenter(sDots[2]), s3 = dotCenter(sDots[3]);
+      const a1 = dotCenter(aDots[1]);
+      const a = [2, 3, 4].map(i => dotCenter(aDots[i]));
+      const b0 = dotCenter(bDots[0]);
+      const b = [2, 3, 4].map(i => dotCenter(bDots[i]));
+      const s = [1, 2, 3].map(i => dotCenter(sDots[i]));
 
       // input: each client to the server, on its own schedule
-      line(b0, s1, PURPLE, 'arrow-purple');
-      line(a1, s2, CYAN, 'arrow-cyan');
-      // authoritative update: the server back to the client that sent it
-      line(s1, b2, BLUE, 'arrow-blue');
-      line(s2, a3, BLUE, 'arrow-blue');
-      // events the server originates itself, pushed to everyone
-      line(s3, a4, BLUE, 'arrow-blue');
-      line(s3, b4, BLUE, 'arrow-blue');
+      line(b0, s[0], PURPLE, 'arrow-purple');
+      line(a1, s[1], CYAN, 'arrow-cyan');
+
+      // every server tick broadcasts to both clients — whether it is answering an
+      // input it just took or raising an event of its own
+      s.forEach((from, i) => {
+        line(from, a[i], BLUE, 'arrow-blue');
+        line(from, b[i], BLUE, 'arrow-blue');
+      });
 
       // A's labels sit above its line, B's below its line — clear of the T-labels either way
       label('send', a1.x - 12, a1.y - 10, CYAN, 'end');
-      label('reconcile', a3.x + 12, a3.y - 10, BLUE, 'start');
+      label('reconcile', a[0].x + 12, a[0].y - 10, BLUE, 'start');
       label('send', b0.x + 12, b0.y + 18, PURPLE, 'start');
-      label('reconcile', b2.x + 12, b2.y + 18, BLUE, 'start');
-      label('server events', s3.x - 12, s3.y - 10, BLUE, 'end');
+      label('reconcile', b[0].x + 12, b[0].y + 18, BLUE, 'start');
+      label('server events', s[2].x - 12, s[2].y - 10, BLUE, 'end');
     }
 
     window.addEventListener('load', drawArrows);

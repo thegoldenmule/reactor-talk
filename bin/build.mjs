@@ -13,6 +13,8 @@
 //                            (The img/ spelling is kept for outline compatibility; no PNG is
 //                            read.) Slides without a diagram show their plain paragraphs centered.
 //   `- bullet` / paragraphs  become speaker notes (press S in the deck).
+//   A `###` with no diagram and no paragraphs is a section divider: just its title, centered,
+//                            with no header band.
 //   `##` / `#` headings, `---` rules and everything before the first `###` are ignored.
 //   The `## Appendix` section and anything after it still produce slides; sections after
 //   `## Gaps` / `## Likely` do not (they are prep notes, not slides).
@@ -121,6 +123,10 @@ const section = (s, i) => {
     const w = widthOf.get(s.diagram) ?? manifest.defaultViewport.width;
     return `<section data-slide="${i + 1}">${header}<div class="art"><div class="fit"><iframe src="diagrams/pages/${s.diagram}.html" data-w="${w}" style="width:${w}px" scrolling="no" title="${esc(s.alt)}"></iframe></div></div>${notes}</section>`;
   }
+  if (!s.text.length) {
+    // Section divider: the title alone, centered, no header band.
+    return `<section data-slide="${i + 1}" class="divider"><div class="mid"><h2>${inline(s.title)}</h2></div>${notes}</section>`;
+  }
   const body = s.text.map((t) => `<p>${inline(t)}</p>`).join("");
   return `<section data-slide="${i + 1}">${header}<div class="art text">${body}</div>${notes}</section>`;
 };
@@ -169,6 +175,17 @@ const html = `<!DOCTYPE html>
     .reveal .art iframe { border: 0; background: transparent; pointer-events: none; display: block; margin: 0; max-width: none; max-height: none; box-shadow: none; }
     .reveal .art.text { flex-direction: column; text-align: center; }
     .reveal .art.text p { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size: 48px; color: rgba(255,255,255,0.6); margin: 0 0 0.4em; max-width: 1400px; }
+    /* section divider: title centered on an otherwise empty frame */
+    /* reveal forces display:block on the current section, so the centering lives on .mid */
+    .reveal .divider .mid {
+      position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+    }
+    .reveal .divider h2 {
+      margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 96px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;
+      text-transform: none; color: #fff; text-shadow: none;
+    }
     /* keep the slide number as the only chrome, and tiny */
     .reveal .slide-number { background: transparent; color: rgba(255,255,255,0.25); font-size: 12px; }
     /* pdf export: one slide per page, dark background preserved */
@@ -246,4 +263,5 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
 `;
 writeFileSync(join(root, "index.html"), html);
 console.log(`wrote index.html: ${slides.length} slides (${slides.filter((s) => s.diagram).length} diagrams, ${used.length} pages copied)`);
-for (const s of slides) if (!s.diagram && !s.text.length) console.warn(`  note: "${s.title}" has no diagram and no text`);
+const dividers = slides.filter((s) => !s.diagram && !s.text.length).map((s) => s.title);
+if (dividers.length) console.log(`  dividers: ${dividers.join(", ")}`);

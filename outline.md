@@ -23,6 +23,8 @@ A structured runtime for local-first applications.
 
 ## The Vision
 
+### The Vision
+
 ### Business Processes as Documents
 
 ![Document editors for an invoice, a wiki page and a business process](img/document-editors.png)
@@ -43,6 +45,8 @@ A structured runtime for local-first applications.
   these use cases.
 
 ## Technical Requirements
+
+### The Requirements
 
 ### Run Everywhere
 
@@ -75,6 +79,8 @@ A structured runtime for local-first applications.
 - All applications built on this stack must be inherently realtime multi-user.
 
 ## Act I — Document Models
+
+### Document Models
 
 ### Where we started: the reducer
 
@@ -132,6 +138,8 @@ A structured runtime for local-first applications.
 
 ## Act II — The Reactor
 
+### The Reactor
+
 ### The runtime: CQRS
 
 ![Reactor CQRS: write side, event bus, read side](img/reactor-cqrs.png)
@@ -169,6 +177,8 @@ A structured runtime for local-first applications.
   database. Reactor don't care."
 
 ## Act III — Sync
+
+### Sync
 
 #### The ask, restated (no slide)
 
@@ -300,6 +310,8 @@ A structured runtime for local-first applications.
   preserve resulting state change as well."
 
 ## Act IV — Over the network
+
+### Over the Network
 
 ### Channels and mailboxes
 

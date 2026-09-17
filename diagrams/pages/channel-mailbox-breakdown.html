@@ -32,6 +32,16 @@
       align-self: center;
       text-align: right;
     }
+    /* Every item is placed explicitly. Mixing auto-placed items with ones that have a
+       definite column (.kind, .channel) walks the auto cursor into the channel column,
+       which is what put Reactor B's mailboxes inside the divider. */
+    .r-head   { grid-row: 1; }
+    .r-outbox { grid-row: 2; }
+    .r-cross  { grid-row: 3; }
+    .r-inbox  { grid-row: 4; }
+    .r-dead   { grid-row: 5; }
+    .c-a      { grid-column: 2; }
+    .c-b      { grid-column: 4; }
     .kind-name {
       font-size: 17px;
       font-weight: var(--font-weight-bold);
@@ -59,8 +69,9 @@
       justify-self: center;
       width: 100%;
       display: flex;
-      align-items: center;
+      align-items: flex-start;   /* keep the label clear of the crossing arrows */
       justify-content: center;
+      padding-top: 26px;
       border-left: 1px dashed var(--border-glass);
       border-right: 1px dashed var(--border-glass);
     }
@@ -81,7 +92,9 @@
        1:1, and the crossing lands at x=457, the channel's centre. */
     .cross {
       grid-column: 2 / 5;
+      grid-row: 3;
       justify-self: center;
+      align-self: center;   /* the default stretch blows the row height out */
       display: block;
       overflow: visible;
     }
@@ -146,22 +159,22 @@
 
           <!-- row 1: the two Reactors, and the channel between them -->
           <div></div>
-          <div class="side-head a">Reactor A</div>
-          <div class="channel"><span>one channel</span></div>
-          <div class="side-head b">Reactor B</div>
+          <div class="side-head a r-head c-a">Reactor A</div>
+          <div class="channel r-head"><span>one channel</span></div>
+          <div class="side-head b r-head c-b">Reactor B</div>
 
           <!-- row 2 -->
-          <div class="kind">
+          <div class="kind r-outbox">
             <div class="kind-name">Outbox</div>
           </div>
-          <div class="mb">
+          <div class="mb r-outbox c-a">
             <div class="ops">
               <div class="op a">A&#8323;<span class="ts">t=12</span><span class="hash">e9c4</span></div>
               <div class="op a">A&#8324;<span class="ts">t=18</span><span class="hash">f2a8</span></div>
               <div class="op a">A&#8325;<span class="ts">t=27</span><span class="hash">c1d9</span></div>
             </div>
           </div>
-          <div class="mb">
+          <div class="mb r-outbox c-b">
             <div class="ops">
               <div class="op b">B&#8323;<span class="ts">t=14</span><span class="hash">a8f5</span></div>
               <div class="op b">B&#8324;<span class="ts">t=21</span><span class="hash">e3d7</span></div>
@@ -170,24 +183,24 @@
           </div>
 
           <!-- each outbox delivers into the other side's inbox -->
-          <svg class="cross" width="914" height="76" viewBox="0 0 914 76" aria-hidden="true">
-            <line class="a-line" x1="205" y1="4" x2="697" y2="66" />
-            <polygon class="a-head" points="697,58 712,68 694,74" />
-            <line class="b-line" x1="709" y1="4" x2="217" y2="66" />
-            <polygon class="b-head" points="217,58 202,68 220,74" />
+          <svg class="cross" width="914" height="64" viewBox="0 0 914 64" aria-hidden="true">
+            <line class="a-line" x1="205" y1="6" x2="696" y2="56.5" />
+            <polygon class="a-head" points="709,58 694.6,61.5 695.6,51.6" />
+            <line class="b-line" x1="709" y1="6" x2="218" y2="56.5" />
+            <polygon class="b-head" points="205,58 218.4,51.6 219.4,61.5" />
           </svg>
 
           <!-- row: each side holds what the other sent -->
-          <div class="kind">
+          <div class="kind r-inbox">
             <div class="kind-name">Inbox</div>
           </div>
-          <div class="mb">
+          <div class="mb r-inbox c-a">
             <div class="ops">
               <div class="op b">B&#8324;<span class="ts">t=21</span><span class="hash">e3d7</span></div>
               <div class="op b">B&#8325;<span class="ts">t=30</span><span class="hash">f7b1</span></div>
             </div>
           </div>
-          <div class="mb">
+          <div class="mb r-inbox c-b">
             <div class="ops">
               <div class="op a">A&#8323;<span class="ts">t=12</span><span class="hash">e9c4</span></div>
               <div class="op a">A&#8324;<span class="ts">t=18</span><span class="hash">f2a8</span></div>
@@ -196,15 +209,15 @@
           </div>
 
           <!-- row 4: B3 could not be applied, so it never reached A's inbox -->
-          <div class="kind dead">
+          <div class="kind dead r-dead">
             <div class="kind-name">Dead letter</div>
           </div>
-          <div class="mb">
+          <div class="mb r-dead c-a">
             <div class="ops">
               <div class="op failed">B&#8323; &#10005;<span class="ts">t=14</span><span class="hash">a8f5</span></div>
             </div>
           </div>
-          <div class="mb">
+          <div class="mb r-dead c-b">
             <div class="empty">empty</div>
           </div>
 

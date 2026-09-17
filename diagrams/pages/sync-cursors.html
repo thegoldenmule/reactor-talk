@@ -9,167 +9,121 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
+    /* One stream of operations, with A's outbox cursors tracked above it and B's inbox
+       cursors below. The four land on four different ordinals on purpose — they move
+       independently, and the previous version pinned them in pairs, which made them look
+       like they had to agree.
+
+       The three tracks share one 8-column template, so a cursor placed in column N sits
+       directly over operation N. Every item is placed explicitly; no auto placement. */
     .frame { max-width: 1100px; }
     .card { height: auto; }
-    .card-body { flex: none; gap: var(--space-2xl); }
+    .card-body { flex: none; }
 
-    .direction {
+    .wrap {
       display: grid;
-      grid-template-columns: 110px 1fr 110px;
+      grid-template-columns: 132px 1fr;
+      column-gap: var(--space-lg);
+      row-gap: var(--space-sm);
       align-items: center;
-      gap: var(--space-lg);
     }
 
-    .endpoint {
-      border: 1px solid var(--border-glass);
-      border-radius: var(--radius-md);
-      padding: var(--space-sm) var(--space-md);
-      font-size: 13px;
+    .lbl {
+      grid-column: 1;
+      text-align: right;
+      font-size: 14px;
       font-weight: var(--font-weight-semibold);
-      text-align: center;
-      background: var(--bg-elevated);
+      white-space: nowrap;
     }
-    .endpoint.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
-    .endpoint.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
-    .endpoint .role {
-      display: block;
-      font-size: 9px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .lbl.cyan  { color: var(--accent-cyan); }
+    .lbl.green { color: var(--accent-green); }
+    .lbl.muted { color: var(--text-muted); font-weight: var(--font-weight-medium); }
+
+    .track, .ops {
+      grid-column: 2;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      column-gap: 10px;
     }
 
-    /* Number line */
-    .line-wrap { position: relative; height: 120px; }
     .line {
-      position: absolute;
-      left: 0; right: 0; top: 50%;
+      grid-column: 1 / -1;
       height: 2px;
       background: var(--border-glass);
-      transform: translateY(-50%);
+      border-radius: 1px;
     }
-    .line::after {
-      content: '';
-      position: absolute;
-      right: -1px; top: 50%;
-      transform: translateY(-50%);
-      border-top: 5px solid transparent;
-      border-bottom: 5px solid transparent;
-      border-left: 8px solid var(--border-glass);
-    }
-    /* filled segment: applied (0..ack) and seen-but-pending (ack..latest) */
-    .seg {
-      position: absolute;
-      top: 50%;
-      height: 4px;
-      transform: translateY(-50%);
-      border-radius: 2px;
-    }
-    .seg.applied.cyan  { background: var(--accent-cyan); }
-    .seg.applied.green { background: var(--accent-green); }
-    .seg.pending.cyan  { background: var(--accent-cyan);  opacity: 0.3; }
-    .seg.pending.green { background: var(--accent-green); opacity: 0.3; }
+    .track.top .line { grid-row: 1; }
+    .track.top .cur  { grid-row: 2; }
+    .track.bottom .cur  { grid-row: 1; }
+    .track.bottom .line { grid-row: 2; }
 
-    .tick {
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--bg-surface);
-      border: 2px solid var(--text-muted);
-    }
-    .tick-num {
-      position: absolute;
-      top: calc(50% + 12px);
-      transform: translateX(-50%);
-      font-size: 10px;
-      color: var(--text-muted);
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
-    }
-
-    /* Cursor markers */
-    .cursor {
-      position: absolute;
-      transform: translateX(-50%);
+    .cur {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
-    .cursor.above { bottom: calc(50% + 8px); }
-    .cursor.below { top: calc(50% + 26px); flex-direction: column-reverse; }
-    .cursor-pin {
-      width: 2px; height: 14px;
-    }
-    .cursor-tag {
-      font-size: 10px;
+    .track.bottom .cur { flex-direction: column-reverse; }
+    .tag {
+      font-size: 12px;
       font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: var(--radius-xs);
-      border: 1px solid;
       white-space: nowrap;
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      line-height: 1.2;
     }
-    .cursor.cyan .cursor-pin  { background: var(--accent-cyan); }
-    .cursor.cyan .cursor-tag  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
-    .cursor.green .cursor-pin { background: var(--accent-green); }
-    .cursor.green .cursor-tag { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
-    .cursor.dim .cursor-tag   { opacity: 0.55; }
-    .cursor.dim .cursor-pin   { opacity: 0.55; }
+    .pin { width: 2px; height: 13px; border-radius: 1px; }
+    .cur.cyan  .tag { color: var(--accent-cyan); }
+    .cur.cyan  .pin { background: var(--accent-cyan); }
+    .cur.green .tag { color: var(--accent-green); }
+    .cur.green .pin { background: var(--accent-green); }
+    /* "latest" is the leading edge; "ack" is the settled one, so ack reads solid */
+    .cur.ahead .tag { opacity: 0.72; }
+    .cur.ahead .pin { opacity: 0.72; }
 
-    .dir-label {
-      font-size: 10px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+    .op {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm, 8px);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 11px 0;
       text-align: center;
-      margin-bottom: var(--space-sm);
+      font-size: 16px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
     }
-
   </style>
 </head>
 <body>
   <div class="frame">
     <div class="card">
       <div class="card-body">
+        <div class="wrap">
 
-        <!-- A → B : A's outbox, B's inbox -->
-        <div>
-          <div class="dir-label">A → B &nbsp;·&nbsp; A's outbox / B's inbox &nbsp;·&nbsp; A's ordinals</div>
-          <div class="direction">
-            <div class="endpoint accent-cyan">Reactor A<span class="role">outbox</span></div>
-            <div class="line-wrap">
-              <div class="line"></div>
-              <div class="seg applied cyan" style="left: 0%; width: 55%;"></div>
-              <div class="seg pending cyan" style="left: 55%; width: 25%;"></div>
-              <div class="tick" style="left: 0%"></div><span class="tick-num" style="left: 0%">0</span>
-              <div class="tick" style="left: 55%"></div><span class="tick-num" style="left: 55%">41</span>
-              <div class="tick" style="left: 80%"></div><span class="tick-num" style="left: 80%">47</span>
-              <div class="cursor cyan above" style="left: 55%">
-                <span class="cursor-tag">outbox.ack</span><div class="cursor-pin"></div>
-              </div>
-              <div class="cursor cyan above dim" style="left: 80%">
-                <span class="cursor-tag">outbox.latest</span><div class="cursor-pin"></div>
-              </div>
-              <div class="cursor green below" style="left: 55%">
-                <span class="cursor-tag">inbox.ack</span><div class="cursor-pin"></div>
-              </div>
-              <div class="cursor green below dim" style="left: 80%">
-                <span class="cursor-tag">inbox.latest</span><div class="cursor-pin"></div>
-              </div>
-            </div>
-            <div class="endpoint accent-green">Reactor B<span class="role">inbox</span></div>
+          <div class="lbl cyan" style="grid-row: 1;">A&rsquo;s outbox</div>
+          <div class="track top" style="grid-row: 1;">
+            <div class="line"></div>
+            <div class="cur cyan"       style="grid-column: 4;"><span class="tag">outbox.ack</span><span class="pin"></span></div>
+            <div class="cur cyan ahead" style="grid-column: 8;"><span class="tag">outbox.latest</span><span class="pin"></span></div>
           </div>
+
+          <div class="lbl muted" style="grid-row: 2;">operations</div>
+          <div class="ops" style="grid-row: 2;">
+            <div class="op">41</div>
+            <div class="op">42</div>
+            <div class="op">43</div>
+            <div class="op">44</div>
+            <div class="op">45</div>
+            <div class="op">46</div>
+            <div class="op">47</div>
+            <div class="op">48</div>
+          </div>
+
+          <div class="lbl green" style="grid-row: 3;">B&rsquo;s inbox</div>
+          <div class="track bottom" style="grid-row: 3;">
+            <div class="cur green"       style="grid-column: 5;"><span class="tag">inbox.ack</span><span class="pin"></span></div>
+            <div class="cur green ahead" style="grid-column: 7;"><span class="tag">inbox.latest</span><span class="pin"></span></div>
+            <div class="line"></div>
+          </div>
+
         </div>
-
-
-
       </div>
     </div>
   </div>

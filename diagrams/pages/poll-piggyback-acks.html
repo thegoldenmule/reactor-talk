@@ -111,7 +111,21 @@
     .cur.b { color: var(--accent-green); }
     .cur.none { color: var(--text-muted); font-weight: var(--font-weight-medium); font-size: 12.5px; }
 
-    .mini { position: relative; width: 100%; height: 2px; background: var(--text-secondary); }
+    /* The line stops 6px short of the head. Both arrow colours are translucent
+       (--text-secondary is .6 alpha, --text-muted .38), so any overlap between line and
+       arrowhead stacks into a darker patch and the dashes read straight through the
+       triangle. The head is a 7px border-left sitting at right:-1px, so it covers the last
+       6px; clipping the background to the content box keeps them from ever overlapping. */
+    .mini {
+      position: relative;
+      width: 100%;
+      height: 2px;
+      background: var(--text-secondary);
+      background-clip: content-box;
+      background-origin: content-box;
+    }
+    .envelope.to-b .mini { padding-right: 6px; }
+    .envelope.to-a .mini { padding-left: 6px; }
     .mini::after {
       content: '';
       position: absolute; top: 50%;
@@ -121,14 +135,12 @@
     }
     .envelope.to-b .mini::after { right: -1px; border-left:  7px solid var(--text-secondary); }
     .envelope.to-a .mini::after { left:  -1px; border-right: 7px solid var(--text-secondary); }
-    /* Dashes as a gradient rather than a dashed border. A dashed border leaves a gap at
-       each end, so the line never met the arrowhead, and height:0 + border-top put the
-       ::after (top:50% of a zero-height content box) below the line instead of on it.
-       Each 20% cell is gap-then-dash, so the run ends on a dash flush with the head. */
     .mini.soft {
-      height: 2px;
+      /* the shorthand resets clip/origin, so restate them */
       background: repeating-linear-gradient(to right, transparent 0 40%, var(--text-muted) 40% 100%);
       background-size: 20% 100%;
+      background-clip: content-box;
+      background-origin: content-box;
     }
     .envelope.to-b .mini.soft::after { border-left-color: var(--text-muted); }
   </style>

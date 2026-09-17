@@ -18,6 +18,10 @@
        A's ordinals are in the 40s and B's in the 110s because they are genuinely separate
        spaces. 45 and 47 are B's inbox cursors from the previous slide, unchanged.
 
+       The rows are deliberately uneven. The request sends both inbox cursors
+       (gql-req-channel.ts:316 passes inbox.ackOrdinal and inbox.latestOrdinal); the response
+       returns only an ackOrdinal, no latest. That asymmetry is real, not a simplification.
+
        Endpoint boxes, pill tags and line treatment match sync-cursors. Everything is placed
        explicitly. */
     .frame { max-width: 1100px; }
@@ -128,7 +132,6 @@
             <div class="arrow to-a"></div>
             <div class="chips">
               <span class="chip cyan">inbox.ack 45</span>
-              <span class="chip cyan dim">inbox.latest 47</span>
             </div>
             <div class="msg-label">poll response</div>
           </div>

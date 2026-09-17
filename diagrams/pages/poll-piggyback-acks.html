@@ -9,76 +9,54 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* Two messages, one each way. Each carries operations in its own direction and an
-       acknowledgement of the other side's operations coming back. What each message carries
-       is the sender's inbox cursors, and an inbox's cursors are always stated in the OTHER
-       reactor's ordinal space — so the request is green (B's numbers) and the response cyan
-       (A's numbers). That flip is the whole point of the slide.
+    /* What a poll actually moves, cursor by cursor.
 
-       A's ordinals are in the 40s and B's in the 110s because they are genuinely separate
-       spaces. 45 and 47 are B's inbox cursors from the previous slide, unchanged.
+       Each row is one cursor crossing the wire and landing on the other reactor's opposite
+       cursor — an inbox ack on one side sets an outbox ack on the other. The middle row is
+       the exception the slide exists to show: inbox.latest crosses too, but lands on
+       nothing; the server uses it only to filter which operations to return.
 
-       The rows are deliberately uneven. The request sends both inbox cursors
-       (gql-req-channel.ts:316 passes inbox.ackOrdinal and inbox.latestOrdinal); the response
-       returns only an ackOrdinal, no latest. That asymmetry is real, not a simplification.
+       A crossing never changes ordinal space, so each row is a single colour. Green rows are
+       B's ordinals (A's inbox holds B's operations), the cyan row is A's. Source:
+       packages/reactor/src/sync/design.md and resolvers.ts:1118 / :1178.
 
-       Endpoint boxes, pill tags and line treatment match sync-cursors. Everything is placed
-       explicitly. */
+       Endpoint boxes, pill tags and the line-with-arrowhead match sync-cursors. Everything
+       is placed explicitly. */
     .frame { max-width: 1100px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wrap {
       display: grid;
-      grid-template-columns: 124px 1fr 124px;
-      column-gap: var(--space-xl);
-      row-gap: var(--space-xl);
+      grid-template-columns: 1fr 250px 1fr;
+      column-gap: var(--space-lg);
+      row-gap: var(--space-lg);
       align-items: center;
     }
 
     .endpoint {
-      grid-row: 1 / 3;
+      grid-row: 1;
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-md);
       padding: var(--space-sm) var(--space-md);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: var(--font-weight-semibold);
       text-align: center;
       background: var(--bg-elevated);
     }
     .endpoint.a { grid-column: 1; border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
     .endpoint.b { grid-column: 3; border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
-    .endpoint .role {
-      display: block;
-      font-size: 9px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
 
-    .msg {
-      grid-column: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .msg-label {
-      font-size: 10px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .chips { display: flex; gap: var(--space-md); }
+    .left  { grid-column: 1; justify-self: end; }
+    .right { grid-column: 3; justify-self: start; }
+
     .chip {
-      font-size: 11px;
+      display: inline-block;
+      font-size: 12px;
       font-weight: var(--font-weight-semibold);
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 5px 10px;
+      padding: 6px 11px;
       border-radius: var(--radius-xs);
       border: 1px solid;
       white-space: nowrap;
@@ -86,13 +64,25 @@
     }
     .chip.cyan  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
     .chip.green { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
-
-    .arrow {
-      position: relative;
-      width: 100%;
-      height: 2px;
-      background: var(--border-glass);
+    /* lands nowhere */
+    .chip.none {
+      color: var(--text-muted);
+      border-color: var(--border-glass);
+      border-style: dashed;
+      background: transparent;
+      text-transform: none;
+      letter-spacing: 0;
     }
+
+    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .hop-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .arrow { position: relative; width: 100%; height: 2px; background: var(--border-glass); }
     .arrow::after {
       content: '';
       position: absolute;
@@ -103,6 +93,13 @@
     }
     .arrow.to-b::after { right: -1px; border-left:  8px solid var(--border-glass); }
     .arrow.to-a::after { left:  -1px; border-right: 8px solid var(--border-glass); }
+    /* the one that carries no cursor with it */
+    .arrow.filters {
+      background: none;
+      border-top: 2px dashed var(--border-glass);
+      height: 0;
+    }
+    .arrow.filters::after { right: -1px; border-left: 8px solid var(--border-glass); opacity: 0.5; }
   </style>
 </head>
 <body>
@@ -111,28 +108,32 @@
       <div class="card-body">
         <div class="wrap">
 
-          <div class="endpoint a">Reactor A<span class="role">polls</span></div>
+          <div class="endpoint a">Reactor A</div>
+          <div class="endpoint b">Reactor B</div>
 
-          <!-- A -> B : A's new operations, plus A's ack of B's -->
-          <div class="msg" style="grid-row: 1;">
-            <div class="msg-label">poll request</div>
-            <div class="chips">
-              <span class="chip green">inbox.ack 112</span>
-              <span class="chip green">inbox.latest 114</span>
-            </div>
+          <!-- ack crosses and sets the opposite cursor -->
+          <div class="left"  style="grid-row: 2;"><span class="chip green">inbox.ack 112</span></div>
+          <div class="hop"   style="grid-row: 2;">
+            <div class="hop-label">poll request</div>
             <div class="arrow to-b"></div>
           </div>
+          <div class="right" style="grid-row: 2;"><span class="chip green">outbox.ack 112</span></div>
 
-          <div class="endpoint b">Reactor B<span class="role">answers</span></div>
-
-          <!-- B -> A : B's new operations, plus B's ack of A's -->
-          <div class="msg" style="grid-row: 2;">
-            <div class="arrow to-a"></div>
-            <div class="chips">
-              <span class="chip cyan">inbox.ack 45</span>
-            </div>
-            <div class="msg-label">poll response</div>
+          <!-- latest crosses but sets nothing -->
+          <div class="left"  style="grid-row: 3;"><span class="chip green">inbox.latest 114</span></div>
+          <div class="hop"   style="grid-row: 3;">
+            <div class="hop-label">poll request</div>
+            <div class="arrow to-b filters"></div>
           </div>
+          <div class="right" style="grid-row: 3;"><span class="chip none">filters the response</span></div>
+
+          <!-- and the same crossing in the other direction -->
+          <div class="left"  style="grid-row: 4;"><span class="chip cyan">outbox.ack 45</span></div>
+          <div class="hop"   style="grid-row: 4;">
+            <div class="hop-label">poll response</div>
+            <div class="arrow to-a"></div>
+          </div>
+          <div class="right" style="grid-row: 4;"><span class="chip cyan">inbox.ack 45</span></div>
 
         </div>
       </div>

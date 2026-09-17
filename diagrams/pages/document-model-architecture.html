@@ -57,9 +57,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: var(--space-md);
-      padding-top: 40px;
+      padding-top: 29px;
     }
 
     /* Box component used in columns */
@@ -153,13 +153,6 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-    .h-arrow-sublabel {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: none;
-      letter-spacing: normal;
-    }
-
     .model-flow {
       display: flex;
       flex-direction: column;
@@ -284,10 +277,7 @@
           <div class="col-bridge">
             <div class="h-arrow">
               <div class="h-arrow-line"></div>
-              <div>
-                <div class="h-arrow-label">Codegen</div>
-                <div class="h-arrow-sublabel">TS Types</div>
-              </div>
+              <div class="h-arrow-label">Codegen</div>
               <div class="h-arrow-line has-head"></div>
             </div>
           </div>

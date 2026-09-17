@@ -86,8 +86,6 @@
     }
     .chip.cyan  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
     .chip.green { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
-    /* same convention as sync-cursors: latest is the leading edge, ack is the settled one */
-    .chip.dim   { opacity: 0.55; }
 
     .arrow {
       position: relative;
@@ -120,7 +118,7 @@
             <div class="msg-label">poll request</div>
             <div class="chips">
               <span class="chip green">inbox.ack 112</span>
-              <span class="chip green dim">inbox.latest 114</span>
+              <span class="chip green">inbox.latest 114</span>
             </div>
             <div class="arrow to-b"></div>
           </div>

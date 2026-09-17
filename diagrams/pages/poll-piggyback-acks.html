@@ -121,8 +121,16 @@
     }
     .envelope.to-b .mini::after { right: -1px; border-left:  7px solid var(--text-secondary); }
     .envelope.to-a .mini::after { left:  -1px; border-right: 7px solid var(--text-secondary); }
-    .mini.soft { background: none; height: 0; border-top: 2px dashed var(--text-muted); }
-    .envelope.to-b .mini.soft::after { border-left-color: var(--text-muted); opacity: 0.5; }
+    /* Dashes as a gradient rather than a dashed border. A dashed border leaves a gap at
+       each end, so the line never met the arrowhead, and height:0 + border-top put the
+       ::after (top:50% of a zero-height content box) below the line instead of on it.
+       Each 20% cell is gap-then-dash, so the run ends on a dash flush with the head. */
+    .mini.soft {
+      height: 2px;
+      background: repeating-linear-gradient(to right, transparent 0 40%, var(--text-muted) 40% 100%);
+      background-size: 20% 100%;
+    }
+    .envelope.to-b .mini.soft::after { border-left-color: var(--text-muted); }
   </style>
 </head>
 <body>

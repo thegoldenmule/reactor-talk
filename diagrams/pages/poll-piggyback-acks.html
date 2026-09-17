@@ -9,88 +9,84 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* Both mailboxes on both sides, paired so each arrow is horizontal: A's outbox faces
-       B's inbox, A's inbox faces B's outbox.
+    /* Two steps in order, request first. Every arrow reads source -> destination, left to
+       right, so the one rule the slide teaches is stated twice in the same shape:
 
-       Colour is reactor identity only — cyan is A, green is B, as everywhere else in the
-       deck. The cursors themselves are neutral, so colour never has to mean two things.
+           the sender's inbox.ack sets the receiver's outbox.ack
 
-       Line style carries the meaning instead: a solid arrow is an ack, which lands and sets
-       the opposite cursor (the value repeats across the row). The dashed arrow is latest,
-       which crosses but sets nothing — B's outbox.latest is B's own scan watermark, so the
-       dashed line stops short of the box rather than touching it. */
+       Earlier versions drew the physical direction of each message instead, which pointed
+       the arrows opposite ways and hid the mapping. Direction now lives in the step label.
+
+       Colour is reactor identity only, and only on the possessive: "A's" cyan, "B's" green.
+       The cursor names are neutral, so you can see the ownership flip across each arrow
+       while the inbox->outbox mapping stays plain. */
     .frame { max-width: 1150px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wrap {
       display: grid;
-      grid-template-columns: 1fr 260px 1fr;
+      grid-template-columns: 1fr 190px 1fr;
       column-gap: var(--space-lg);
-      row-gap: var(--space-lg);
+      row-gap: var(--space-md);
       align-items: center;
     }
 
-    /* the only coloured things on the slide */
-    .who { grid-row: 1; font-size: 16px; font-weight: var(--font-weight-bold); text-align: center; }
-    .who.a { grid-column: 1; color: var(--accent-cyan); }
-    .who.b { grid-column: 3; color: var(--accent-green); }
-
-    .mb {
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      background: rgba(0, 0, 0, 0.25);
-      padding: var(--space-sm) var(--space-md) var(--space-md);
-    }
-    .mb-name {
-      font-size: 10px;
+    .step {
+      grid-column: 1 / -1;
+      font-size: 11px;
       font-weight: var(--font-weight-semibold);
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-bottom: 6px;
     }
-    .val {
+    .step.second { margin-top: var(--space-lg); }
+
+    .cur {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px var(--space-md);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
       display: flex;
+      align-items: baseline;
       justify-content: space-between;
       gap: var(--space-lg);
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
-      font-size: 14px;
-      line-height: 1.7;
     }
-    .val .k { color: var(--text-secondary); }
-    .val .v { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
+    .cur .name { font-size: 14px; font-weight: var(--font-weight-semibold); color: var(--text-primary); }
+    .cur .own  { font-weight: var(--font-weight-bold); }
+    .cur .own.a { color: var(--accent-cyan); }
+    .cur .own.b { color: var(--accent-green); }
+    .cur .v    { font-size: 15px; font-weight: var(--font-weight-bold); color: var(--text-primary); }
 
-    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: var(--space-md); }
-    .wire { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; }
-    .wire-label {
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+    /* nothing lands here */
+    .cur.none {
+      border-style: dashed;
+      background: transparent;
+      justify-content: center;
+    }
+    .cur.none .name { color: var(--text-muted); font-weight: var(--font-weight-medium); }
+
+    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .hop-verb {
       font-size: 12px;
       font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: var(--text-secondary);
     }
-    .wire-label .note { color: var(--text-muted); font-weight: var(--font-weight-medium); }
-
+    .hop.soft .hop-verb { color: var(--text-muted); }
     .arrow { position: relative; width: 100%; height: 2px; background: var(--border-glass); }
     .arrow::after {
       content: '';
-      position: absolute; top: 50%;
+      position: absolute; right: -1px; top: 50%;
       transform: translateY(-50%);
       border-top: 5px solid transparent;
       border-bottom: 5px solid transparent;
+      border-left: 8px solid var(--border-glass);
     }
-    .arrow.to-b::after { right: -1px; border-left:  8px solid var(--border-glass); }
-    .arrow.to-a::after { left:  -1px; border-right: 8px solid var(--border-glass); }
-    /* crosses, but lands on nothing: shorter, dashed, no head */
-    .arrow.nowhere {
-      width: 62%;
-      align-self: flex-start;
-      background: none;
-      height: 0;
-      border-top: 2px dashed var(--border-glass);
-      opacity: 0.75;
-    }
-    .arrow.nowhere::after { content: none; }
+    .arrow.soft { background: none; height: 0; border-top: 2px dashed var(--border-glass); }
+    .arrow.soft::after { opacity: 0.45; }
   </style>
 </head>
 <body>
@@ -99,47 +95,41 @@
       <div class="card-body">
         <div class="wrap">
 
-          <div class="who a">Reactor A</div>
-          <div class="who b">Reactor B</div>
+          <div class="step">1 &nbsp;·&nbsp; Poll request &nbsp;&mdash;&nbsp; A sends to B</div>
 
-          <!-- B's inbox ack comes back on the response and sets A's outbox ack -->
-          <div class="mb" style="grid-row: 2; grid-column: 1;">
-            <div class="mb-name">outbox</div>
-            <div class="val"><span class="k">ack</span><span class="v">45</span></div>
-            <div class="val"><span class="k">latest</span><span class="v">48</span></div>
+          <div class="cur" style="grid-row: 2; grid-column: 1;">
+            <span class="name"><span class="own a">A&rsquo;s</span> inbox.ack</span><span class="v">112</span>
           </div>
           <div class="hop" style="grid-row: 2;">
-            <div class="wire">
-              <div class="wire-label">ack</div>
-              <div class="arrow to-a"></div>
-            </div>
+            <div class="hop-verb">sets</div>
+            <div class="arrow"></div>
           </div>
-          <div class="mb" style="grid-row: 2; grid-column: 3;">
-            <div class="mb-name">inbox</div>
-            <div class="val"><span class="k">ack</span><span class="v">45</span></div>
-            <div class="val"><span class="k">latest</span><span class="v">47</span></div>
+          <div class="cur" style="grid-row: 2; grid-column: 3;">
+            <span class="name"><span class="own b">B&rsquo;s</span> outbox.ack</span><span class="v">112</span>
           </div>
 
-          <!-- A's inbox cursors go out on the request; only the ack lands -->
-          <div class="mb" style="grid-row: 3; grid-column: 1;">
-            <div class="mb-name">inbox</div>
-            <div class="val"><span class="k">ack</span><span class="v">112</span></div>
-            <div class="val"><span class="k">latest</span><span class="v">114</span></div>
+          <div class="cur" style="grid-row: 3; grid-column: 1;">
+            <span class="name"><span class="own a">A&rsquo;s</span> inbox.latest</span><span class="v">114</span>
           </div>
-          <div class="hop" style="grid-row: 3;">
-            <div class="wire">
-              <div class="wire-label">ack</div>
-              <div class="arrow to-b"></div>
-            </div>
-            <div class="wire">
-              <div class="wire-label">latest <span class="note">&mdash; filters only</span></div>
-              <div class="arrow to-b nowhere"></div>
-            </div>
+          <div class="hop soft" style="grid-row: 3;">
+            <div class="hop-verb">filters</div>
+            <div class="arrow soft"></div>
           </div>
-          <div class="mb" style="grid-row: 3; grid-column: 3;">
-            <div class="mb-name">outbox</div>
-            <div class="val"><span class="k">ack</span><span class="v">112</span></div>
-            <div class="val"><span class="k">latest</span><span class="v">115</span></div>
+          <div class="cur none" style="grid-row: 3; grid-column: 3;">
+            <span class="name">no cursor is set</span>
+          </div>
+
+          <div class="step second">2 &nbsp;·&nbsp; Poll response &nbsp;&mdash;&nbsp; B sends to A</div>
+
+          <div class="cur" style="grid-row: 5; grid-column: 1;">
+            <span class="name"><span class="own b">B&rsquo;s</span> inbox.ack</span><span class="v">45</span>
+          </div>
+          <div class="hop" style="grid-row: 5;">
+            <div class="hop-verb">sets</div>
+            <div class="arrow"></div>
+          </div>
+          <div class="cur" style="grid-row: 5; grid-column: 3;">
+            <span class="name"><span class="own a">A&rsquo;s</span> outbox.ack</span><span class="v">45</span>
           </div>
 
         </div>

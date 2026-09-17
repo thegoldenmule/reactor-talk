@@ -183,26 +183,6 @@
           </div>
         </div>
 
-        <!-- B → A : B's outbox, A's inbox -->
-        <div>
-          <div class="dir-label">B → A &nbsp;·&nbsp; B's outbox / A's inbox &nbsp;·&nbsp; B's ordinals</div>
-          <div class="direction">
-            <div class="endpoint accent-green">Reactor B<span class="role">outbox</span></div>
-            <div class="line-wrap">
-              <div class="line"></div>
-              <div class="seg applied green" style="left: 0%; width: 70%;"></div>
-              <div class="tick" style="left: 0%"></div><span class="tick-num" style="left: 0%">0</span>
-              <div class="tick" style="left: 70%"></div><span class="tick-num" style="left: 70%">112</span>
-              <div class="cursor green above" style="left: 70%">
-                <span class="cursor-tag">outbox.ack = outbox.latest</span><div class="cursor-pin"></div>
-              </div>
-              <div class="cursor cyan below" style="left: 70%">
-                <span class="cursor-tag">inbox.ack = inbox.latest</span><div class="cursor-pin"></div>
-              </div>
-            </div>
-            <div class="endpoint accent-cyan">Reactor A<span class="role">inbox</span></div>
-          </div>
-        </div>
 
         <div class="footer">
           <span class="rule">ack ≤ latest</span>

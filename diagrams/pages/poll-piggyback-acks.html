@@ -9,23 +9,25 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* A on the left, B on the right. A's inbox sits top-left and B's outbox top-right; A's
-       outbox bottom-left and B's inbox bottom-right. That pairing puts each mailbox opposite
-       the one it sets, so both crossings are horizontal.
+    /* A on the left, B on the right. A's inbox faces B's outbox, A's outbox faces B's inbox,
+       so each mailbox sits opposite the one it sets and both crossings are horizontal.
 
-       Between them, one big arrow per message, pointing the way that message travels — right
-       for the request, left for the response. The cursors it carries ride inside it, as
-       small arrows pointing the same way. Nothing else on the slide moves.
+       Between them one big arrow per message, shaped to point the way it travels. The
+       cursors it carries ride inside as sub-arrows naming the mapping. Values live in the
+       mailboxes only — the sub-arrows state the rule, the boxes hold the numbers.
 
-       Colour is reactor identity, as everywhere else: A cyan, B green. The envelopes and the
-       cursor values are neutral. */
+       Both envelopes use the same 56px padding on both sides, so their inner grids are
+       identical and all three sub-arrows sit in one vertical column. 56 clears the 46px
+       clip-path point on whichever side it falls.
+
+       Colour is reactor identity: A cyan, B green, everywhere. */
     .frame { max-width: 1200px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wrap {
       display: grid;
-      grid-template-columns: 1fr 1.5fr 1fr;
+      grid-template-columns: 1fr 1.6fr 1fr;
       column-gap: var(--space-md);
       row-gap: var(--space-lg);
       align-items: stretch;
@@ -35,7 +37,6 @@
     .who.a { grid-column: 1; color: var(--accent-cyan); }
     .who.b { grid-column: 3; color: var(--accent-green); }
 
-    /* Mailboxes */
     .mb {
       border: 1px solid;
       border-radius: var(--radius-md);
@@ -67,26 +68,17 @@
     .val .k { color: var(--text-secondary); }
     .val .v { color: var(--text-primary); font-weight: var(--font-weight-bold); }
 
-    /* The message itself, shaped as one big arrow in its direction of travel */
     .envelope {
       grid-column: 2;
       background: rgba(255, 255, 255, 0.05);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 7px;
-      padding: var(--space-md) 0;
+      gap: 9px;
+      padding: var(--space-md) 56px;
     }
-    .envelope.to-b {
-      clip-path: polygon(0 0, calc(100% - 46px) 0, 100% 50%, calc(100% - 46px) 100%, 0 100%);
-      padding-left: var(--space-lg);
-      padding-right: 56px;
-    }
-    .envelope.to-a {
-      clip-path: polygon(46px 0, 100% 0, 100% 100%, 46px 100%, 0 50%);
-      padding-left: 56px;
-      padding-right: var(--space-lg);
-    }
+    .envelope.to-b { clip-path: polygon(0 0, calc(100% - 46px) 0, 100% 50%, calc(100% - 46px) 100%, 0 100%); }
+    .envelope.to-a { clip-path: polygon(46px 0, 100% 0, 100% 100%, 46px 100%, 0 50%); }
     .env-name {
       font-size: 11px;
       font-weight: var(--font-weight-bold);
@@ -94,24 +86,25 @@
       text-transform: uppercase;
       color: var(--text-secondary);
     }
-    /* each cursor coloured to the reactor that owns it */
-    .cur { font-weight: var(--font-weight-bold); }
-    .cur.a { color: var(--accent-cyan); }
-    .cur.b { color: var(--accent-green); }
-    .cur.none { color: var(--text-muted); font-weight: var(--font-weight-medium); }
+    .envelope.to-a .env-name { text-align: right; }
 
-    /* the cursors riding inside, pointing the way the message goes */
+    /* one fixed 3-track grid, identical in both envelopes, so the arrows form a column */
     .carries {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 58px 1fr;
       align-items: center;
-      gap: 9px;
+      column-gap: var(--space-md);
       font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
       font-size: 14px;
-      font-weight: var(--font-weight-semibold);
-      color: var(--text-primary);
     }
-    .carries.soft { color: var(--text-muted); font-weight: var(--font-weight-medium); font-size: 12.5px; }
-    .mini { position: relative; width: 34px; height: 2px; background: var(--text-secondary); flex: none; }
+    .cur { font-weight: var(--font-weight-bold); white-space: nowrap; }
+    .cur.l { justify-self: end; }
+    .cur.r { justify-self: start; }
+    .cur.a { color: var(--accent-cyan); }
+    .cur.b { color: var(--accent-green); }
+    .cur.none { color: var(--text-muted); font-weight: var(--font-weight-medium); font-size: 12.5px; }
+
+    .mini { position: relative; width: 100%; height: 2px; background: var(--text-secondary); }
     .mini::after {
       content: '';
       position: absolute; top: 50%;
@@ -134,7 +127,6 @@
           <div class="who a">Reactor A</div>
           <div class="who b">Reactor B</div>
 
-          <!-- request: A's inbox cursors go out, and the ack lands on B's outbox -->
           <div class="mb a" style="grid-row: 2; grid-column: 1;">
             <div class="mb-name">inbox</div>
             <div class="val"><span class="k">ack</span><span class="v">112</span></div>
@@ -143,10 +135,10 @@
           <div class="envelope to-b" style="grid-row: 2;">
             <div class="env-name">request</div>
             <div class="carries">
-              <span class="cur a">inbox.ack 112</span><span class="mini"></span><span class="cur b">outbox.ack 112</span>
+              <span class="cur a l">inbox.ack</span><span class="mini"></span><span class="cur b r">outbox.ack</span>
             </div>
-            <div class="carries soft">
-              <span class="cur a">inbox.latest 114</span><span class="mini soft"></span><span class="cur none">filters only</span>
+            <div class="carries">
+              <span class="cur a l">inbox.latest</span><span class="mini soft"></span><span class="cur none r">filters only</span>
             </div>
           </div>
           <div class="mb b" style="grid-row: 2; grid-column: 3;">
@@ -155,7 +147,6 @@
             <div class="val"><span class="k">latest</span><span class="v">115</span></div>
           </div>
 
-          <!-- response: B's inbox ack comes back and lands on A's outbox -->
           <div class="mb a" style="grid-row: 3; grid-column: 1;">
             <div class="mb-name">outbox</div>
             <div class="val"><span class="k">ack</span><span class="v">45</span></div>
@@ -164,7 +155,7 @@
           <div class="envelope to-a" style="grid-row: 3;">
             <div class="env-name">response</div>
             <div class="carries">
-              <span class="cur a">outbox.ack 45</span><span class="mini"></span><span class="cur b">inbox.ack 45</span>
+              <span class="cur a l">outbox.ack</span><span class="mini"></span><span class="cur b r">inbox.ack</span>
             </div>
           </div>
           <div class="mb b" style="grid-row: 3; grid-column: 3;">

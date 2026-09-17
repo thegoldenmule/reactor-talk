@@ -9,157 +9,129 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
+    /* Two messages, one each way. Each carries operations in its own direction and an
+       acknowledgement of the other side's operations coming back — so every row holds one
+       cyan chip and one green chip, and which is which swaps between the rows. That swap is
+       the whole point of the slide.
+
+       A's ordinals are in the 40s and B's in the 110s because they are separate ordinal
+       spaces; an ack always names the other reactor's numbers.
+
+       Endpoint boxes, pill tags and line treatment match sync-cursors. Everything is placed
+       explicitly. */
     .frame { max-width: 1100px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
-    .lanes {
+    .wrap {
       display: grid;
-      grid-template-columns: 190px 1fr 190px;
-      gap: var(--space-lg);
-      align-items: stretch;
+      grid-template-columns: 124px 1fr 124px;
+      column-gap: var(--space-xl);
+      row-gap: var(--space-xl);
+      align-items: center;
     }
 
-    .actor {
+    .endpoint {
+      grid-row: 1 / 3;
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      text-align: center;
       background: var(--bg-elevated);
-      padding: var(--space-md);
+    }
+    .endpoint.a { grid-column: 1; border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
+    .endpoint.b { grid-column: 3; border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+    .endpoint .role {
+      display: block;
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .msg {
+      grid-column: 2;
       display: flex;
       flex-direction: column;
-      gap: var(--space-sm);
       align-items: center;
-      justify-content: center;
+      gap: 8px;
     }
-    .actor.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
-    .actor.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); }
-    .actor-name { font-size: 15px; font-weight: var(--font-weight-semibold); }
-    .actor.accent-cyan .actor-name  { color: var(--accent-cyan); }
-    .actor.accent-green .actor-name { color: var(--accent-green); }
-    .actor-role {
-      font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--text-muted); font-weight: var(--font-weight-semibold);
-    }
-    .actor-state {
-      margin-top: var(--space-sm);
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+    .msg-label {
       font-size: 10px;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      text-align: left;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
-
-    .messages {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-xl);
-      justify-content: center;
+    .chips { display: flex; gap: var(--space-md); }
+    .chip {
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: var(--radius-xs);
+      border: 1px solid;
+      white-space: nowrap;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
     }
-
-    .msg { display: flex; flex-direction: column; gap: var(--space-xs); }
-    .msg-title {
-      font-size: 10px; font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
-    }
-    .msg.right .msg-title { text-align: left; }
-    .msg.left  .msg-title { text-align: right; }
+    .chip.cyan  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
+    .chip.green { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
+    /* the acknowledgement rides along; the payload is the headline */
+    .chip.ride  { opacity: 0.6; }
 
     .arrow {
       position: relative;
+      width: 100%;
       height: 2px;
-      background: var(--text-secondary);
-      margin: var(--space-sm) 0;
+      background: var(--border-glass);
     }
-    .arrow.right::after {
-      content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
-      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-      border-left: 10px solid var(--text-secondary);
+    .arrow::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
     }
-    .arrow.left::before {
-      content: ''; position: absolute; left: -2px; top: 50%; transform: translateY(-50%);
-      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-      border-right: 10px solid var(--text-secondary);
-    }
-
-    .payload {
-      display: flex;
-      gap: var(--space-sm);
-      flex-wrap: wrap;
-    }
-    .msg.left .payload { justify-content: flex-end; }
-    .chip {
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
-      font-size: 11px;
-      font-weight: var(--font-weight-medium);
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-glass);
-      background: var(--bg-elevated);
-      color: var(--text-primary);
-    }
-    .chip.data { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
-    .chip.ack  { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
-    .chip .k { color: var(--text-muted); }
-
-    .legend {
-      justify-content: center;
-      margin-top: var(--space-xl);
-      margin-bottom: 0;
-    }
-    .legend-dot.purple { background: var(--accent-purple); }
-    .legend-dot.blue   { background: var(--accent-blue); }
+    .arrow.to-b::after { right: -1px; border-left:  8px solid var(--border-glass); }
+    .arrow.to-a::after { left:  -1px; border-right: 8px solid var(--border-glass); }
   </style>
 </head>
 <body>
   <div class="frame">
     <div class="card">
       <div class="card-body">
-        <div class="lanes">
+        <div class="wrap">
 
-          <div class="actor accent-cyan">
-            <div class="actor-name">Reactor A</div>
-            <div class="actor-role">polls</div>
-            <div class="actor-state">
-              inbox.ack&nbsp;&nbsp;&nbsp;= 112<br>
-              outbox.latest = 47
+          <div class="endpoint a">Reactor A<span class="role">polls</span></div>
+
+          <!-- A -> B : A's new operations, plus A's ack of B's -->
+          <div class="msg" style="grid-row: 1;">
+            <div class="msg-label">poll request</div>
+            <div class="chips">
+              <span class="chip cyan">ops A 46&ndash;48</span>
+              <span class="chip green ride">ack B &le; 112</span>
             </div>
+            <div class="arrow to-b"></div>
           </div>
 
-          <div class="messages">
-            <div class="msg right">
-              <div class="msg-title">Poll request</div>
-              <div class="payload">
-                <span class="chip data">ops <span class="k">A[42..47]</span></span>
-                <span class="chip ack">ack <span class="k">B ≤ 112</span></span>
-              </div>
-              <div class="arrow right"></div>
-            </div>
+          <div class="endpoint b">Reactor B<span class="role">answers</span></div>
 
-            <div class="msg left">
-              <div class="msg-title">Poll response</div>
-              <div class="arrow left"></div>
-              <div class="payload">
-                <span class="chip ack">ack <span class="k">A ≤ 47</span></span>
-                <span class="chip data">ops <span class="k">B[113..]</span></span>
-              </div>
+          <!-- B -> A : B's new operations, plus B's ack of A's -->
+          <div class="msg" style="grid-row: 2;">
+            <div class="arrow to-a"></div>
+            <div class="chips">
+              <span class="chip green">ops B 113&ndash;115</span>
+              <span class="chip cyan ride">ack A &le; 47</span>
             </div>
+            <div class="msg-label">poll response</div>
           </div>
 
-          <div class="actor accent-green">
-            <div class="actor-name">Reactor B</div>
-            <div class="actor-role">answers</div>
-            <div class="actor-state">
-              inbox.ack&nbsp;&nbsp;&nbsp;= 41 → 47<br>
-              outbox.latest = 112+
-            </div>
-          </div>
-
-        </div>
-
-        <div class="legend">
-          <div class="legend-item"><span class="legend-dot purple"></span>data one way</div>
-          <div class="legend-item"><span class="legend-dot blue"></span>acknowledgment the other</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--text-muted)"></span>lost reply? re-poll with the same cursors</div>
         </div>
       </div>
     </div>

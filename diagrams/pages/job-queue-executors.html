@@ -161,24 +161,21 @@
       text-align: center;
     }
 
-    /* ---- op store / connection pool -------------------------------------- */
-    .pool { width: 78%; }
-    .pool-conns {
-      display: flex;
-      gap: var(--space-xs);
-      margin-top: var(--space-sm);
-    }
-    .pool-conn {
-      flex: 1;
+    /* Each executor holds its own connection to the store */
+    .pg-conn {
+      margin-top: var(--space-xs);
       border: 1px solid var(--accent-green);
-      border-radius: var(--radius-xs);
-      padding: 2px var(--space-xs);
-      font-size: 10px;
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 11px;
       font-weight: var(--font-weight-medium);
       font-family: 'SF Mono', 'Fira Code', monospace;
       color: var(--accent-green);
-      opacity: 0.8;
+      text-align: center;
     }
+
+    /* ---- op store --------------------------------------------------------- */
+    .pool { width: 78%; }
   </style>
 </head>
 <body>
@@ -211,6 +208,7 @@
               <div class="box accent-blue">
                 <div class="box-title">Executor</div>
                 <div class="reducer">Reducer</div>
+                <div class="pg-conn">pg conn</div>
               </div>
             </div>
             <div class="drive">
@@ -218,6 +216,7 @@
               <div class="box accent-blue">
                 <div class="box-title">Executor</div>
                 <div class="reducer">Reducer</div>
+                <div class="pg-conn">pg conn</div>
               </div>
             </div>
             <div class="drive">
@@ -225,6 +224,7 @@
               <div class="box accent-blue">
                 <div class="box-title">Executor</div>
                 <div class="reducer">Reducer</div>
+                <div class="pg-conn">pg conn</div>
               </div>
             </div>
           </div>
@@ -243,12 +243,6 @@
           <!-- Op store: a Postgres connection pool -->
           <div class="box accent-green pool">
             <div class="box-title">Op Store</div>
-            <div class="pool-conns">
-              <span class="pool-conn">pg conn</span>
-              <span class="pool-conn">pg conn</span>
-              <span class="pool-conn">pg conn</span>
-              <span class="pool-conn">pg conn</span>
-            </div>
           </div>
 
         </div>

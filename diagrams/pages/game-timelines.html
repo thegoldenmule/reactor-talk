@@ -24,7 +24,7 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      gap: 110px;
+      gap: 90px;
     }
 
     .timeline-row {
@@ -61,8 +61,9 @@
       height: 2px;
       transform: translateY(-50%);
     }
-    .timeline-line.peer-a { background: var(--accent-cyan); }
-    .timeline-line.peer-b { background: var(--accent-purple); }
+    .timeline-line.peer-a  { background: var(--accent-cyan); }
+    .timeline-line.server  { background: var(--accent-blue); }
+    .timeline-line.peer-b  { background: var(--accent-purple); }
 
     /* Tick marks — the right-hand fifth is left clear for the arrow labels */
     .ticks {
@@ -73,11 +74,13 @@
       z-index: 1;
     }
 
+    /* The dot is centred on the line; the T-label hangs off it, so flipping the label
+       to the other side never moves the dot. */
     .tick {
+      position: relative;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
     }
 
     .tick-dot {
@@ -87,13 +90,25 @@
       border: 2px solid;
     }
     .tick-dot.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg); }
+    .tick-dot.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg); }
     .tick-dot.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); }
 
+    /* Bottom row carries its T-labels above the line, leaving the space below it
+       free for that client's send / reconcile labels. */
+
     .tick-label {
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 10px;
       font-weight: var(--font-weight-medium);
       color: var(--text-muted);
       font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+    }
+    .tick--flip .tick-label {
+      top: auto;
+      bottom: calc(100% + 5px);
     }
 
     /* SVG overlay for arrows */
@@ -129,17 +144,32 @@
             </div>
           </div>
 
-          <!-- Client B — the same thing, the other way round -->
+          <!-- Server in the middle: both clients talk to it, not to each other -->
+          <div class="timeline-row">
+            <div class="timeline-label" style="color: var(--accent-blue);">Server</div>
+            <div class="timeline-track">
+              <div class="timeline-line server"></div>
+              <div class="ticks" id="s-ticks">
+                <div class="tick"><div class="tick-dot accent-blue"></div></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div></div>
+                <div class="tick"><div class="tick-dot accent-blue"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Client B — the same three steps as A -->
           <div class="timeline-row">
             <div class="timeline-label" style="color: var(--accent-purple);">Client B</div>
             <div class="timeline-track">
               <div class="timeline-line peer-b"></div>
               <div class="ticks" id="b-ticks">
-                <div class="tick"><div class="tick-dot accent-purple"></div><span class="tick-label">T0</span></div>
-                <div class="tick"><div class="tick-dot accent-purple"></div><span class="tick-label">T1</span></div>
-                <div class="tick"><div class="tick-dot accent-purple"></div><span class="tick-label">T2</span></div>
-                <div class="tick"><div class="tick-dot accent-purple"></div><span class="tick-label">T3</span></div>
-                <div class="tick"><div class="tick-dot accent-purple"></div><span class="tick-label">T4</span></div>
+                <div class="tick tick--flip"><div class="tick-dot accent-purple"></div><span class="tick-label">T0</span></div>
+                <div class="tick tick--flip"><div class="tick-dot accent-purple"></div><span class="tick-label">T1</span></div>
+                <div class="tick tick--flip"><div class="tick-dot accent-purple"></div><span class="tick-label">T2</span></div>
+                <div class="tick tick--flip"><div class="tick-dot accent-purple"></div><span class="tick-label">T3</span></div>
+                <div class="tick tick--flip"><div class="tick-dot accent-purple"></div><span class="tick-label">T4</span></div>
               </div>
             </div>
           </div>
@@ -152,9 +182,10 @@
   </div>
 
   <script>
-    // Each peer sends at T1 and reconciles what it receives at T3 — the same three
-    // steps, mirrored, so the two arrows cross.
+    // Both clients do the same three things: send input to the server, receive the
+    // authoritative update back, reconcile it against what they already simulated.
     const CYAN = '#04d9eb';
+    const BLUE = '#0285ff';
     const PURPLE = '#a93cce';
 
     function drawArrows() {
@@ -164,12 +195,13 @@
       const containerRect = container.getBoundingClientRect();
 
       const aDots = document.querySelectorAll('#a-ticks .tick-dot');
+      const sDots = document.querySelectorAll('#s-ticks .tick-dot');
       const bDots = document.querySelectorAll('#b-ticks .tick-dot');
 
       svg.innerHTML = '';
 
       const defs = document.createElementNS(ns, 'defs');
-      [['arrow-cyan', CYAN], ['arrow-purple', PURPLE]].forEach(([id, fill]) => {
+      [['arrow-cyan', CYAN], ['arrow-blue', BLUE], ['arrow-purple', PURPLE]].forEach(([id, fill]) => {
         const marker = document.createElementNS(ns, 'marker');
         marker.setAttribute('id', id);
         marker.setAttribute('viewBox', '0 0 10 8');
@@ -194,6 +226,19 @@
         };
       }
 
+      function line(from, to, color, markerId) {
+        const el = document.createElementNS(ns, 'line');
+        el.setAttribute('x1', from.x);
+        el.setAttribute('y1', from.y);
+        el.setAttribute('x2', to.x);
+        el.setAttribute('y2', to.y);
+        el.setAttribute('stroke', color);
+        el.setAttribute('stroke-width', '2');
+        el.setAttribute('marker-end', `url(#${markerId})`);
+        el.setAttribute('stroke-dasharray', '6,4');
+        svg.appendChild(el);
+      }
+
       function label(text, x, y, color, anchor) {
         const el = document.createElementNS(ns, 'text');
         el.setAttribute('x', x);
@@ -207,27 +252,22 @@
         svg.appendChild(el);
       }
 
-      // from/to are dot centres; labels sit above each line, clear of the T-labels below it
-      function hop(from, to, color, markerId) {
-        const line = document.createElementNS(ns, 'line');
-        line.setAttribute('x1', from.x);
-        line.setAttribute('y1', from.y);
-        line.setAttribute('x2', to.x);
-        line.setAttribute('y2', to.y);
-        line.setAttribute('stroke', color);
-        line.setAttribute('stroke-width', '2');
-        line.setAttribute('marker-end', `url(#${markerId})`);
-        line.setAttribute('stroke-dasharray', '6,4');
-        svg.appendChild(line);
+      const a1 = dotCenter(aDots[1]), a3 = dotCenter(aDots[3]);
+      const b1 = dotCenter(bDots[1]), b3 = dotCenter(bDots[3]);
+      const s2 = dotCenter(sDots[2]);
 
-        label('send', from.x - 12, from.y - 10, color, 'end');
-        label('reconcile', to.x + 12, to.y - 10, color, 'start');
-      }
+      // input: each client up/down to the server
+      line(a1, s2, CYAN, 'arrow-cyan');
+      line(b1, s2, PURPLE, 'arrow-purple');
+      // authoritative update: the server back out to each client
+      line(s2, a3, BLUE, 'arrow-blue');
+      line(s2, b3, BLUE, 'arrow-blue');
 
-      // A sends at T1, B reconciles at T3
-      hop(dotCenter(aDots[1]), dotCenter(bDots[3]), CYAN, 'arrow-cyan');
-      // B sends at T1, A reconciles at T3
-      hop(dotCenter(bDots[1]), dotCenter(aDots[3]), PURPLE, 'arrow-purple');
+      // A's labels sit above its line, B's below its line — clear of the T-labels either way
+      label('send', a1.x - 12, a1.y - 10, CYAN, 'end');
+      label('reconcile', a3.x + 12, a3.y - 10, BLUE, 'start');
+      label('send', b1.x - 12, b1.y + 18, PURPLE, 'end');
+      label('reconcile', b3.x + 12, b3.y + 18, BLUE, 'start');
     }
 
     window.addEventListener('load', drawArrows);

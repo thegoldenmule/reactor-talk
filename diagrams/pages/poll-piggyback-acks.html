@@ -9,17 +9,17 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* One idea: an ack crosses the wire and lands on the other reactor's opposite cursor.
-       Two rows, one each way, so the poll carries an acknowledgement in both directions.
+    /* Both mailboxes on both sides, paired so each arrow is horizontal: A's outbox faces
+       B's inbox, A's inbox faces B's outbox.
 
-       One box style throughout. Colour is the ordinal space, and it never changes along a
-       crossing: the green row is B's ordinals, the cyan row is A's. The value repeats across
-       a row because that is what "sets the opposite cursor" means.
+       Colour is reactor identity only — cyan is A, green is B, as everywhere else in the
+       deck. The cursors themselves are neutral, so colour never has to mean two things.
 
-       inbox.latest also crosses but sets nothing on the remote — it only filters which
-       operations come back. That is in the speaker notes, not here; drawing it needed a
-       third arrow and a third box style and cost more than it explained. */
-    .frame { max-width: 1000px; }
+       Line style carries the meaning instead: a solid arrow is an ack, which lands and sets
+       the opposite cursor (the value repeats across the row). The dashed arrow is latest,
+       which crosses but sets nothing — B's outbox.latest is B's own scan watermark, so the
+       dashed line stops short of the box rather than touching it. */
+    .frame { max-width: 1150px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
@@ -27,56 +27,70 @@
       display: grid;
       grid-template-columns: 1fr 260px 1fr;
       column-gap: var(--space-lg);
-      row-gap: var(--space-xl);
+      row-gap: var(--space-lg);
       align-items: center;
     }
 
-    .who {
-      grid-row: 1;
-      font-size: 16px;
-      font-weight: var(--font-weight-bold);
-      text-align: center;
-    }
+    /* the only coloured things on the slide */
+    .who { grid-row: 1; font-size: 16px; font-weight: var(--font-weight-bold); text-align: center; }
     .who.a { grid-column: 1; color: var(--accent-cyan); }
     .who.b { grid-column: 3; color: var(--accent-green); }
 
-    .left  { grid-column: 1; justify-self: end; }
-    .right { grid-column: 3; justify-self: start; }
-
-    .chip {
-      display: inline-block;
-      font-size: 13px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 8px 13px;
-      border-radius: var(--radius-xs);
-      border: 1px solid;
-      white-space: nowrap;
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+    .mb {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.25);
+      padding: var(--space-sm) var(--space-md) var(--space-md);
     }
-    .chip.cyan  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
-    .chip.green { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
-
-    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 7px; }
-    .hop-label {
-      font-size: 11px;
+    .mb-name {
+      font-size: 10px;
       font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-muted);
+      margin-bottom: 6px;
     }
+    .val {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-lg);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .val .k { color: var(--text-secondary); }
+    .val .v { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
+
+    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: var(--space-md); }
+    .wire { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; }
+    .wire-label {
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-secondary);
+    }
+    .wire-label .note { color: var(--text-muted); font-weight: var(--font-weight-medium); }
+
     .arrow { position: relative; width: 100%; height: 2px; background: var(--border-glass); }
     .arrow::after {
       content: '';
-      position: absolute;
-      top: 50%;
+      position: absolute; top: 50%;
       transform: translateY(-50%);
       border-top: 5px solid transparent;
       border-bottom: 5px solid transparent;
     }
     .arrow.to-b::after { right: -1px; border-left:  8px solid var(--border-glass); }
     .arrow.to-a::after { left:  -1px; border-right: 8px solid var(--border-glass); }
+    /* crosses, but lands on nothing: shorter, dashed, no head */
+    .arrow.nowhere {
+      width: 62%;
+      align-self: flex-start;
+      background: none;
+      height: 0;
+      border-top: 2px dashed var(--border-glass);
+      opacity: 0.75;
+    }
+    .arrow.nowhere::after { content: none; }
   </style>
 </head>
 <body>
@@ -88,19 +102,45 @@
           <div class="who a">Reactor A</div>
           <div class="who b">Reactor B</div>
 
-          <div class="left"  style="grid-row: 2;"><span class="chip green">inbox.ack 112</span></div>
-          <div class="hop"   style="grid-row: 2;">
-            <div class="hop-label">poll request</div>
-            <div class="arrow to-b"></div>
+          <!-- B's inbox ack comes back on the response and sets A's outbox ack -->
+          <div class="mb" style="grid-row: 2; grid-column: 1;">
+            <div class="mb-name">outbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">45</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">48</span></div>
           </div>
-          <div class="right" style="grid-row: 2;"><span class="chip green">outbox.ack 112</span></div>
+          <div class="hop" style="grid-row: 2;">
+            <div class="wire">
+              <div class="wire-label">ack</div>
+              <div class="arrow to-a"></div>
+            </div>
+          </div>
+          <div class="mb" style="grid-row: 2; grid-column: 3;">
+            <div class="mb-name">inbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">45</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">47</span></div>
+          </div>
 
-          <div class="left"  style="grid-row: 3;"><span class="chip cyan">outbox.ack 45</span></div>
-          <div class="hop"   style="grid-row: 3;">
-            <div class="hop-label">poll response</div>
-            <div class="arrow to-a"></div>
+          <!-- A's inbox cursors go out on the request; only the ack lands -->
+          <div class="mb" style="grid-row: 3; grid-column: 1;">
+            <div class="mb-name">inbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">112</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">114</span></div>
           </div>
-          <div class="right" style="grid-row: 3;"><span class="chip cyan">inbox.ack 45</span></div>
+          <div class="hop" style="grid-row: 3;">
+            <div class="wire">
+              <div class="wire-label">ack</div>
+              <div class="arrow to-b"></div>
+            </div>
+            <div class="wire">
+              <div class="wire-label">latest <span class="note">&mdash; filters only</span></div>
+              <div class="arrow to-b nowhere"></div>
+            </div>
+          </div>
+          <div class="mb" style="grid-row: 3; grid-column: 3;">
+            <div class="mb-name">outbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">112</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">115</span></div>
+          </div>
 
         </div>
       </div>

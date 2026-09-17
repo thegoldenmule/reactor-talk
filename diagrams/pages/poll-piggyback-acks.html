@@ -16,6 +16,13 @@
        cursors it carries ride inside as sub-arrows naming the mapping. Values live in the
        mailboxes only — the sub-arrows state the rule, the boxes hold the numbers.
 
+       inbox.ack and inbox.latest answer different questions. ack is "I have durably applied
+       through here", so B can forget those (resolvers.ts:1118 trims them). latest is "I have
+       received through here" — B must keep them in case A never applies them, but must not
+       resend them, or it would re-transmit 113-114 on every poll while A's apply queue
+       drains (resolvers.ts:1190). Because latest tracks what actually arrived, a lost
+       response leaves it un-advanced and B resends on its own.
+
        Both envelopes use the same 56px padding on both sides, so their inner grids are
        identical and all three sub-arrows sit in one vertical column. 56 clears the 46px
        clip-path point on whichever side it falls.
@@ -138,7 +145,7 @@
               <span class="cur a l">inbox.ack</span><span class="mini"></span><span class="cur b r">outbox.ack</span>
             </div>
             <div class="carries">
-              <span class="cur a l">inbox.latest</span><span class="mini soft"></span><span class="cur none r">filters only</span>
+              <span class="cur a l">inbox.latest</span><span class="mini soft"></span><span class="cur none r">don&rsquo;t resend these</span>
             </div>
           </div>
           <div class="mb b" style="grid-row: 2; grid-column: 3;">

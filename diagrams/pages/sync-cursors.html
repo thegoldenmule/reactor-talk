@@ -9,84 +9,132 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* One stream of operations, with A's outbox cursors tracked above it and B's inbox
-       cursors below. The four land on four different ordinals on purpose — they move
-       independently, and the previous version pinned them in pairs, which made them look
-       like they had to agree.
+    /* One stream of operations, with A's outbox cursors tracked above and B's inbox cursors
+       below. The four cursors land on four different ordinals on purpose — they move
+       independently, and the earlier version pinned them in pairs.
 
-       The three tracks share one 8-column template, so a cursor placed in column N sits
-       directly over operation N. Every item is placed explicitly; no auto placement. */
+       Line, segment, cursor-pin and cursor-tag styling is unchanged from the original
+       two-timeline version. What changed is placement: all three rows share one 8-column
+       template, so a cursor in column N sits over operation N, and a segment spanning
+       columns 1..N covers exactly the operations it describes. Percentage offsets are gone,
+       and with them the risk of the bars drifting out of step with the boxes. */
     .frame { max-width: 1100px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wrap {
       display: grid;
-      grid-template-columns: 132px 1fr;
+      grid-template-columns: 116px 1fr;
       column-gap: var(--space-lg);
       row-gap: var(--space-sm);
       align-items: center;
     }
 
-    .lbl {
+    .endpoint {
       grid-column: 1;
-      text-align: right;
-      font-size: 14px;
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
       font-weight: var(--font-weight-semibold);
-      white-space: nowrap;
+      text-align: center;
+      background: var(--bg-elevated);
     }
-    .lbl.cyan  { color: var(--accent-cyan); }
-    .lbl.green { color: var(--accent-green); }
-    .lbl.muted { color: var(--text-muted); font-weight: var(--font-weight-medium); }
+    .endpoint.accent-cyan  { border-color: var(--accent-cyan);  background: var(--accent-cyan-bg);  color: var(--accent-cyan); }
+    .endpoint.accent-green { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+    .endpoint .role {
+      display: block;
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .stream-label {
+      grid-column: 1;
+      text-align: center;
+      font-size: 9px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
 
+    /* Shared 8-column track: cursors, bars and operations all key off this. */
     .track, .ops {
       grid-column: 2;
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       column-gap: 10px;
     }
+    .track.top    { grid-template-rows: auto 4px; row-gap: 6px; }
+    .track.bottom { grid-template-rows: 4px auto; row-gap: 6px; }
+    .track.top .line, .track.top .seg       { grid-row: 2; align-self: center; }
+    .track.bottom .line, .track.bottom .seg { grid-row: 1; align-self: center; }
+    .track.top .cursor    { grid-row: 1; }
+    .track.bottom .cursor { grid-row: 2; }
 
+    /* Number line, with its arrowhead at the leading end */
     .line {
+      position: relative;
       grid-column: 1 / -1;
       height: 2px;
       background: var(--border-glass);
-      border-radius: 1px;
     }
-    .track.top .line { grid-row: 1; }
-    .track.top .cur  { grid-row: 2; }
-    .track.bottom .cur  { grid-row: 1; }
-    .track.bottom .line { grid-row: 2; }
+    .line::after {
+      content: '';
+      position: absolute;
+      right: -1px; top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid var(--border-glass);
+    }
+    /* filled segment: applied (through ack) and seen-but-pending (ack..latest) */
+    .seg { height: 4px; border-radius: 2px; }
+    .seg.applied.cyan  { background: var(--accent-cyan); }
+    .seg.applied.green { background: var(--accent-green); }
+    .seg.pending.cyan  { background: var(--accent-cyan);  opacity: 0.3; }
+    .seg.pending.green { background: var(--accent-green); opacity: 0.3; }
 
-    .cur {
+    /* Cursor markers */
+    .cursor {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
     }
-    .track.bottom .cur { flex-direction: column-reverse; }
-    .tag {
-      font-size: 12px;
+    .track.bottom .cursor { flex-direction: column-reverse; }
+    .cursor-pin { width: 2px; height: 14px; }
+    .cursor-tag {
+      font-size: 10px;
       font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      border: 1px solid;
       white-space: nowrap;
-      line-height: 1.2;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
     }
-    .pin { width: 2px; height: 13px; border-radius: 1px; }
-    .cur.cyan  .tag { color: var(--accent-cyan); }
-    .cur.cyan  .pin { background: var(--accent-cyan); }
-    .cur.green .tag { color: var(--accent-green); }
-    .cur.green .pin { background: var(--accent-green); }
-    /* "latest" is the leading edge; "ack" is the settled one, so ack reads solid */
-    .cur.ahead .tag { opacity: 0.72; }
-    .cur.ahead .pin { opacity: 0.72; }
+    .cursor.cyan .cursor-pin  { background: var(--accent-cyan); }
+    .cursor.cyan .cursor-tag  { color: var(--accent-cyan);  border-color: var(--accent-cyan);  background: var(--accent-cyan-bg); }
+    .cursor.green .cursor-pin { background: var(--accent-green); }
+    .cursor.green .cursor-tag { color: var(--accent-green); border-color: var(--accent-green); background: var(--accent-green-bg); }
+    .cursor.dim .cursor-tag   { opacity: 0.55; }
+    .cursor.dim .cursor-pin   { opacity: 0.55; }
 
+    /* The operations themselves — ordinals, nothing else */
     .op {
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm, 8px);
       background: rgba(0, 0, 0, 0.25);
-      padding: 11px 0;
+      padding: 10px 0;
       text-align: center;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: var(--font-weight-semibold);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
       color: var(--text-primary);
     }
   </style>
@@ -97,14 +145,17 @@
       <div class="card-body">
         <div class="wrap">
 
-          <div class="lbl cyan" style="grid-row: 1;">A&rsquo;s outbox</div>
+          <!-- A's outbox: acked through 44, produced through 48 -->
+          <div class="endpoint accent-cyan" style="grid-row: 1;">Reactor A<span class="role">outbox</span></div>
           <div class="track top" style="grid-row: 1;">
+            <div class="cursor cyan"     style="grid-column: 4;"><span class="cursor-tag">outbox.ack</span><div class="cursor-pin"></div></div>
+            <div class="cursor cyan dim" style="grid-column: 8;"><span class="cursor-tag">outbox.latest</span><div class="cursor-pin"></div></div>
             <div class="line"></div>
-            <div class="cur cyan"       style="grid-column: 4;"><span class="tag">outbox.ack</span><span class="pin"></span></div>
-            <div class="cur cyan ahead" style="grid-column: 8;"><span class="tag">outbox.latest</span><span class="pin"></span></div>
+            <div class="seg applied cyan" style="grid-column: 1 / 5;"></div>
+            <div class="seg pending cyan" style="grid-column: 5 / 9;"></div>
           </div>
 
-          <div class="lbl muted" style="grid-row: 2;">operations</div>
+          <div class="stream-label" style="grid-row: 2;">operations</div>
           <div class="ops" style="grid-row: 2;">
             <div class="op">41</div>
             <div class="op">42</div>
@@ -116,11 +167,14 @@
             <div class="op">48</div>
           </div>
 
-          <div class="lbl green" style="grid-row: 3;">B&rsquo;s inbox</div>
+          <!-- B's inbox: applied through 45, seen through 47 -->
+          <div class="endpoint accent-green" style="grid-row: 3;">Reactor B<span class="role">inbox</span></div>
           <div class="track bottom" style="grid-row: 3;">
-            <div class="cur green"       style="grid-column: 5;"><span class="tag">inbox.ack</span><span class="pin"></span></div>
-            <div class="cur green ahead" style="grid-column: 7;"><span class="tag">inbox.latest</span><span class="pin"></span></div>
             <div class="line"></div>
+            <div class="seg applied green" style="grid-column: 1 / 6;"></div>
+            <div class="seg pending green" style="grid-column: 6 / 8;"></div>
+            <div class="cursor green"     style="grid-column: 5;"><span class="cursor-tag">inbox.ack</span><div class="cursor-pin"></div></div>
+            <div class="cursor green dim" style="grid-column: 7;"><span class="cursor-tag">inbox.latest</span><div class="cursor-pin"></div></div>
           </div>
 
         </div>

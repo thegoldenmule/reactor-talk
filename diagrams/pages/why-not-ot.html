@@ -102,6 +102,13 @@
       line-height: 20px;
       text-align: center;
     }
+    .fail-mark.partial {
+      border-color: #F59E0B;
+      background: rgba(245, 158, 11, 0.12);
+      color: #F59E0B;
+    }
+    .fail-title.partial { color: #F59E0B; }
+
     .fail-title {
       font-size: 12px;
       font-weight: var(--font-weight-semibold);
@@ -155,6 +162,13 @@
               <div>
                 <div class="fail-title">Audit trail intact</div>
                 <div class="fail-note">The signature covered the Action B actually signed. A has decided what B meant.</div>
+              </div>
+            </div>
+            <div class="fail">
+              <span class="fail-mark partial">~</span>
+              <div>
+                <div class="fail-title partial">Any reducer</div>
+                <div class="fail-note">Like CRDTs, transforms are tricky to generalize &mdash; and here the reducers are written by users.</div>
               </div>
             </div>
           </div>

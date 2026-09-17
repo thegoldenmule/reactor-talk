@@ -221,15 +221,16 @@ A structured runtime for local-first applications.
 
 ![OT rewrites the operation that arrives from the other client](img/why-not-ot.png)
 
+- Reordering is what forces the question. II: "If we reorder them, then we'd need to mutate the
+  immutable operation. This is very similar to a technique called Operational Transformation
+  (OT). This is what Google Docs uses, among other widely used tools."
 - II: "In OT, you essentially rewrite operations coming from other clients so that they make
-  sense."
-- II: "operations are immutable objects that include information about what order they ran in
-  and a resulting state hash. If we reorder them, then we'd need to mutate the immutable
-  operation."
-- II: "each Reactor writes to append-only storage backends... so we can't actually go back and
-  rewrite operations or their order." Fails 2.
-- II: "do you really want your mutations altered by someone else? Who gets to decide that
-  anyway?" Fails 3.
+  sense. There is more to it than that (just like with CRDTs) but that's the gist."
+- II: "OT has some similar rough edges to CRDT, in that they can be tricky to generalize."
+- II: "if you are working on a document, particularly one with sensitive information, do you
+  really want your mutations altered by someone else? Who gets to decide that anyway?" Fails 3.
+- II: "each Reactor writes to append-only storage backends (like Swarm or Hypercore), so we
+  can't actually go back and rewrite operations or their order." Fails 2.
 - II: "We never rewrite a user's intent... We can create new Operations but we can never create
   new Actions. This is the main difference between Operational Reshuffle and Operational
   Transformation."

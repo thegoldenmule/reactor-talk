@@ -9,84 +9,118 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* Two steps in order, request first. Every arrow reads source -> destination, left to
-       right, so the one rule the slide teaches is stated twice in the same shape:
+    /* A on the left, B on the right. A's inbox sits top-left and B's outbox top-right; A's
+       outbox bottom-left and B's inbox bottom-right. That pairing puts each mailbox opposite
+       the one it sets, so both crossings are horizontal.
 
-           the sender's inbox.ack sets the receiver's outbox.ack
+       Between them, one big arrow per message, pointing the way that message travels — right
+       for the request, left for the response. The cursors it carries ride inside it, as
+       small arrows pointing the same way. Nothing else on the slide moves.
 
-       Earlier versions drew the physical direction of each message instead, which pointed
-       the arrows opposite ways and hid the mapping. Direction now lives in the step label.
-
-       Colour is reactor identity only, and only on the possessive: "A's" cyan, "B's" green.
-       The cursor names are neutral, so you can see the ownership flip across each arrow
-       while the inbox->outbox mapping stays plain. */
-    .frame { max-width: 1150px; }
+       Colour is reactor identity, as everywhere else: A cyan, B green. The envelopes and the
+       cursor values are neutral. */
+    .frame { max-width: 1200px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wrap {
       display: grid;
-      grid-template-columns: 1fr 190px 1fr;
-      column-gap: var(--space-lg);
-      row-gap: var(--space-md);
-      align-items: center;
+      grid-template-columns: 1fr 1.5fr 1fr;
+      column-gap: var(--space-md);
+      row-gap: var(--space-lg);
+      align-items: stretch;
     }
 
-    .step {
-      grid-column: 1 / -1;
-      font-size: 11px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .step.second { margin-top: var(--space-lg); }
+    .who { grid-row: 1; font-size: 16px; font-weight: var(--font-weight-bold); text-align: center; }
+    .who.a { grid-column: 1; color: var(--accent-cyan); }
+    .who.b { grid-column: 3; color: var(--accent-green); }
 
-    .cur {
-      border: 1px solid var(--border-subtle);
+    /* Mailboxes */
+    .mb {
+      border: 1px solid;
       border-radius: var(--radius-md);
       background: rgba(0, 0, 0, 0.25);
-      padding: 10px var(--space-md);
-      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      padding: var(--space-sm) var(--space-md) var(--space-md);
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: var(--space-lg);
-    }
-    .cur .name { font-size: 14px; font-weight: var(--font-weight-semibold); color: var(--text-primary); }
-    .cur .own  { font-weight: var(--font-weight-bold); }
-    .cur .own.a { color: var(--accent-cyan); }
-    .cur .own.b { color: var(--accent-green); }
-    .cur .v    { font-size: 15px; font-weight: var(--font-weight-bold); color: var(--text-primary); }
-
-    /* nothing lands here */
-    .cur.none {
-      border-style: dashed;
-      background: transparent;
+      flex-direction: column;
       justify-content: center;
     }
-    .cur.none .name { color: var(--text-muted); font-weight: var(--font-weight-medium); }
+    .mb.a { border-color: var(--accent-cyan); }
+    .mb.b { border-color: var(--accent-green); }
+    .mb-name {
+      font-size: 11px;
+      font-weight: var(--font-weight-bold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .mb.a .mb-name { color: var(--accent-cyan); }
+    .mb.b .mb-name { color: var(--accent-green); }
+    .val {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-lg);
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .val .k { color: var(--text-secondary); }
+    .val .v { color: var(--text-primary); font-weight: var(--font-weight-bold); }
 
-    .hop { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .hop-verb {
-      font-size: 12px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.06em;
+    /* The message itself, shaped as one big arrow in its direction of travel */
+    .envelope {
+      grid-column: 2;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 7px;
+      padding: var(--space-md) 0;
+    }
+    .envelope.to-b {
+      clip-path: polygon(0 0, calc(100% - 46px) 0, 100% 50%, calc(100% - 46px) 100%, 0 100%);
+      padding-left: var(--space-lg);
+      padding-right: 56px;
+    }
+    .envelope.to-a {
+      clip-path: polygon(46px 0, 100% 0, 100% 100%, 46px 100%, 0 50%);
+      padding-left: 56px;
+      padding-right: var(--space-lg);
+    }
+    .env-name {
+      font-size: 11px;
+      font-weight: var(--font-weight-bold);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-secondary);
     }
-    .hop.soft .hop-verb { color: var(--text-muted); }
-    .arrow { position: relative; width: 100%; height: 2px; background: var(--border-glass); }
-    .arrow::after {
+    .envelope.to-a .env-name,
+    .envelope.to-a .carries { text-align: right; }
+
+    /* the cursors riding inside, pointing the way the message goes */
+    .carries {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
+    }
+    .envelope.to-a .carries { flex-direction: row-reverse; }
+    .carries.soft { color: var(--text-muted); font-weight: var(--font-weight-medium); font-size: 12.5px; }
+    .mini { position: relative; width: 34px; height: 2px; background: var(--text-secondary); flex: none; }
+    .mini::after {
       content: '';
-      position: absolute; right: -1px; top: 50%;
+      position: absolute; top: 50%;
       transform: translateY(-50%);
       border-top: 5px solid transparent;
       border-bottom: 5px solid transparent;
-      border-left: 8px solid var(--border-glass);
     }
-    .arrow.soft { background: none; height: 0; border-top: 2px dashed var(--border-glass); }
-    .arrow.soft::after { opacity: 0.45; }
+    .envelope.to-b .mini::after { right: -1px; border-left:  7px solid var(--text-secondary); }
+    .envelope.to-a .mini::after { left:  -1px; border-right: 7px solid var(--text-secondary); }
+    .mini.soft { background: none; height: 0; border-top: 2px dashed var(--text-muted); }
+    .envelope.to-b .mini.soft::after { border-left-color: var(--text-muted); opacity: 0.5; }
   </style>
 </head>
 <body>
@@ -95,41 +129,40 @@
       <div class="card-body">
         <div class="wrap">
 
-          <div class="step">1 &nbsp;·&nbsp; Poll request &nbsp;&mdash;&nbsp; A sends to B</div>
+          <div class="who a">Reactor A</div>
+          <div class="who b">Reactor B</div>
 
-          <div class="cur" style="grid-row: 2; grid-column: 1;">
-            <span class="name"><span class="own a">A&rsquo;s</span> inbox.ack</span><span class="v">112</span>
+          <!-- request: A's inbox cursors go out, and the ack lands on B's outbox -->
+          <div class="mb a" style="grid-row: 2; grid-column: 1;">
+            <div class="mb-name">inbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">112</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">114</span></div>
           </div>
-          <div class="hop" style="grid-row: 2;">
-            <div class="hop-verb">sets</div>
-            <div class="arrow"></div>
+          <div class="envelope to-b" style="grid-row: 2;">
+            <div class="env-name">poll request</div>
+            <div class="carries"><span class="mini"></span>ack 112 &nbsp;sets&nbsp; outbox.ack</div>
+            <div class="carries soft"><span class="mini soft"></span>latest 114 &nbsp;filters only</div>
           </div>
-          <div class="cur" style="grid-row: 2; grid-column: 3;">
-            <span class="name"><span class="own b">B&rsquo;s</span> outbox.ack</span><span class="v">112</span>
-          </div>
-
-          <div class="cur" style="grid-row: 3; grid-column: 1;">
-            <span class="name"><span class="own a">A&rsquo;s</span> inbox.latest</span><span class="v">114</span>
-          </div>
-          <div class="hop soft" style="grid-row: 3;">
-            <div class="hop-verb">filters</div>
-            <div class="arrow soft"></div>
-          </div>
-          <div class="cur none" style="grid-row: 3; grid-column: 3;">
-            <span class="name">no cursor is set</span>
+          <div class="mb b" style="grid-row: 2; grid-column: 3;">
+            <div class="mb-name">outbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">112</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">115</span></div>
           </div>
 
-          <div class="step second">2 &nbsp;·&nbsp; Poll response &nbsp;&mdash;&nbsp; B sends to A</div>
-
-          <div class="cur" style="grid-row: 5; grid-column: 1;">
-            <span class="name"><span class="own b">B&rsquo;s</span> inbox.ack</span><span class="v">45</span>
+          <!-- response: B's inbox ack comes back and lands on A's outbox -->
+          <div class="mb a" style="grid-row: 3; grid-column: 1;">
+            <div class="mb-name">outbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">45</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">48</span></div>
           </div>
-          <div class="hop" style="grid-row: 5;">
-            <div class="hop-verb">sets</div>
-            <div class="arrow"></div>
+          <div class="envelope to-a" style="grid-row: 3;">
+            <div class="env-name">poll response</div>
+            <div class="carries"><span class="mini"></span>ack 45 &nbsp;sets&nbsp; outbox.ack</div>
           </div>
-          <div class="cur" style="grid-row: 5; grid-column: 3;">
-            <span class="name"><span class="own a">A&rsquo;s</span> outbox.ack</span><span class="v">45</span>
+          <div class="mb b" style="grid-row: 3; grid-column: 3;">
+            <div class="mb-name">inbox</div>
+            <div class="val"><span class="k">ack</span><span class="v">45</span></div>
+            <div class="val"><span class="k">latest</span><span class="v">47</span></div>
           </div>
 
         </div>

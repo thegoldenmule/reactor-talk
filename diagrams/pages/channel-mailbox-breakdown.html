@@ -13,14 +13,14 @@
        Reactors at once. Columns are the two Reactors, separated by the single channel they
        share. Operations keep their origin colour — cyan for A, green for B — so the other
        side's ops sitting in an inbox read at a glance without needing delivery arrows. */
-    .frame { max-width: 1200px; }
+    .frame { max-width: 1300px; }
     .card { height: auto; }
     .card-body { flex: none; }
 
     .wire {
       position: relative;
       display: grid;
-      grid-template-columns: 150px 1fr 46px 1fr;
+      grid-template-columns: 120px 1fr 46px 1fr 120px;
       grid-template-rows: 44px 112px 112px 112px;
       row-gap: var(--space-md);
       column-gap: var(--space-lg);
@@ -33,6 +33,11 @@
       align-self: center;
       text-align: right;
     }
+    /* the same label mirrored on Reactor B's side */
+    .kind.mirror {
+      grid-column: 5;
+      text-align: left;
+    }
     /* Every item is placed explicitly. Mixing auto-placed items with ones that have a
        definite column (.kind, .channel) walks the auto cursor into the channel column,
        which is what put Reactor B's mailboxes inside the divider. */
@@ -43,6 +48,7 @@
     .c-a      { grid-column: 2; }
     .c-b      { grid-column: 4; }
     .kind-name {
+      white-space: nowrap;
       font-size: 17px;
       font-weight: var(--font-weight-bold);
       color: var(--text-primary);
@@ -64,6 +70,7 @@
 
     /* The one channel the pair shares, running the full height between them */
     .channel {
+      position: relative;
       grid-column: 3;
       grid-row: 1 / 5;
       justify-self: center;
@@ -90,15 +97,18 @@
        to 150 / 410 / 46 / 410 with 24px gaps, so this SVG is exactly the 914px from the
        start of Reactor A's column to the end of Reactor B's: viewBox units are CSS pixels
        1:1, and the crossing lands at x=457, the channel's centre. */
-    /* Overlay, not a grid item — absolutely positioned children are out of flow, so the
-       arrows add no vertical space. With the rows fixed above, .wire is exactly 1088x428 at
-       the design width, so the viewBox maps 1:1 and the endpoints can be stated in pixels:
-       x=584 is the right edge of Reactor A's column, x=678 the left edge of Reactor B's,
-       y=116 and y=244 the vertical centres of the outbox and inbox rows. */
+    /* Overlay inside the channel, so it adds no vertical space and — importantly — depends
+       on nothing that varies with page width. Its horizontal span is the column gap plus the
+       channel plus the column gap: 24 + 46 + 24 = 94px, all fixed. Its vertical span is from
+       the outbox row centre to the inbox row centre: rows are 44/112/112/112 with 16px gaps,
+       so 116px to 244px, a 128px drop. Left edge is -25px, not -24:
+       absolute offsets resolve against the padding box, which sits 1px inside the channel's
+       dashed border, so the extra pixel puts the line flush with Reactor A's column edge and
+       its tip flush with Reactor B's. */
     .cross {
       position: absolute;
-      left: 0;
-      top: 0;
+      left: -25px;
+      top: 116px;
       pointer-events: none;
       overflow: visible;
     }
@@ -164,7 +174,16 @@
           <!-- row 1: the two Reactors, and the channel between them -->
           <div></div>
           <div class="side-head a r-head c-a">Reactor A</div>
-          <div class="channel r-head"><span>one channel</span></div>
+          <div class="channel r-head">
+            <span>one channel</span>
+            <!-- right edge of each outbox, across the channel, to the other side's inbox -->
+            <svg class="cross" width="94" height="128" viewBox="0 0 94 128" aria-hidden="true">
+              <line class="a-line" x1="0" y1="0" x2="86" y2="118" />
+              <polygon class="a-head" points="94,128 81.7,119.7 89.7,113.8" />
+              <line class="b-line" x1="94" y1="0" x2="8" y2="118" />
+              <polygon class="b-head" points="0,128 4.3,113.8 12.3,119.7" />
+            </svg>
+          </div>
           <div class="side-head b r-head c-b">Reactor B</div>
 
           <!-- row 2 -->
@@ -183,6 +202,10 @@
               <div class="op b">B&#8323;<span class="ts">t=14</span><span class="hash">a8f5</span></div>
               <div class="op b">B&#8324;<span class="ts">t=21</span><span class="hash">e3d7</span></div>
               <div class="op b">B&#8325;<span class="ts">t=30</span><span class="hash">f7b1</span></div>
+
+          <div class="kind mirror r-outbox">
+            <div class="kind-name">Outbox</div>
+          </div>
             </div>
           </div>
 
@@ -201,6 +224,10 @@
               <div class="op a">A&#8323;<span class="ts">t=12</span><span class="hash">e9c4</span></div>
               <div class="op a">A&#8324;<span class="ts">t=18</span><span class="hash">f2a8</span></div>
               <div class="op a">A&#8325;<span class="ts">t=27</span><span class="hash">c1d9</span></div>
+
+          <div class="kind mirror r-inbox">
+            <div class="kind-name">Inbox</div>
+          </div>
             </div>
           </div>
 
@@ -217,13 +244,9 @@
             <div class="empty">empty</div>
           </div>
 
-          <!-- right edge of each outbox, across the channel, to the other side's inbox -->
-          <svg class="cross" width="1088" height="428" viewBox="0 0 1088 428" aria-hidden="true">
-            <line class="a-line" x1="584" y1="116" x2="670" y2="234" />
-            <polygon class="a-head" points="678,244 665.7,235.7 673.7,229.8" />
-            <line class="b-line" x1="678" y1="116" x2="592" y2="234" />
-            <polygon class="b-head" points="584,244 588.3,229.8 596.3,235.7" />
-          </svg>
+          <div class="kind dead mirror r-dead">
+            <div class="kind-name">Dead letter</div>
+          </div>
 
         </div>
       </div>

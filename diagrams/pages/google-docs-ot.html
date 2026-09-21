@@ -9,162 +9,144 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .frame { max-width: 700px; }
+    .frame { max-width: 1400px; }
     .card { height: auto; }
-    .card-body { flex: none; gap: var(--space-lg); }
+    .card-body { flex: none; }
 
-    .mono { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: -0.01em; }
+    /* Box component — the same fixed height the CRDT pages use, so all three
+       slides put their rows in exactly the same place. */
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      box-sizing: border-box;
+      min-height: 76px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      text-align: center;
+    }
+    .box.accent-cyan   { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg);   color: var(--accent-cyan); }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    .box.accent-red    { border-color: #ef4444; background: rgba(239, 68, 68, 0.12); color: #ef4444; }
 
-    /* The two concurrent operations, side by side at the top */
-    .ops {
+    .box-title {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      letter-spacing: -0.01em;
+    }
+    .box-detail {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 3px;
+    }
+
+    /* Vertical connector — downward arrow */
+    .v-connector {
+      width: 3px;
+      height: 20px;
+      background: var(--text-primary);
+      margin: var(--space-sm) auto;
+      position: relative;
+    }
+    .v-connector::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+
+    /* Two panels: the ordering problem, then the transform that fixes it */
+    .panels {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--space-md);
+      gap: var(--space-xl);
     }
-    .op {
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-glass);
-      background: var(--bg-elevated);
-      padding: var(--space-md);
-      text-align: center;
-    }
-    .op.a { border-color: var(--accent-purple); background: var(--accent-purple-bg); }
-    .op.b { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg); }
-    .op-who {
-      font-size: 11px;
-      font-weight: var(--font-weight-semibold);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-    }
-    .op-expr { font-size: 15px; font-weight: var(--font-weight-semibold); margin-top: 2px; }
-    .op.a .op-expr { color: var(--accent-purple); }
-    .op.b .op-expr { color: var(--accent-cyan); }
-
-    .start {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .start b { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
-
-    /* A labelled band: "apply them in each client's order" / "transform first" */
-    .band { border-top: 1px solid var(--border-subtle); padding-top: var(--space-md); }
-    .band-label {
-      font-size: 11px;
+    .panel-label {
+      font-size: 12px;
       font-weight: var(--font-weight-semibold);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-muted);
       margin-bottom: var(--space-md);
+      text-align: center;
     }
 
-    /* One client's chain:  "AC" --a--> "ABC" --b--> "ADBC" */
-    .chain {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-sm);
+    /* Two-column grid, one column per Reactor */
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 var(--space-md);
+      align-items: start;
+      position: relative;
     }
-    .chain:last-child { margin-bottom: 0; }
-    .chain-who {
-      width: 62px;
-      flex-shrink: 0;
+
+    /* SVG arrow overlay */
+    .arrow-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Side wrappers with dashed borders */
+    .side-wrapper {
+      border: 1px dashed var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      padding-top: var(--space-lg);
+      position: relative;
+    }
+    .side-wrapper-label {
+      position: absolute;
+      top: -9px;
+      left: var(--space-md);
       font-size: 11px;
       font-weight: var(--font-weight-semibold);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-sm);
       color: var(--text-muted);
     }
-    .doc {
-      font-size: 14px;
-      font-weight: var(--font-weight-semibold);
-      padding: var(--space-sm) var(--space-md);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-glass);
-      background: var(--bg-elevated);
-      min-width: 78px;
-      text-align: center;
-    }
-    .doc.bad   { border-color: #ef4444; background: rgba(239, 68, 68, 0.12); color: #ef4444; }
-    .doc.good  { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
 
-    /* Arrow with the operation that runs on it sitting above the line */
-    .step {
-      flex: 1;
-      position: relative;
-      height: 2px;
-      background: var(--border-glass);
-      min-width: 52px;
+    /* Column flow */
+    .col-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
     }
-    .step::after {
-      content: '';
-      position: absolute;
-      right: -1px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-top: 5px solid transparent;
-      border-bottom: 5px solid transparent;
-      border-left: 7px solid var(--border-glass);
-    }
-    .step-label {
-      position: absolute;
-      bottom: 7px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 11px;
-      font-weight: var(--font-weight-semibold);
-      white-space: nowrap;
-    }
-    .step-label.a { color: var(--accent-purple); }
-    .step-label.b { color: var(--accent-cyan); }
 
     .verdict {
-      margin-top: var(--space-md);
+      margin-top: var(--space-lg);
       text-align: center;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: var(--font-weight-semibold);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      letter-spacing: -0.01em;
     }
     .verdict.bad  { color: #ef4444; }
     .verdict.good { color: var(--accent-green); }
-
-    /* The transform itself */
-    .transform {
-      border: 1px solid var(--accent-blue);
-      background: var(--accent-blue-bg);
-      border-radius: var(--radius-md);
-      padding: var(--space-md) var(--space-lg);
-    }
-    .transform-title {
-      font-size: 14px;
-      font-weight: var(--font-weight-semibold);
-      color: var(--accent-blue);
-      text-align: center;
-    }
-    .transform-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-align: center;
-      margin-top: 2px;
-    }
-    .rules {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-sm) var(--space-md);
-      margin-top: var(--space-md);
-    }
-    .rule {
-      font-size: 13px;
-      text-align: center;
-      color: var(--text-primary);
-    }
-    .rule-note {
+    .verdict-note {
       display: block;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
       font-family: var(--font-family);
+      font-size: 12px;
+      font-weight: var(--font-weight-regular);
       letter-spacing: 0;
+      color: var(--text-secondary);
+      margin-top: var(--space-xs);
     }
   </style>
 </head>
@@ -172,79 +154,160 @@
   <div class="frame">
     <div class="card">
       <div class="card-body">
+        <div class="panels">
 
-        <div class="start">both clients start from <b class="mono">"AC"</b></div>
+          <!-- ============ Left: the operations do not commute ============ -->
+          <div>
+            <div class="panel-label">Apply them in arrival order</div>
+            <div class="three-col" data-panel="plain">
+              <svg class="arrow-overlay"><defs>
+                <marker id="head-plain" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill="#F59E0B" />
+                </marker>
+              </defs></svg>
 
-        <div class="ops">
-          <div class="op a">
-            <div class="op-who">Client A</div>
-            <div class="op-expr mono">a = ins(1, "B")</div>
+              <div class="side-wrapper">
+                <span class="side-wrapper-label">Reactor A</span>
+                <div class="col-flow">
+                  <div class="box"><div class="box-title">"AC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-purple" data-arrow="a-a">
+                    <div class="box-title">a = ins(1, "B")</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box"><div class="box-title">"ABC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-cyan" data-arrow="a-b">
+                    <div class="box-title">b = ins(1, "D")</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-red"><div class="box-title">"ADBC"</div></div>
+                </div>
+              </div>
+
+              <div class="side-wrapper">
+                <span class="side-wrapper-label">Reactor B</span>
+                <div class="col-flow">
+                  <div class="box"><div class="box-title">"AC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-cyan" data-arrow="b-b">
+                    <div class="box-title">b = ins(1, "D")</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box"><div class="box-title">"ADC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-purple" data-arrow="b-a">
+                    <div class="box-title">a = ins(1, "B")</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-red"><div class="box-title">"ABDC"</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="verdict bad">
+              b &compfn; a &nbsp;&ne;&nbsp; a &compfn; b
+              <span class="verdict-note">the same two operations, two different documents</span>
+            </div>
           </div>
-          <div class="op b">
-            <div class="op-who">Client B</div>
-            <div class="op-expr mono">b = ins(1, "D")</div>
+
+          <!-- ============ Right: T(a, b) makes them commute ============ -->
+          <div>
+            <div class="panel-label">Transform the operation that arrives</div>
+            <div class="three-col" data-panel="ot">
+              <svg class="arrow-overlay"><defs>
+                <marker id="head-ot" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill="#F59E0B" />
+                </marker>
+              </defs></svg>
+
+              <div class="side-wrapper">
+                <span class="side-wrapper-label">Reactor A</span>
+                <div class="col-flow">
+                  <div class="box"><div class="box-title">"AC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-purple" data-arrow="a-a">
+                    <div class="box-title">a = ins(1, "B")</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box"><div class="box-title">"ABC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-cyan" data-arrow="a-b">
+                    <div class="box-title">T(b, a) = ins(2, "D")</div>
+                    <div class="box-detail">shifted past B</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-green"><div class="box-title">"ABDC"</div></div>
+                </div>
+              </div>
+
+              <div class="side-wrapper">
+                <span class="side-wrapper-label">Reactor B</span>
+                <div class="col-flow">
+                  <div class="box"><div class="box-title">"AC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-cyan" data-arrow="b-b">
+                    <div class="box-title">b = ins(1, "D")</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box"><div class="box-title">"ADC"</div></div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-purple" data-arrow="b-a">
+                    <div class="box-title">T(a, b) = ins(1, "B")</div>
+                    <div class="box-detail">unchanged &mdash; A wins the tie</div>
+                  </div>
+                  <div class="v-connector"></div>
+                  <div class="box accent-green"><div class="box-title">"ABDC"</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="verdict good">
+              T(b, a) &compfn; a &nbsp;=&nbsp; T(a, b) &compfn; b
+              <span class="verdict-note">rewritten until the pair commutes</span>
+            </div>
           </div>
+
         </div>
-
-        <div class="band">
-          <div class="band-label">Apply them in the order each client saw</div>
-
-          <div class="chain">
-            <span class="chain-who">A</span>
-            <span class="doc mono">"AC"</span>
-            <span class="step"><span class="step-label a mono">a</span></span>
-            <span class="doc mono">"ABC"</span>
-            <span class="step"><span class="step-label b mono">b</span></span>
-            <span class="doc bad mono">"ADBC"</span>
-          </div>
-
-          <div class="chain">
-            <span class="chain-who">B</span>
-            <span class="doc mono">"AC"</span>
-            <span class="step"><span class="step-label b mono">b</span></span>
-            <span class="doc mono">"ADC"</span>
-            <span class="step"><span class="step-label a mono">a</span></span>
-            <span class="doc bad mono">"ABDC"</span>
-          </div>
-
-          <div class="verdict bad mono">b &compfn; a &nbsp;&ne;&nbsp; a &compfn; b</div>
-        </div>
-
-        <div class="transform">
-          <div class="transform-title mono">T(op, against) &rarr; op&prime;</div>
-          <div class="transform-sub">rewrite the incoming operation so the pair commutes</div>
-          <div class="rules">
-            <div class="rule mono">T(b, a) = ins(2, "D")<span class="rule-note">shifted past B</span></div>
-            <div class="rule mono">T(a, b) = ins(1, "B")<span class="rule-note">unchanged &mdash; A wins the tie</span></div>
-          </div>
-        </div>
-
-        <div class="band">
-          <div class="band-label">Apply the transformed operation instead</div>
-
-          <div class="chain">
-            <span class="chain-who">A</span>
-            <span class="doc mono">"AC"</span>
-            <span class="step"><span class="step-label a mono">a</span></span>
-            <span class="doc mono">"ABC"</span>
-            <span class="step"><span class="step-label b mono">T(b, a)</span></span>
-            <span class="doc good mono">"ABDC"</span>
-          </div>
-
-          <div class="chain">
-            <span class="chain-who">B</span>
-            <span class="doc mono">"AC"</span>
-            <span class="step"><span class="step-label b mono">b</span></span>
-            <span class="doc mono">"ADC"</span>
-            <span class="step"><span class="step-label a mono">T(a, b)</span></span>
-            <span class="doc good mono">"ABDC"</span>
-          </div>
-
-          <div class="verdict good mono">T(b, a) &compfn; a &nbsp;=&nbsp; T(a, b) &compfn; b</div>
-        </div>
-
       </div>
     </div>
   </div>
+  <script>
+    function drawArrows() {
+      document.querySelectorAll('.three-col').forEach((grid) => {
+        const svg = grid.querySelector('.arrow-overlay');
+        const marker = svg.querySelector('marker').id;
+        const gridRect = grid.getBoundingClientRect();
+        svg.querySelectorAll('line').forEach(l => l.remove());
+
+        function boxEdge(attr, side) {
+          const r = grid.querySelector(`[data-arrow="${attr}"]`).getBoundingClientRect();
+          return {
+            x: (side === 'right' ? r.right : r.left) - gridRect.left,
+            y: r.top + r.height / 2 - gridRect.top
+          };
+        }
+
+        function addLine(from, to) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', from.x);
+          line.setAttribute('y1', from.y);
+          line.setAttribute('x2', to.x);
+          line.setAttribute('y2', to.y);
+          line.setAttribute('stroke', '#F59E0B');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('stroke-dasharray', '6 4');
+          line.setAttribute('marker-end', `url(#${marker})`);
+          svg.appendChild(line);
+        }
+
+        // A's own operation travels to B, B's travels to A.
+        addLine(boxEdge('a-a', 'right'), boxEdge('b-a', 'left'));
+        addLine(boxEdge('b-b', 'left'), boxEdge('a-b', 'right'));
+      });
+    }
+
+    drawArrows();
+  </script>
 </body>
 </html>

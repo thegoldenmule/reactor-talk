@@ -16,22 +16,26 @@ Timing: 20 min. Opening 2, Act I 4, Act II 3, Act III 8, Act IV 3.
 
 A structured runtime for local-first applications.
 
-- Hands-on tech lead. About a year at Powerhouse on this runtime.
-- I: "Powerhouse provides a local-first tool-set that allows open organizations to collaboratively coordinate people, code and capital."
-- I: "our goal is to provide users true agency and ownership, without sacrificing the typical merits of centralized services."
-- I: "We are aiming for the convenience of a centralized SaaS with the sovereignty of local-first."
+- I've spent the last year or so at Powerhouse architecting and implementing this project.
+- "Structured runtime for local-first applications."
 
 ## The Vision
 
 ### The Vision
 
-### Business Processes as Documents
+- Powerhouse approched me to evaluate their prototype system, and eventually completely rewrite it.
+
+### Google Docs for Bespoke Business Tools and Processes
 
 ![Document editors for an invoice, a wiki page and a business process](img/document-editors.png)
 
 - The vision of Powerhouse was to enable anyone to create bespoke documents that could model
   many types of artifacts: an invoice, a wiki page, or even an internal business process or
   workflow.
+
+### This includes the documents...
+
+![A drive's documents and files, each one an instance of a document model](img/document-list.png)
 
 ### ... and the Operations on them
 

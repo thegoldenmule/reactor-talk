@@ -18,8 +18,8 @@
     /* Write on the left, the token in the middle, read on the right */
     .trip {
       display: grid;
-      grid-template-columns: 1fr 300px 1fr;
-      gap: var(--space-lg);
+      grid-template-columns: 1fr 88px 300px 88px 1fr;
+      gap: var(--space-md);
       align-items: center;
     }
 
@@ -110,24 +110,13 @@
     .token-body .k { color: var(--text-muted); }
     .token-body .n { color: var(--accent-cyan); }
 
-    /* The two hops the token makes */
+    /* The two hops the token makes, left to right across the middle */
     .hop {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      font-size: 10px;
-      font-weight: var(--font-weight-semibold);
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      color: var(--text-muted);
-      margin: var(--space-md) 0;
-    }
-    .hop-line {
-      height: 2px;
-      flex: 1;
-      background: var(--accent-cyan);
       position: relative;
+      height: 2px;
+      background: var(--accent-cyan);
     }
-    .hop-line::after {
+    .hop::after {
       content: '';
       position: absolute;
       right: -1px;
@@ -136,6 +125,17 @@
       border-top: 5px solid transparent;
       border-bottom: 5px solid transparent;
       border-left: 7px solid var(--accent-cyan);
+    }
+    .hop-label {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent-cyan);
+      white-space: nowrap;
     }
 
     /* The lag the token covers */
@@ -195,13 +195,10 @@
             <div class="box accent-green mono">Op Store</div>
           </div>
 
-          <!-- ============ The token ============ -->
-          <div>
-            <div class="hop">
-              <span>Token</span>
-              <span class="hop-line"></span>
-            </div>
+          <!-- ============ The token, handed across the middle ============ -->
+          <div class="hop"><span class="hop-label">Token</span></div>
 
+          <div>
             <div class="token">
               <div class="token-title mono">ConsistencyToken</div>
 <div class="token-body mono"><span class="k">coordinates: [</span>
@@ -211,11 +208,9 @@
     operationIndex: <span class="n">42</span> }
 <span class="k">]</span></div>
             </div>
-
-            <div class="hop">
-              <span class="hop-line"></span>
-            </div>
           </div>
+
+          <div class="hop"></div>
 
           <!-- ============ Read ============ -->
           <div class="side">

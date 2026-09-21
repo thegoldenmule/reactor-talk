@@ -382,6 +382,10 @@ Questions?
 
 ![Clients against ops/sec, with the analytical boundary and the experimental runs](img/reshuffle-stability-map.png)
 
+### Maximum sustainable processing time
+
+![Critical ms/op against client count, per ops/sec, with the typical server range shaded](img/sustainable-processing-time.png)
+
 ### Critical-security signature
 
 ![Payload + input-state hash + previous operation id](img/critical-security-signature-binding.png)

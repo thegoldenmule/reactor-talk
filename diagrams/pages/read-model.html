@@ -64,11 +64,14 @@
     }
 
     /* Tall function box in the middle */
+    /* Fixed size, so the two read-model slides put every part in the same place
+       no matter which view name sits in the middle. */
     .fn-box {
       grid-column: 2;
       grid-row: 1;
+      width: 170px;
       min-height: 90px;
-      padding: var(--space-xl) var(--space-xl);
+      padding: var(--space-xl) var(--space-md);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -143,10 +146,14 @@
     }
 
     /* ── Result table (Postgres-style) ── */
+    /* Same footprint as the analytics chart on the next slide */
     .result-box {
       border-radius: var(--radius-md);
       overflow: hidden;
-      min-width: 420px;
+      width: 560px;
+      height: 224px;
+      display: flex;
+      flex-direction: column;
     }
     .db-label {
       font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
@@ -164,6 +171,7 @@
       font-size: 13px;
     }
     .result-table {
+      flex: 1;
       width: 100%;
       border-collapse: collapse;
       font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);

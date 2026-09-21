@@ -39,7 +39,7 @@ A structured runtime for local-first applications.
 
 ### ... and the Operations on them
 
-![The signed operation history behind a single document](img/document-operation-log.png)
+![A document's revisions, each one signed and verified](img/document-operation-log.png)
 
 ### ... created by "Citizen Builders"
 

@@ -75,11 +75,6 @@
       border-right: 6px solid transparent;
       border-top: 8px solid var(--text-primary);
     }
-    /* Anchored right for a label that would otherwise run off the card */
-    .v-conn-label.flip {
-      left: auto;
-      right: 12px;
-    }
     .v-conn-label {
       position: absolute;
       left: 12px;
@@ -236,7 +231,7 @@
 
             <div class="box accent-amber mono">waitForConsistency(token)</div>
 
-            <div class="v-conn"><span class="v-conn-label flip">tracked[&quot;doc_a1:global:main&quot;] &ge; 42</span></div>
+            <div class="v-conn"></div>
 
             <div class="box accent-green mono">DocumentSnapshot</div>
           </div>

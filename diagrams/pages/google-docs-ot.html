@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 700px; }
+    .card { height: auto; }
+    .card-body { flex: none; gap: var(--space-lg); }
+
+    .mono { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: -0.01em; }
+
+    /* The two concurrent operations, side by side at the top */
+    .ops {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+    .op {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-elevated);
+      padding: var(--space-md);
+      text-align: center;
+    }
+    .op.a { border-color: var(--accent-purple); background: var(--accent-purple-bg); }
+    .op.b { border-color: var(--accent-cyan);   background: var(--accent-cyan-bg); }
+    .op-who {
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .op-expr { font-size: 15px; font-weight: var(--font-weight-semibold); margin-top: 2px; }
+    .op.a .op-expr { color: var(--accent-purple); }
+    .op.b .op-expr { color: var(--accent-cyan); }
+
+    .start {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .start b { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
+
+    /* A labelled band: "apply them in each client's order" / "transform first" */
+    .band { border-top: 1px solid var(--border-subtle); padding-top: var(--space-md); }
+    .band-label {
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    /* One client's chain:  "AC" --a--> "ABC" --b--> "ADBC" */
+    .chain {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    .chain:last-child { margin-bottom: 0; }
+    .chain-who {
+      width: 62px;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .doc {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-elevated);
+      min-width: 78px;
+      text-align: center;
+    }
+    .doc.bad   { border-color: #ef4444; background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .doc.good  { border-color: var(--accent-green); background: var(--accent-green-bg); color: var(--accent-green); }
+
+    /* Arrow with the operation that runs on it sitting above the line */
+    .step {
+      flex: 1;
+      position: relative;
+      height: 2px;
+      background: var(--border-glass);
+      min-width: 52px;
+    }
+    .step::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid var(--border-glass);
+    }
+    .step-label {
+      position: absolute;
+      bottom: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+    }
+    .step-label.a { color: var(--accent-purple); }
+    .step-label.b { color: var(--accent-cyan); }
+
+    .verdict {
+      margin-top: var(--space-md);
+      text-align: center;
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+    }
+    .verdict.bad  { color: #ef4444; }
+    .verdict.good { color: var(--accent-green); }
+
+    /* The transform itself */
+    .transform {
+      border: 1px solid var(--accent-blue);
+      background: var(--accent-blue-bg);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+    }
+    .transform-title {
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-blue);
+      text-align: center;
+    }
+    .transform-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 2px;
+    }
+    .rules {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm) var(--space-md);
+      margin-top: var(--space-md);
+    }
+    .rule {
+      font-size: 13px;
+      text-align: center;
+      color: var(--text-primary);
+    }
+    .rule-note {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-family: var(--font-family);
+      letter-spacing: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="start">both clients start from <b class="mono">"AC"</b></div>
+
+        <div class="ops">
+          <div class="op a">
+            <div class="op-who">Client A</div>
+            <div class="op-expr mono">a = ins(1, "B")</div>
+          </div>
+          <div class="op b">
+            <div class="op-who">Client B</div>
+            <div class="op-expr mono">b = ins(1, "D")</div>
+          </div>
+        </div>
+
+        <div class="band">
+          <div class="band-label">Apply them in the order each client saw</div>
+
+          <div class="chain">
+            <span class="chain-who">A</span>
+            <span class="doc mono">"AC"</span>
+            <span class="step"><span class="step-label a mono">a</span></span>
+            <span class="doc mono">"ABC"</span>
+            <span class="step"><span class="step-label b mono">b</span></span>
+            <span class="doc bad mono">"ADBC"</span>
+          </div>
+
+          <div class="chain">
+            <span class="chain-who">B</span>
+            <span class="doc mono">"AC"</span>
+            <span class="step"><span class="step-label b mono">b</span></span>
+            <span class="doc mono">"ADC"</span>
+            <span class="step"><span class="step-label a mono">a</span></span>
+            <span class="doc bad mono">"ABDC"</span>
+          </div>
+
+          <div class="verdict bad mono">b &compfn; a &nbsp;&ne;&nbsp; a &compfn; b</div>
+        </div>
+
+        <div class="transform">
+          <div class="transform-title mono">T(op, against) &rarr; op&prime;</div>
+          <div class="transform-sub">rewrite the incoming operation so the pair commutes</div>
+          <div class="rules">
+            <div class="rule mono">T(b, a) = ins(2, "D")<span class="rule-note">shifted past B</span></div>
+            <div class="rule mono">T(a, b) = ins(1, "B")<span class="rule-note">unchanged &mdash; A wins the tie</span></div>
+          </div>
+        </div>
+
+        <div class="band">
+          <div class="band-label">Apply the transformed operation instead</div>
+
+          <div class="chain">
+            <span class="chain-who">A</span>
+            <span class="doc mono">"AC"</span>
+            <span class="step"><span class="step-label a mono">a</span></span>
+            <span class="doc mono">"ABC"</span>
+            <span class="step"><span class="step-label b mono">T(b, a)</span></span>
+            <span class="doc good mono">"ABDC"</span>
+          </div>
+
+          <div class="chain">
+            <span class="chain-who">B</span>
+            <span class="doc mono">"AC"</span>
+            <span class="step"><span class="step-label b mono">b</span></span>
+            <span class="doc mono">"ADC"</span>
+            <span class="step"><span class="step-label a mono">T(a, b)</span></span>
+            <span class="doc good mono">"ABDC"</span>
+          </div>
+
+          <div class="verdict good mono">T(b, a) &compfn; a &nbsp;=&nbsp; T(a, b) &compfn; b</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

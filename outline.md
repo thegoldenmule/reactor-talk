@@ -37,7 +37,7 @@ A structured runtime for local-first applications.
 
 ![The signed operation history behind a single document](img/document-operation-log.png)
 
-### Support "Citizen Builders"
+### ... created by "Citizen Builders"
 
 ![Vetra's agent prompt box typing out real use cases](img/vetra-prompt-typewriter.png)
 
@@ -46,9 +46,9 @@ A structured runtime for local-first applications.
 
 ## Technical Requirements
 
-### The Requirements
+### Technical Requirements
 
-### Run Everywhere
+### It must... run everywhere
 
 ![The Reactor runs everywhere and syncs](img/reactor-environments.png)
 
@@ -58,21 +58,21 @@ A structured runtime for local-first applications.
 - I: "able to run serially without impeding the render thread of a browser while also able to
   scale horizontally in a server environment."
 
-### Local First
+### It must... be local first
 
 ![Centralized vs local first: where the data and the execution live](img/local-first-ownership.png)
 
 - Both the data and the execution must be locally owned by the user.
 - Sovereignty and responsiveness.
 
-### Transparent Audit Trails
+### It must... have signed audit trails
 
 ![Append-only operations chained by signature](img/audit-trail-signature-chain.png)
 
 - "each Reactor must write to append-only storage"
 - "the stream of operations form a signature chain"
 
-### Multi-User by Default
+### It must... be multi-user by default
 
 ![Realtime multi-user sync](img/multi-user-sync.png)
 
@@ -82,7 +82,7 @@ A structured runtime for local-first applications.
 
 ### Document Models
 
-### Where we started: the reducer
+### Inspiration: reducers
 
 ![Flux/Redux reducer loop](img/reducer-update-loop.png)
 
@@ -94,7 +94,7 @@ A structured runtime for local-first applications.
   how would you synchronize state between multiple users, especially given the constraint of
   append-only storage? Oh and a nit-picky third: how the heck do you scale this approach?"
 
-### Event sourcing: state as a stream
+### Inspiration: Event sourcing
 
 ![State as a stream of events](img/event-sourcing.png)
 
@@ -103,7 +103,7 @@ A structured runtime for local-first applications.
 - I: "All the sudden we don't just have a username, we have an entire history of usernames along
   with descriptive reasons why the username changed at all."
 
-### Aggregates: many views from one stream
+### Inspiration: Aggregates
 
 ![Folding a stream into an aggregate](img/event-sourcing-aggregates.png)
 
@@ -113,7 +113,7 @@ A structured runtime for local-first applications.
   product, have it in production for three years, and only then think about unique-for-all-time
   usernames."
 
-### Command sourcing: store the intent, not the result
+### Event -> Command sourcing
 
 ![Action stream reduced to states](img/action-stream-reducer.png)
 
@@ -140,7 +140,7 @@ A structured runtime for local-first applications.
 
 ### The Reactor
 
-### The runtime: CQRS
+### CQRS
 
 ![Reactor CQRS: write side, event bus, read side](img/reactor-cqrs.png)
 
@@ -154,11 +154,11 @@ A structured runtime for local-first applications.
   and something more robust in a server environment, like RabbitMQ (this part is not deployed)."
 - Read side: a coordinator hands `Operation[]` to read models.
 
-### Inside the Job Queue
+### Writes
 
 ![The job queue fans into per-drive executors that share one Postgres op store](img/job-queue-executors.png)
 
-### A read model: DocumentView
+### Read models
 
 ![DocumentView projects operations into a Postgres table](img/read-model.png)
 
@@ -168,7 +168,7 @@ A structured runtime for local-first applications.
   would still get fast reads from a turbocharged read model."
 - Also built in: DocumentIndexer, "a graph of relationships between documents."
 
-### Read models don't care where they write
+### Read models
 
 ![Analytics read model into a time-series DB](img/analytics-read-model.png)
 
@@ -202,6 +202,7 @@ A structured runtime for local-first applications.
 
 ![CRDT commutativity with max()](img/crdt-max-operations.png)
 
+- Commutative
 - II: "CRDTs allow users to do work local-first and eventually come to a consensus on what the
   result should be."
 - `max(x, 5)` and `max(x, 6)` in either order give 6. Passes 1, 2 and 3.
@@ -217,9 +218,9 @@ A structured runtime for local-first applications.
 - II: "CRDTs are fairly tricky primitives for developers to work with anyway." Reducers here are
   written by users. Fails the reducer requirement.
 
-### Why not just OT?
+### How Google Docs do it: OT
 
-![OT rewrites the operation that arrives from the other client](img/why-not-ot.png)
+![a and b do not commute until T(a, b) rewrites them](img/google-docs-ot.png)
 
 - Reordering is what forces the question. II: "If we reorder them, then we'd need to mutate the
   immutable operation. This is very similar to a technique called Operational Transformation

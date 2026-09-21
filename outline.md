@@ -378,13 +378,6 @@ Questions?
 
 ## Appendix slides (only if asked)
 
-### Reactor job pipeline
-
-![Reactor architecture: queue → executors → op log + event bus](img/reactor-architecture.png)
-
-- Write side in more detail: mutations, queue, executors, operation log and event bus, read
-  models.
-
 ### Critical-security signature
 
 ![Payload + input-state hash + previous operation id](img/critical-security-signature-binding.png)
@@ -393,18 +386,6 @@ Questions?
   down: the previous Operation id."
 - II: "Since the Operation id is actually a composite id that includes a monotonically
   increasing index... This type of signature will reject on any reshuffle and any state change."
-
-### Ping-pong: rounds of convergence
-
-![Multiple rounds of bidirectional sync](img/ping-pong-sync.png)
-
-- Round 1 converges to A′ = B′. B keeps working. Round 2 converges to A″ = B″.
-
-### One-way sync
-
-![Reactor A's reshuffled operations applied to B](img/one-way-sync.png)
-
-- A reshuffles; B applies A's new operations onto its stream.
 
 ---
 

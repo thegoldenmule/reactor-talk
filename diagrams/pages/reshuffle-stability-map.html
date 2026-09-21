@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1100px; }
+    .card  { height: auto; }
+    .card-body { flex: none; }
+
+    /* A light-background plot, matted on white so it reads as a figure rather
+       than a hole in the slide. Asset lives in pages/assets/ and is copied into
+       the deck by its build. */
+    .shot { margin: 0; }
+    .shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: var(--space-md);
+      box-sizing: border-box;
+      box-shadow:
+        0 28px 64px rgba(0, 0, 0, 0.72),
+        0 6px 16px rgba(0, 0, 0, 0.55);
+    }
+    .slot {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      aspect-ratio: 1500 / 1050;
+      text-align: center;
+      padding: var(--space-md);
+      box-sizing: border-box;
+      border: 1px dashed var(--border-glass);
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .shot.empty img { display: none; }
+    .shot.empty .slot { display: flex; }
+    .slot code {
+      color: var(--text-secondary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+        <figure class="shot">
+          <img src="assets/reshuffle-stability-map.png" alt="Reshuffle stability map: clients against ops per second, with the analytical boundary and experimental runs" onerror="this.closest('.shot').classList.add('empty')">
+          <div class="slot">screenshot slot<code>pages/assets/reshuffle-stability-map.png</code></div>
+        </figure>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

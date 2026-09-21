@@ -378,6 +378,10 @@ Questions?
 
 ## Appendix slides (only if asked)
 
+### Reshuffle stability map
+
+![Clients against ops/sec, with the analytical boundary and the experimental runs](img/reshuffle-stability-map.png)
+
 ### Critical-security signature
 
 ![Payload + input-state hash + previous operation id](img/critical-security-signature-binding.png)

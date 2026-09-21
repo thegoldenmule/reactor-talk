@@ -399,6 +399,10 @@ Questions?
 - II: "Since the Operation id is actually a composite id that includes a monotonically
   increasing index... This type of signature will reject on any reshuffle and any state change."
 
+### Read-after-write: the consistency token
+
+![A write mints a token the next read blocks on until the read model has caught up](img/consistency-token.png)
+
 ---
 
 ## Gaps to fill before the talk

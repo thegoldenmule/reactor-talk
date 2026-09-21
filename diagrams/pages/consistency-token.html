@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .frame { max-width: 1240px; }
+    .card  { height: auto; }
+    .card-body { flex: none; }
+
+    .mono { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: -0.01em; }
+
+    /* ---- the round trip: write on the left, read on the right --------------- */
+    .trip {
+      display: grid;
+      grid-template-columns: 1fr 296px 1fr;
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .side {
+      border: 1px dashed var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg) var(--space-md) var(--space-md);
+      position: relative;
+    }
+    .side-label {
+      position: absolute;
+      top: -9px;
+      left: var(--space-md);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--bg-surface);
+      padding: 0 var(--space-sm);
+      color: var(--text-muted);
+    }
+
+    .box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+      text-align: center;
+    }
+    .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
+    .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    .box.accent-amber  { border-color: #F59E0B; background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+    .box.muted         { color: var(--text-muted); }
+
+    .box-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+    }
+    .box-detail {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 3px;
+    }
+
+    /* Vertical connector */
+    .v-conn {
+      width: 3px;
+      height: 16px;
+      background: var(--text-primary);
+      margin: var(--space-sm) auto var(--space-md);
+      position: relative;
+    }
+    .v-conn::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+    .v-conn-label {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ---- the token itself, sitting between the two sides ------------------- */
+    .token {
+      border: 1px solid var(--accent-cyan);
+      background: var(--accent-cyan-bg);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+    }
+    .token-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-cyan);
+      text-align: center;
+      margin-bottom: var(--space-sm);
+    }
+    .token-body {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      white-space: pre;
+    }
+    .token-body .k { color: var(--text-muted); }
+    .token-body .n { color: var(--accent-cyan); }
+
+    /* the two hops the token makes */
+    .hop {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--text-muted);
+      justify-content: center;
+      margin: var(--space-sm) 0;
+    }
+    .hop-line {
+      height: 2px;
+      flex: 1;
+      background: var(--accent-cyan);
+      position: relative;
+    }
+    .hop-line.to-right::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid var(--accent-cyan);
+    }
+    .hop-line.to-left::after {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-right: 7px solid var(--accent-cyan);
+    }
+
+    /* ---- the lag the token exists to cover --------------------------------- */
+    .catchup {
+      margin-top: var(--space-lg);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: var(--space-lg);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: var(--space-md);
+      align-items: center;
+    }
+    .catchup-arrow {
+      position: relative;
+      height: 2px;
+      background: var(--text-muted);
+      min-width: 168px;
+    }
+    .catchup-arrow::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid var(--text-muted);
+    }
+    .catchup-label {
+      position: absolute;
+      bottom: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .catchup-note {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: var(--space-sm);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="trip">
+
+          <!-- ============ Write ============ -->
+          <div class="side">
+            <span class="side-label">Write</span>
+
+            <div class="box accent-purple">
+              <div class="box-title mono">execute(documentId, branch, commands)</div>
+            </div>
+
+            <div class="v-conn"></div>
+
+            <div class="box muted">
+              <div class="box-title mono">JobInfo</div>
+              <div class="box-detail mono">coordinates: [] &mdash; empty, not yet useful</div>
+            </div>
+
+            <div class="v-conn"><span class="v-conn-label">executor reduces</span></div>
+
+            <div class="box accent-green">
+              <div class="box-title mono">Op Store</div>
+              <div class="box-detail mono">operationIndex 42 &nbsp;&middot;&nbsp; source of truth</div>
+            </div>
+
+            <div class="v-conn"><span class="v-conn-label">JOB_WRITE_READY</span></div>
+
+            <div class="box accent-cyan" style="border-color: var(--accent-cyan); background: var(--accent-cyan-bg); color: var(--accent-cyan);">
+              <div class="box-title mono">createConsistencyToken(ops)</div>
+            </div>
+          </div>
+
+          <!-- ============ The token ============ -->
+          <div>
+            <div class="hop">
+              <span>waitForJob()</span>
+              <span class="hop-line to-right"></span>
+            </div>
+
+            <div class="token">
+              <div class="token-title mono">ConsistencyToken</div>
+<div class="token-body mono"><span class="k">version:</span> 1
+<span class="k">coordinates: [</span>
+  { documentId: <span class="n">"doc_a1"</span>,
+    scope:      <span class="n">"global"</span>,
+    branch:     <span class="n">"main"</span>,
+    operationIndex: <span class="n">42</span> }
+<span class="k">]</span></div>
+            </div>
+
+            <div class="hop">
+              <span>passed to the read</span>
+              <span class="hop-line to-right"></span>
+            </div>
+          </div>
+
+          <!-- ============ Read ============ -->
+          <div class="side">
+            <span class="side-label">Read</span>
+
+            <div class="box accent-blue">
+              <div class="box-title mono">get(id, view, consistencyToken)</div>
+            </div>
+
+            <div class="v-conn"></div>
+
+            <div class="box accent-amber">
+              <div class="box-title mono">waitForConsistency(token)</div>
+              <div class="box-detail mono">every coordinate must satisfy<br>tracked["doc_a1:global:main"] &ge; 42</div>
+            </div>
+
+            <div class="v-conn"><span class="v-conn-label">else park the waiter</span></div>
+
+            <div class="box accent-green">
+              <div class="box-title mono">DocumentSnapshot</div>
+              <div class="box-detail mono">the write is guaranteed visible</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============ what the token is covering for ============ -->
+        <div class="catchup">
+          <div class="box accent-green">
+            <div class="box-title mono">Op Store</div>
+          </div>
+          <div class="catchup-arrow"><span class="catchup-label">indexOperations()</span></div>
+          <div class="box accent-blue">
+            <div class="box-title mono">Read models</div>
+            <div class="box-detail mono">indexed asynchronously</div>
+          </div>
+          <div class="catchup-arrow"><span class="catchup-label">update(coordinates)</span></div>
+          <div class="box accent-amber">
+            <div class="box-title mono">ConsistencyTracker</div>
+            <div class="box-detail mono">high-water mark per documentId:scope:branch</div>
+          </div>
+          <div class="catchup-note">the read model lags the op store &mdash; raising this mark is what releases the waiter above</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -9,9 +9,25 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .frame { max-width: 700px; }
+    .frame { max-width: 1120px; }
     .card { height: auto; }
     .card-body { flex: none; gap: var(--space-md); }
+
+    /* The write path on the left, what travels down it on the right */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr auto 300px;
+      gap: var(--space-xl);
+      align-items: stretch;
+    }
+    .layout-divider {
+      width: 1px;
+      background: linear-gradient(to bottom,
+        transparent,
+        var(--border-glass) 6%,
+        var(--border-glass) 94%,
+        transparent);
+    }
 
     /* Box component */
     .box {
@@ -175,12 +191,84 @@
 
     /* ---- op store --------------------------------------------------------- */
     .pool { width: 78%; }
+
+    /* ---- anatomy: an Action, then the Operation that carries it ------------- */
+    .anatomy {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: space-between;
+    }
+    .mono { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: -0.01em; }
+
+    .action {
+      border: 1px solid var(--accent-purple);
+      background: var(--accent-purple-bg);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+    }
+    .action-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-xs);
+    }
+
+    .field {
+      display: flex;
+      gap: var(--space-sm);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .field-key { color: var(--text-muted); }
+    .field-val { color: var(--text-primary); }
+    .field-val.sig { color: var(--accent-cyan); }
+
+    /* The stem between them carries the whole leftover height */
+    .anatomy-stem {
+      flex: 1;
+      min-height: 24px;
+      width: 3px;
+      margin: var(--space-md) auto;
+      background: var(--text-primary);
+      position: relative;
+    }
+    .anatomy-stem::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-primary);
+    }
+
+    /* The Operation wraps the very same Action box */
+    .operation {
+      border: 1px solid var(--accent-green);
+      background: var(--accent-green-bg);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm) var(--space-md);
+    }
+    .operation-title {
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-xs);
+    }
+    .operation .action { margin-top: var(--space-xs); }
   </style>
 </head>
 <body>
   <div class="frame">
     <div class="card">
       <div class="card-body">
+        <div class="layout">
         <div class="diagram-flow">
 
           <!-- Job queue -->
@@ -244,6 +332,35 @@
             <div class="box-title">Op Store</div>
           </div>
 
+        </div>
+
+        <div class="layout-divider"></div>
+
+        <!-- What the queue carries: an Action, wrapped into an Operation -->
+        <aside class="anatomy">
+
+          <div class="action">
+            <div class="action-title">Action</div>
+            <div class="field mono"><span class="field-key">type</span><span class="field-val">SET_TITLE</span></div>
+            <div class="field mono"><span class="field-key">input</span><span class="field-val">{ title: "Q3" }</span></div>
+            <div class="field mono"><span class="field-key">sig</span><span class="field-val sig">0x8f&hellip;c1</span></div>
+          </div>
+
+          <div class="anatomy-stem"></div>
+
+          <div class="operation">
+            <div class="operation-title">Operation</div>
+            <div class="field mono"><span class="field-key">index</span><span class="field-val">42</span></div>
+            <div class="field mono"><span class="field-key">t</span><span class="field-val">1732041600</span></div>
+            <div class="action">
+              <div class="action-title">Action</div>
+              <div class="field mono"><span class="field-key">type</span><span class="field-val">SET_TITLE</span></div>
+              <div class="field mono"><span class="field-key">input</span><span class="field-val">{ title: "Q3" }</span></div>
+              <div class="field mono"><span class="field-key">sig</span><span class="field-val sig">0x8f&hellip;c1</span></div>
+            </div>
+          </div>
+
+        </aside>
         </div>
       </div>
     </div>

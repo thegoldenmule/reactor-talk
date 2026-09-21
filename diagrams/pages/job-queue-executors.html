@@ -441,6 +441,9 @@
     }
 
     alignAnatomy();
+    // Web fonts land after first layout and move everything down, so measure again.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignAnatomy);
+    window.addEventListener('resize', alignAnatomy);
   </script>
 </body>
 </html>

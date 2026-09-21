@@ -52,15 +52,14 @@
       gap: 0;
     }
 
-    /* Center bridge column — the arrow is placed on the plus's centre line by the
-       script at the bottom of the page. */
-    .col-bridge {
-      position: relative;
-    }
-    .col-bridge .h-arrow {
+    /* Center bridge column — empty; the codegen arrow hangs off the types row, which the
+       script at the bottom of the page drops onto the spec's centre line. */
+    .types-row { position: relative; }
+    .types-row .h-arrow {
       position: absolute;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 50%;
+      right: calc(100% + var(--space-lg));
+      transform: translateY(-50%);
     }
 
     /* The spec is a state schema AND an action schema, not one leading to the other */
@@ -87,6 +86,8 @@
     .box.accent-purple { border-color: var(--accent-purple); background: var(--accent-purple-bg); color: var(--accent-purple); }
     .box.accent-blue   { border-color: var(--accent-blue);   background: var(--accent-blue-bg);   color: var(--accent-blue); }
     .box.accent-green  { border-color: var(--accent-green);  background: var(--accent-green-bg);  color: var(--accent-green); }
+    /* The reducer is hand-written, not generated, so it does not share the types' colour */
+    .box.accent-amber  { border-color: #F59E0B; background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
 
     .box-title {
       font-size: 14px;
@@ -279,18 +280,18 @@
             </div>
           </div>
 
-          <!-- Center Bridge -->
-          <div class="col-bridge">
+          <!-- Center Bridge: spacing only, the arrow itself sits with the types -->
+          <div class="col-bridge"></div>
+
+          <!-- Right Column: Reducer -->
+          <div class="col-reducer">
+           <div class="types-row" id="typesRow">
             <div class="h-arrow" id="codegenArrow">
               <div class="h-arrow-line"></div>
               <div class="h-arrow-label">Codegen</div>
               <div class="h-arrow-line has-head"></div>
             </div>
-          </div>
-
-          <!-- Right Column: Reducer -->
-          <div class="col-reducer">
-            <div class="type-group">
+            <div class="type-group" id="typeGroup">
               <div class="box accent-blue">
                 <div class="box-title">Command</div>
                 <div class="box-detail">{ type, input }</div>
@@ -300,8 +301,9 @@
                 <div class="box-detail">{ ... }</div>
               </div>
             </div>
+           </div>
             <div class="v-connector"></div>
-            <div class="box accent-blue" style="padding: var(--space-lg);">
+            <div class="box accent-amber" style="padding: var(--space-lg);">
               <div class="box-title">Reducer</div>
               <div class="box-detail">
                 f(state, command) &rarr; (state', operation[])
@@ -335,18 +337,27 @@
     </div>
   </div>
   <script>
-    // The codegen arrow leaves from the middle of the spec's "+".
-    function placeCodegenArrow() {
+    // Codegen turns the spec into the two types and nothing else, so the Command/State row
+    // drops onto the centre line of the spec's "+". The arrow rides with that row.
+    function placeCodegen() {
       var plus = document.getElementById('specPlus');
-      var arrow = document.getElementById('codegenArrow');
-      var bridge = arrow.parentElement;
-      var p = plus.getBoundingClientRect();
-      var b = bridge.getBoundingClientRect();
-      arrow.style.top = (p.top + p.height / 2 - b.top) + 'px';
+      var types = document.getElementById('typeGroup');
+      var column = document.querySelector('.col-reducer');
+
+      column.style.marginTop = '0px';
+      var drop = centreOf(plus) - centreOf(types);
+      if (drop > 0) column.style.marginTop = drop + 'px';
+
+      function centreOf(el) {
+        var r = el.getBoundingClientRect();
+        return r.top + r.height / 2;
+      }
     }
 
-    placeCodegenArrow();
-    window.addEventListener('resize', placeCodegenArrow);
+    placeCodegen();
+    // Web fonts land after first layout and move everything down, so measure again.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeCodegen);
+    window.addEventListener('resize', placeCodegen);
   </script>
 </body>
 </html>

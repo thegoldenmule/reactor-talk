@@ -40,11 +40,6 @@
       font-family: 'SF Mono', 'Fira Code', monospace;
       letter-spacing: -0.01em;
     }
-    .box-detail {
-      font-size: 11px;
-      opacity: 0.75;
-      margin-top: 3px;
-    }
 
     /* Vertical connector — downward arrow */
     .v-connector {
@@ -167,15 +162,6 @@
     }
     .verdict.bad  { color: #ef4444; }
     .verdict.good { color: var(--accent-green); }
-    .verdict-note {
-      display: block;
-      font-family: var(--font-family);
-      font-size: 12px;
-      font-weight: var(--font-weight-regular);
-      letter-spacing: 0;
-      color: var(--text-secondary);
-      margin-top: var(--space-xs);
-    }
   </style>
 </head>
 <body>
@@ -235,7 +221,6 @@
 
             <div class="verdict bad">
               b &compfn; a &nbsp;&ne;&nbsp; a &compfn; b
-              <span class="verdict-note">the same two operations, two different documents</span>
             </div>
           </div>
 
@@ -264,7 +249,6 @@
                   <div class="v-connector"></div>
                   <div class="box accent-cyan" data-arrow="a-b">
                     <div class="box-title">T(b, a) = ins(2, "D")</div>
-                    <div class="box-detail">shifted past B</div>
                   </div>
                   <div class="v-connector"></div>
                   <div class="box accent-green"><div class="box-title">"ABDC"</div></div>
@@ -284,7 +268,6 @@
                   <div class="v-connector"></div>
                   <div class="box accent-purple" data-arrow="b-a">
                     <div class="box-title">T(a, b) = ins(1, "B")</div>
-                    <div class="box-detail">unchanged &mdash; A wins the tie</div>
                   </div>
                   <div class="v-connector"></div>
                   <div class="box accent-green"><div class="box-title">"ABDC"</div></div>
@@ -294,7 +277,6 @@
 
             <div class="verdict good">
               T(b, a) &compfn; a &nbsp;=&nbsp; T(a, b) &compfn; b
-              <span class="verdict-note">rewritten until the pair commutes</span>
             </div>
           </div>
 

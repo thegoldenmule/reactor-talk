@@ -52,14 +52,25 @@
       gap: 0;
     }
 
-    /* Center bridge column */
+    /* Center bridge column — the arrow is placed on the plus's centre line by the
+       script at the bottom of the page. */
     .col-bridge {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: var(--space-md);
-      padding-top: 29px;
+      position: relative;
+    }
+    .col-bridge .h-arrow {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* The spec is a state schema AND an action schema, not one leading to the other */
+    .spec-plus {
+      font-size: 26px;
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      color: var(--accent-cyan);
+      text-align: center;
+      margin: var(--space-sm) 0 var(--space-md);
     }
 
     /* Box component used in columns */
@@ -259,7 +270,7 @@
               <div class="box-title">State Schema</div>
               <div class="box-detail"></div>
             </div>
-            <div class="v-connector"></div>
+            <div class="spec-plus" id="specPlus">+</div>
             <div class="box accent-cyan">
               <div class="box-title">Action Schema</div>
               <div class="box-detail">
@@ -270,7 +281,7 @@
 
           <!-- Center Bridge -->
           <div class="col-bridge">
-            <div class="h-arrow">
+            <div class="h-arrow" id="codegenArrow">
               <div class="h-arrow-line"></div>
               <div class="h-arrow-label">Codegen</div>
               <div class="h-arrow-line has-head"></div>
@@ -323,5 +334,19 @@
       </div>
     </div>
   </div>
+  <script>
+    // The codegen arrow leaves from the middle of the spec's "+".
+    function placeCodegenArrow() {
+      var plus = document.getElementById('specPlus');
+      var arrow = document.getElementById('codegenArrow');
+      var bridge = arrow.parentElement;
+      var p = plus.getBoundingClientRect();
+      var b = bridge.getBoundingClientRect();
+      arrow.style.top = (p.top + p.height / 2 - b.top) + 'px';
+    }
+
+    placeCodegenArrow();
+    window.addEventListener('resize', placeCodegenArrow);
+  </script>
 </body>
 </html>

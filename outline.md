@@ -119,7 +119,7 @@ A structured runtime for local-first applications.
 
 ### Event -> Command sourcing
 
-![Action stream reduced to states](img/action-stream-reducer.png)
+![Command stream reduced to states](img/action-stream-reducer.png)
 
 - I: "in command sourcing, we don't store the output, we store the command. The difference seems
   slight but we are aiming for both the data and the execution to be locally owned by the user.
@@ -136,7 +136,7 @@ A structured runtime for local-first applications.
   state."
 - Left: schema first, codegen gives types and reducer stubs. Right: reducer emits a PHDocument,
   "a stream of Operations and the state produced by them."
-- I: "We use the term Operation to refer to the result of an applied Action." Action is the
+- I: "We use the term Operation to refer to the result of an applied Action." Command is the
   signed intent; Operation is the result.
 - I: "Document Models are themselves documents."
 
@@ -268,9 +268,9 @@ A structured runtime for local-first applications.
 
 ### Step 3: replay from the merge base
 
-![Replay actions in timestamp order as new operations](img/reshuffled-new-ops.png)
+![Replay commands in timestamp order as new operations](img/reshuffled-new-ops.png)
 
-- Replay the 9 Actions in timestamp order. Nine new Operations.
+- Replay the 9 Commands in timestamp order. Nine new Operations.
 - II: "the hashes of each of the new operations will be different than the original, but the
   timestamps remain the same... the ordinal is part of the hash."
 - II: "This hash, however, is different than the signature (which itself is a hash) on the

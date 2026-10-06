@@ -41,7 +41,7 @@ Backup: `deck.pdf` opened fullscreen in Preview.
 
 ## Publish
 
-GitHub Pages serves `docs/` from `main` at <https://thegoldenmule.github.io/reactor-talk/>.
+GitHub Pages serves `docs/` from `main` at <https://thegoldenmule.com/reactor-talk/>.
 Build, commit and push; Pages redeploys on its own. `docs/.nojekyll` keeps Pages from running
 Jekyll over the files.
 

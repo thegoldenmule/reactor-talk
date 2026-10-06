@@ -6,7 +6,7 @@
     "dev": "node bin/dev.mjs",
     "build": "node bin/build.mjs",
     "render": "python3 bin/render-diagrams.py",
-    "serve": "python3 -m http.server 7788 --bind 127.0.0.1",
+    "serve": "python3 -m http.server 7788 --bind 127.0.0.1 --directory docs",
     "pdf": "python3 bin/pdf.py"
   },
   "license": "UNLICENSED",

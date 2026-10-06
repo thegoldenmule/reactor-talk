@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Build the deck from outline.md. One command does everything:
 //   1. copies the diagram sources this deck uses out of ../ph-diagrams (override with
-//      PH_DIAGRAMS) into diagrams/pages/ and diagrams/css/, byte for byte, along with
+//      PH_DIAGRAMS) into docs/diagrams/pages/ and docs/diagrams/css/, byte for byte, along with
 //      pages/assets/ (screenshots that diagram pages embed);
-//   2. writes index.html (a reveal.js deck) that shows each diagram page live in an iframe,
+//   2. writes docs/index.html (a reveal.js deck) that shows each diagram page live in an iframe,
 //      scaled to fit under the slide header. No PNG rendering anywhere.
 //
 // Outline rules:
@@ -87,8 +87,9 @@ if (missing.length) {
 }
 for (const id of used) if (!widthOf.has(id)) console.warn(`  note: "${id}" is not in manifest.json; using default viewport width`);
 
-const pagesDir = join(root, "diagrams", "pages");
-const cssDir = join(root, "diagrams", "css");
+const site = join(root, "docs");
+const pagesDir = join(site, "diagrams", "pages");
+const cssDir = join(site, "diagrams", "css");
 mkdirSync(pagesDir, { recursive: true });
 mkdirSync(cssDir, { recursive: true });
 for (const f of readdirSync(join(DIAGRAMS, "css"))) if (f.endsWith(".css")) copyFileSync(join(DIAGRAMS, "css", f), join(cssDir, f));
@@ -263,7 +264,7 @@ ${slides.map(section).map((s) => "      " + s).join("\n")}
 </body>
 </html>
 `;
-writeFileSync(join(root, "index.html"), html);
-console.log(`wrote index.html: ${slides.length} slides (${slides.filter((s) => s.diagram).length} diagrams, ${used.length} pages copied)`);
+writeFileSync(join(site, "index.html"), html);
+console.log(`wrote docs/index.html: ${slides.length} slides (${slides.filter((s) => s.diagram).length} diagrams, ${used.length} pages copied)`);
 const dividers = slides.filter((s) => !s.diagram && !s.text.length).map((s) => s.title);
 if (dividers.length) console.log(`  dividers: ${dividers.join(", ")}`);

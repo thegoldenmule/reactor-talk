@@ -6,7 +6,7 @@
 //   npm run dev        → http://127.0.0.1:7788/
 //
 // No dependencies. Reload is a server-sent event; the client script is injected into
-// index.html at serve time, so the committed index.html stays clean.
+// docs/index.html at serve time, so the committed page stays clean.
 import { createServer } from "node:http";
 import { readFileSync, existsSync, statSync, watch } from "node:fs";
 import { spawn } from "node:child_process";
@@ -14,6 +14,7 @@ import { dirname, join, extname, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const site = join(root, "docs");
 const diagrams = process.env.PH_DIAGRAMS || join(root, "..", "ph-diagrams");
 const port = Number(process.env.PORT || 7788);
 
@@ -41,8 +42,8 @@ const server = createServer((req, res) => {
     req.on("close", () => clients.delete(res));
     return;
   }
-  let file = resolve(root, "." + (url === "/" ? "/index.html" : url));
-  if (!file.startsWith(root) || !existsSync(file) || statSync(file).isDirectory()) {
+  let file = resolve(site, "." + (url === "/" ? "/index.html" : url));
+  if (!file.startsWith(site) || !existsSync(file) || statSync(file).isDirectory()) {
     res.writeHead(404); res.end("not found"); return;
   }
   const type = types[extname(file)] || "application/octet-stream";
@@ -80,7 +81,7 @@ const schedule = () => { clearTimeout(timer); timer = setTimeout(flush, 150); };
 watch(root, { recursive: true }, (_, name) => {
   if (!name) return;
   const n = String(name);
-  if (n.startsWith("node_modules") || n.startsWith(".git") || n.startsWith("reveal")) return;
+  if (n.startsWith("node_modules") || n.startsWith(".git") || n.startsWith("docs")) return;
   if (n === "outline.md" || n === "bin/build.mjs") { pendingBuild = true; schedule(); }
 });
 

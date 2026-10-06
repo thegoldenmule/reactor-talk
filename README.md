@@ -6,14 +6,15 @@ narrative lives in **`outline.md`**, which is also the deck's source.
 
 ```
 outline.md          The outline + speaker notes. Edit this. `###` = one slide.
-index.html          Generated deck (reveal.js). Don't edit; run `npm run build`.
-diagrams/           Build-time copy of the diagram pages + CSS the outline uses. Don't edit here.
+docs/               The static site GitHub Pages serves. Everything in it is built or vendored:
+  index.html          Generated deck (reveal.js). Don't edit; run `npm run build`.
+  diagrams/           Build-time copy of the diagram pages + CSS the outline uses. Don't edit here.
+  reveal/             Vendored reveal.js dist — works offline, no npm install needed to present.
 img/                Diagram PNGs; only feed the PDF backup.
 bin/dev.mjs         Dev loop: serve + watch + rebuild + browser reload
-bin/build.mjs       outline.md → index.html, and copies the needed ../ph-diagrams pages into diagrams/
+bin/build.mjs       outline.md → docs/index.html, and copies the needed ../ph-diagrams pages into docs/diagrams/
 bin/render-diagrams.py   ../ph-diagrams/pages/*.html → img/*.png (PDF backup only)
 bin/pdf.py          outline.md + img/ → deck.pdf (backup for a dead browser; no browser involved)
-reveal/             Vendored reveal.js dist — works offline, no npm install needed to present.
 ```
 
 ## Iterate
@@ -37,6 +38,12 @@ slide). Share the **fullscreen window**, not the whole screen, so the speaker vi
 Arrow keys / space advance. `Esc` shows the overview. `?` lists shortcuts.
 
 Backup: `deck.pdf` opened fullscreen in Preview.
+
+## Publish
+
+GitHub Pages serves `docs/` from `main` at <https://thegoldenmule.github.io/reactor-talk/>.
+Build, commit and push; Pages redeploys on its own. `docs/.nojekyll` keeps Pages from running
+Jekyll over the files.
 
 ## Edit
 
